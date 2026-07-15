@@ -1,0 +1,46 @@
+# AXON TECH Kenya — Premium Technology Hardware
+
+> AXON TECH Kenya is a premium technology hardware retailer based in Nairobi, Kenya. We sell laptops, tablets, smartphones, audio devices, and accessories from our Axon brand and other premium manufacturers. We serve customers across East Africa with fast delivery and local warranty support.
+
+## Company Information
+
+- [About AXON TECH Kenya](https://axontechnologies.co.ke/contact): Our story, location at Simara Mall Nairobi, business hours, and contact details
+- [Contact & Location](https://axontechnologies.co.ke/contact): Simara Mall, Ground Floor, Shop G50, Nairobi, Kenya. Phone: +254 745 017979
+
+## Products
+
+- [Full Product Catalog](https://axontechnologies.co.ke/catalog): Browse all our technology products across categories
+- [Axon Slate Pro Tablet](https://axontechnologies.co.ke/product/axon-slate-pro): Our flagship tablet with Axon-X1 chip, 12.9" Liquid Infinity Display, starting at $899
+- [Axon Book 16 Laptop](https://axontechnologies.co.ke/product/axon-book-16): High-performance 16" laptop with multi-core processors, starting at $1,499
+- [Axon Book 14 Laptop](https://axontechnologies.co.ke/product/axon-book-14): Compact professional laptop in aerospace-grade alloy, starting at $1,299
+- [Axon Phone 1 Pro](https://axontechnologies.co.ke/product/axon-phone-1-pro): Flagship smartphone with Axon-M1 neural processor, starting at $799
+- [Axon Buds Pro](https://axontechnologies.co.ke/product/axon-buds-pro): Immersive spatial audio earbuds with noise cancellation, starting at $249
+- [Axon Studio Pro Headphones](https://axontechnologies.co.ke/product/axon-studio-pro): Premium over-ear headphones with adaptive sound, starting at $349
+- [Axon Audio Engine](https://axontechnologies.co.ke/product/axon-audio-engine): Professional sound processor and amplification stage, starting at $1,299
+- [Axon Slate Air Tablet](https://axontechnologies.co.ke/product/axon-slate-air): Ultra-thin featherweight tablet, starting at $899
+- [Axon Buds Light](https://axontechnologies.co.ke/product/axon-buds-light): Lightweight true wireless earphones, starting at $129
+- [Power Capsule V2](https://axontechnologies.co.ke/product/power-capsule-v2): Modular power bank and charging capsule, starting at $79
+- [Power Hub Pro](https://axontechnologies.co.ke/product/power-hub-pro): Aluminum desktop dock and charging hub, starting at $79
+- [Axon Click 2 Keyboard](https://axontechnologies.co.ke/product/axon-click-2): Mechanical precision keyboard, starting at $129
+
+## Blog & Technical Insights
+
+- [AXON TECH Blog](https://axontechnologies.co.ke/blog): Technical articles on metrology, calibration, and engineering
+- [Metrology and Calibration in East Africa](https://axontechnologies.co.ke/blog/future-of-metrology-calibration-nodes-east-africa): Analysis of electronic hardware certification in Nairobi and Sub-Saharan Africa
+- [Silicon Core Diagnostics Guide](https://axontechnologies.co.ke/blog/optimizing-silicon-core-diagnostics-iso-17025): ISO/IEC 17025 guide for hardware developers and calibration labs
+
+## Services
+
+- [Order Tracking](https://axontechnologies.co.ke/track-order): Real-time order tracking and delivery status
+- [Checkout & Delivery](https://axontechnologies.co.ke/checkout): Secure payment with DHL Express, FedEx, and local courier delivery
+
+## Policies
+
+- Privacy Policy: AXON TECH collects information relevant to fulfilling hardware logistics and system diagnostics
+- Delivery Policy: Orders before 12:00 PM UTC dispatch same day. Free international customs pre-payment.
+- Refund Policy: 30-day risk-free return guarantee with full return shipping services
+- Terms of Service: Terms governing all AXON TECH hardware and digital systems
+
+## Location
+
+AXON TECH Kenya operates from Simara Mall, Ground Floor, Shop G50, Nairobi, Kenya. We serve customers across East Africa including Kenya, Tanzania, Uganda, and Rwanda.

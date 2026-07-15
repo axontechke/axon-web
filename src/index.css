@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Montserrat", sans-serif;
+
+  --color-primary: #a73a00;
+  --color-primary-hover: #c44500;
+  --color-primary-container: #ff5c00;
+  --color-primary-fixed: #ffdbce;
+  --color-primary-fixed-dim: #ffb59a;
+  --color-on-primary-fixed: #370e00;
+  --color-on-primary-fixed-variant: #802a00;
+  --color-secondary: #006a6a;
+  --color-secondary-hover: #008080;
+  --color-secondary-container: #6ef3f3;
+  --color-on-secondary-container: #006e6e;
+  --color-tertiary: #0061a6;
+  --color-tertiary-container: #0096fd;
+  --color-on-tertiary-container: #002d51;
+  --color-surface: #fcf9f8;
+  --color-surface-dim: #dcd9d9;
+  --color-surface-bright: #fcf9f8;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f6f3f2;
+  --color-surface-container: #f0eded;
+  --color-surface-container-high: #eae7e7;
+  --color-surface-container-highest: #e5e2e1;
+  --color-on-surface: #1c1b1b;
+  --color-on-surface-variant: #5b4137;
+  --color-outline: #8f7065;
+  --color-outline-variant: #e4beb1;
+  --color-background: #fcf9f8;
+  --color-on-background: #1c1b1b;
+}
+
+.dark {
+  --color-primary: #ff9e7d;
+  --color-primary-hover: #ffbfa8;
+  --color-primary-container: #ff5c00;
+  --color-primary-fixed: #ffdbce;
+  --color-primary-fixed-dim: #ffb59a;
+  --color-on-primary-fixed: #370e00;
+  --color-on-primary-fixed-variant: #802a00;
+  --color-secondary: #49e2e2;
+  --color-secondary-hover: #7dfcfc;
+  --color-secondary-container: #004f4f;
+  --color-on-secondary-container: #6ef3f3;
+  --color-tertiary: #8ec3ff;
+  --color-tertiary-container: #00497e;
+  --color-on-tertiary-container: #d2e4ff;
+  --color-surface: #11100f;
+  --color-surface-dim: #0a0909;
+  --color-surface-bright: #242221;
+  --color-surface-container-lowest: #0d0c0c;
+  --color-surface-container-low: #161514;
+  --color-surface-container: #1e1d1c;
+  --color-surface-container-high: #2a2827;
+  --color-surface-container-highest: #363332;
+  --color-on-surface: #eae0dd;
+  --color-on-surface-variant: #d5c2ba;
+  --color-outline: #857068;
+  --color-outline-variant: #483c37;
+  --color-background: #11100f;
+  --color-on-background: #eae0dd;
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .glass-btn-ios {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    color: var(--color-on-surface);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dark .glass-btn-ios {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0px rgba(255, 255, 255, 0.05);
+    color: var(--color-on-surface);
+  }
+  .glass-btn-ios:hover {
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(255, 255, 255, 0.65);
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  }
+  .dark .glass-btn-ios:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+  .glass-btn-ios:active {
+    transform: scale(0.97);
+  }
+
+  .glass-btn-ios-active {
+    background: rgba(167, 58, 0, 0.15);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(167, 58, 0, 0.35);
+    box-shadow: 0 4px 12px rgba(167, 58, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    color: var(--color-primary);
+    font-weight: 700;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dark .glass-btn-ios-active {
+    background: rgba(255, 158, 125, 0.15);
+    border: 1px solid rgba(255, 158, 125, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 158, 125, 0.1), inset 0 1px 0px rgba(255, 255, 255, 0.05);
+    color: #ff9e7d;
+  }
+  .glass-btn-ios-active:hover {
+    background: rgba(167, 58, 0, 0.22);
+    transform: scale(1.02);
+  }
+  .dark .glass-btn-ios-active:hover {
+    background: rgba(255, 158, 125, 0.22);
+    transform: scale(1.02);
+  }
+  .glass-btn-ios-active:active {
+    transform: scale(0.97);
+  }
+
+  /* Solid filled style for primary actions but with a gorgeous glass feel */
+  .glass-btn-ios-primary {
+    background: linear-gradient(135deg, rgba(167, 58, 0, 0.85), rgba(167, 58, 0, 0.95));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(167, 58, 0, 0.5);
+    box-shadow: 0 4px 12px rgba(167, 58, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dark .glass-btn-ios-primary {
+    background: linear-gradient(135deg, rgba(255, 158, 125, 0.8), rgba(255, 158, 125, 0.9));
+    border: 1px solid rgba(255, 158, 125, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 158, 125, 0.15), inset 0 1px 0px rgba(255, 255, 255, 0.1);
+    color: #370e00;
+  }
+  .glass-btn-ios-primary:hover {
+    background: linear-gradient(135deg, rgba(167, 58, 0, 0.95), rgba(167, 58, 0, 1));
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(167, 58, 0, 0.25);
+  }
+  .dark .glass-btn-ios-primary:hover {
+    background: linear-gradient(135deg, rgba(255, 158, 125, 0.9), rgba(255, 158, 125, 1));
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(255, 158, 125, 0.35);
+  }
+  .glass-btn-ios-primary:active {
+    transform: scale(0.97);
+  }
+
+  .hero-embed-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .hero-embed-container iframe,
+  .hero-embed-container video,
+  .hero-embed-container object,
+  .hero-embed-container embed {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    pointer-events: none;
+  }
+}

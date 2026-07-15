@@ -1,0 +1,163 @@
+# ============================================================
+# robots.txt — AXON TECH Kenya
+# GEO & SEO Optimized — Last updated July 2026
+# ============================================================
+# Strategy: Allow reputable search engines and AI models.
+# Block malicious scrapers, SEO spam bots, and irrelevant crawlers.
+# ============================================================
+
+# ============================================================
+# SECTION 1: REPUTABLE SEARCH ENGINES (Always Allow)
+# ============================================================
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# ============================================================
+# SECTION 2: AI SEARCH & CITATION CRAWLERS (Allow for GEO)
+# These bots fetch live content to cite in AI answers.
+# Blocking any of these = invisible in that platform's answers.
+# ============================================================
+
+# OpenAI — ChatGPT Search citations
+User-agent: OAI-SearchBot
+Allow: /
+
+# OpenAI — User-triggered browsing (ChatGPT browse mode)
+User-agent: ChatGPT-User
+Allow: /
+
+# Perplexity — Search and citations
+User-agent: PerplexityBot
+Allow: /
+
+# Perplexity — User-triggered browsing
+User-agent: Perplexity-User
+Allow: /
+
+# Anthropic — Claude search citations
+User-agent: ClaudeBot
+Allow: /
+
+# Anthropic — User-triggered browsing
+User-agent: Claude-User
+Allow: /
+
+# Anthropic — Claude web search
+User-agent: Claude-Web
+Allow: /
+
+# Anthropic — Additional crawl agent
+User-agent: anthropic-ai
+Allow: /
+
+# Google — AI Overviews and Gemini training
+User-agent: Google-Extended
+Allow: /
+
+# Microsoft — Copilot (powers Bing AI answers)
+User-agent: Bingbot
+Allow: /
+
+# ============================================================
+# SECTION 3: AI TRAINING CRAWLERS (Allow for GEO visibility)
+# Allowing these helps your content appear in future model
+# knowledge. Recommended for marketing/ecommerce sites.
+# ============================================================
+
+# OpenAI — Trains future GPT models
+User-agent: GPTBot
+Allow: /
+
+# Meta — Trains Llama / Meta AI
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# Amazon — Alexa and AI products
+User-agent: Amazonbot
+Allow: /
+
+# Apple — Siri and Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Cohere — Enterprise AI platform
+User-agent: cohere-ai
+Allow: /
+
+# Common Crawl — Open training dataset (used by many AI labs)
+User-agent: CCBot
+Allow: /
+
+# ByteDance — Trains TikTok/ByteDance AI models
+User-agent: Bytespider
+Allow: /
+
+# ============================================================
+# SECTION 4: BLOCKED CRAWLERS
+# Malicious, irrelevant, or aggressive bots.
+# ============================================================
+
+# SEO spam and link extractors
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+# Aggressive scrapers / known bad actors
+User-agent: Rogerbot
+Disallow: /
+
+User-agent: SeekingBot
+Disallow: /
+
+User-agent: Sogou
+Disallow: /
+
+User-agent: Exabot
+Disallow: /
+
+# AI crawlers that are non-compliant or low-value
+User-agent: GPTBot
+Crawl-delay: 2
+
+# ============================================================
+# SECTION 5: PROTECTED PATHS (Apply to all remaining crawlers)
+# ============================================================
+
+User-agent: *
+# Allow everything by default (reputable crawlers inherit this)
+Allow: /
+
+# Block admin/API internal paths from general crawling
+Disallow: /api/
+Disallow: /dev
+Disallow: /db.json
+
+# ============================================================
+# SECTION 6: SITEMAP
+# ============================================================
+
+Sitemap: https://axontechnologies.co.ke/sitemap.xml

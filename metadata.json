@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Axon Tech",
+  "description": "Premium e-commerce and product discovery portal for Axon Tech devices, designed with a clean, high-key aesthetic and featuring a fully responsive product catalog, interactive cart, detail view, and custom checkout flow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
