@@ -208,6 +208,13 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
             </div>
           </div>
         </div>
+
+        {/* COD Notice */}
+        <div className="bg-amber-500/5 border border-amber-500/15 p-3 rounded-xl">
+          <p className="text-[10px] text-amber-700 leading-relaxed">
+            <strong>Cash on Delivery (COD):</strong> If you selected cashout, payment is handled independently once your order is confirmed via WhatsApp. Our delivery partner will collect payment at the door. You will receive a confirmation message before dispatch.
+          </p>
+        </div>
       </div>
 
       {/* Return home */}

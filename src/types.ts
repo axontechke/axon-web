@@ -16,11 +16,11 @@ export interface ProductVariant {
 
 export function formatProductPrice(product: { price?: number; priceKsh?: number }): string {
   const parts: string[] = [];
-  if (product.price !== undefined && product.price !== null && product.price !== 0) {
-    parts.push(`$${product.price.toLocaleString()} USD`);
-  }
   if (product.priceKsh !== undefined && product.priceKsh !== null && product.priceKsh !== 0) {
     parts.push(`KSh ${product.priceKsh.toLocaleString()}`);
+  }
+  if (product.price !== undefined && product.price !== null && product.price !== 0) {
+    parts.push(`$${product.price.toLocaleString()} USD`);
   }
   return parts.length > 0 ? parts.join(" / ") : "Contact for Price";
 }

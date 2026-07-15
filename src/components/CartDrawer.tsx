@@ -262,49 +262,49 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Subtotal</span>
                   <div className="text-right">
-                    {hasUsd && <div>${itemsSubtotalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                     {hasKsh && <div>KSh {itemsSubtotalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                    {hasUsd && <div>${itemsSubtotalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   </div>
                 </div>
                 {discountPercentage > 0 && (
                   <div className="flex justify-between text-green-600 font-medium">
                     <span>Discount ({discountPercentage}%)</span>
                     <div className="text-right">
-                      {hasUsd && <div>-${discountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                       {hasKsh && <div>-KSh {discountKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                      {hasUsd && <div>-${discountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                     </div>
                   </div>
                 )}
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Estimated Shipping</span>
                   <div className="text-right">
-                    {hasUsd && (
-                      <div>{shippingUsd === 0 ? <span className="text-green-600 font-medium">Free</span> : `$${shippingUsd.toFixed(2)} USD`}</div>
-                    )}
                     {hasKsh && (
                       <div>{shippingKsh === 0 ? <span className="text-green-600 font-medium">Free</span> : `KSh ${shippingKsh.toLocaleString()}`}</div>
+                    )}
+                    {hasUsd && (
+                      <div>{shippingUsd === 0 ? <span className="text-green-600 font-medium">Free</span> : `$${shippingUsd.toFixed(2)} USD`}</div>
                     )}
                   </div>
                 </div>
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Estimated Tax (8%)</span>
                   <div className="text-right">
-                    {hasUsd && <div>${taxesUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                     {hasKsh && <div>KSh {taxesKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                    {hasUsd && <div>${taxesUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   </div>
                 </div>
                 <div className="border-t border-outline/10 my-2 pt-2 flex justify-between text-sm font-bold text-on-surface">
                   <span>Total</span>
                   <div className="text-right">
-                    {hasUsd && <div className="text-primary">${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                     {hasKsh && <div className="text-primary">KSh {totalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                    {hasUsd && <div className="text-primary">${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   </div>
                 </div>
               </div>
 
               {!isFreeShipping && (
                 <div className="text-[10px] text-center text-on-surface-variant/60">
-                  💡 Add {hasUsd && <strong>${(150 - subtotalUsd).toFixed(2)} USD</strong>} {hasUsd && hasKsh && "or"} {hasKsh && <strong>KSh {(20000 - subtotalKsh).toLocaleString()}</strong>} more to unlock <strong>Free Shipping</strong>!
+                  Add {hasKsh && <strong>KSh {(20000 - subtotalKsh).toLocaleString()}</strong>} {hasKsh && hasUsd && "or"} {hasUsd && <strong>${(150 - subtotalUsd).toFixed(2)} USD</strong>} more to unlock <strong>Free Shipping</strong>!
                 </div>
               )}
 

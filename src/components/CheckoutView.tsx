@@ -354,8 +354,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                   <span className="text-xs font-bold text-primary text-right">
                     {(subtotalUsd > 150 || subtotalKsh > 20000) ? "FREE" : (
                       <>
-                        {hasUsd && <div>$15.00 USD</div>}
                         {hasKsh && <div>KSh 2,000</div>}
+                        {hasUsd && <div>$15.00 USD</div>}
                       </>
                     )}
                   </span>
@@ -374,8 +374,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     </div>
                   </div>
                   <span className="text-xs font-bold text-primary text-right">
-                    {hasUsd && <div>$25.00 USD</div>}
                     {hasKsh && <div>KSh 3,500</div>}
+                    {hasUsd && <div>$25.00 USD</div>}
                   </span>
                 </label>
 
@@ -392,8 +392,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     </div>
                   </div>
                   <span className="text-xs font-bold text-primary text-right">
-                    {hasUsd && <div>$45.00 USD</div>}
                     {hasKsh && <div>KSh 6,000</div>}
+                    {hasUsd && <div>$45.00 USD</div>}
                   </span>
                 </label>
               </div>
@@ -451,6 +451,12 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 <p className="text-[11px] text-on-surface-variant leading-relaxed">
                   After placing your order, you will receive <strong>payment instructions via WhatsApp</strong> within minutes. Our team will confirm your order details and guide you through M-Pesa or bank transfer payment. Your order will be dispatched once payment is confirmed.
                 </p>
+                <div className="flex items-start gap-2 bg-amber-500/5 border border-amber-500/15 p-3 rounded-xl">
+                  <Banknote className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                  <p className="text-[10px] text-amber-700 leading-relaxed">
+                    <strong>Cash on Delivery (COD):</strong> Cashout is handled independently once your order is confirmed via WhatsApp. Our delivery partner will collect payment at the door. You will receive a confirmation message before dispatch.
+                  </p>
+                </div>
               </div>
 
               {/* Items summary */}
@@ -465,8 +471,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                         <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
                       </div>
                       <div className="text-[11px] font-bold text-on-surface text-right">
-                        {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
                         {item.product.priceKsh !== undefined && <div>KSh {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                        {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
                       </div>
                     </div>
                   ))}
@@ -504,8 +510,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     <p className="text-[10px] text-on-surface-variant/70 font-medium">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
                   </div>
                   <div className="text-xs font-bold text-on-surface text-right">
-                    {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                     {item.product.priceKsh !== undefined && <div>KSh {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                    {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   </div>
                 </div>
               ))}
@@ -515,8 +521,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               <div className="flex justify-between text-on-surface-variant">
                 <span>Subtotal</span>
                 <div className="text-right">
-                  {hasUsd && <div>${subtotalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   {hasKsh && <div>KSh {subtotalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                  {hasUsd && <div>${subtotalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                 </div>
               </div>
               
@@ -524,8 +530,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 <div className="flex justify-between text-green-700 font-medium bg-green-50/50 px-2 py-0.5 rounded">
                   <span>Discount ({discountPercentage}%)</span>
                   <div className="text-right">
-                    {hasUsd && <div>-${discountAmountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                     {hasKsh && <div>-KSh {discountAmountKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                    {hasUsd && <div>-${discountAmountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   </div>
                 </div>
               )}
@@ -533,24 +539,24 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               <div className="flex justify-between text-on-surface-variant">
                 <span>Shipping ({shippingMethod})</span>
                 <div className="text-right">
-                  {hasUsd && <div>{shippingCostUsd === 0 ? <span className="text-green-700 font-bold">FREE</span> : `$${shippingCostUsd.toFixed(2)} USD`}</div>}
                   {hasKsh && <div>{shippingCostKsh === 0 ? <span className="text-green-700 font-bold">FREE</span> : `KSh ${shippingCostKsh.toLocaleString()}`}</div>}
+                  {hasUsd && <div>{shippingCostUsd === 0 ? <span className="text-green-700 font-bold">FREE</span> : `$${shippingCostUsd.toFixed(2)} USD`}</div>}
                 </div>
               </div>
 
               <div className="flex justify-between text-on-surface-variant">
                 <span>Taxes (8%)</span>
                 <div className="text-right">
-                  {hasUsd && <div>${taxesUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   {hasKsh && <div>KSh {taxesKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                  {hasUsd && <div>${taxesUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                 </div>
               </div>
 
               <div className="border-t border-outline/10 pt-3 flex justify-between text-sm font-black text-on-surface font-display">
                 <span>Total</span>
                 <div className="text-right font-bold text-primary">
-                  {hasUsd && <div>${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   {hasKsh && <div>KSh {totalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                  {hasUsd && <div>${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                 </div>
               </div>
             </div>
