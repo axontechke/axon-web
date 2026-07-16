@@ -9,7 +9,13 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy",
+    "worker:migrate": "wrangler d1 migrations apply axon-tech-db",
+    "worker:migrate:local": "wrangler d1 migrations apply axon-tech-db --local",
+    "worker:seed": "wrangler d1 execute axon-tech-db --remote --file=./migrations/0001_init.sql",
+    "worker:seed:local": "wrangler d1 execute axon-tech-db --local --file=./migrations/0001_init.sql"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -34,6 +40,7 @@
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "vite": "^6.2.3",
+    "wrangler": "^4.104.0"
   }
 }
