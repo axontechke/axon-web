@@ -1,6 +1,38 @@
 export interface Env {
   DB: D1Database;
   GEMINI_API_KEY?: string;
+  ADMIN_EMAIL?: string;
+  ADMIN_PASSWORD?: string;
+}
+
+// ─── AUTH UTILITIES ──────────────────────────────────────────
+function generateSalt(): string {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPassword(password: string, salt: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), { name: 'PBKDF2' }, false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, 256
+  );
+  return Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyPassword(password: string, salt: string, hash: string): Promise<boolean> {
+  const computed = await hashPassword(password, salt);
+  return computed === hash;
+}
+
+function generateToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // ─── CORS ────────────────────────────────────────────────────
@@ -425,6 +457,65 @@ async function seedDatabase(db: D1Database): Promise<void> {
   }
 
   await db.batch(batch);
+}
+
+// ─── SEED SUPER ADMIN ────────────────────────────────────────
+async function seedSuperAdmin(db: D1Database, email: string, password: string): Promise<void> {
+  const existing = await db.prepare("SELECT id FROM users WHERE email = ?").first<{ id: string }>().bind(email);
+  if (existing) return;
+
+  const salt = generateSalt();
+  const passwordHash = await hashPassword(password, salt);
+  const id = crypto.randomUUID();
+
+  await db.prepare(
+    "INSERT INTO users (id, email, passwordHash, salt, role) VALUES (?, ?, ?, ?, 'super_admin')"
+  ).bind(id, email, passwordHash, salt).run();
+}
+
+// ─── AUTH HANDLER ─────────────────────────────────────────────
+async function login(req: Request, env: Env): Promise<Response> {
+  const { email, password } = await req.json();
+  if (!email || !password) return jsonError("Email and password required.");
+
+  const user = await env.DB.prepare(
+    "SELECT id, email, passwordHash, salt, role FROM users WHERE email = ?"
+  ).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>().bind(email);
+
+  if (!user) return jsonError("Invalid credentials.", 401);
+
+  const valid = await verifyPassword(password, user.salt, user.passwordHash);
+  if (!valid) return jsonError("Invalid credentials.", 401);
+
+  const token = generateToken();
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+  // Store session token
+  await env.DB.prepare(
+    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
+  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt })).run();
+
+  return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
+}
+
+async function verifyAuth(req: Request, env: Env): Promise<{ userId: string; email: string; role: string } | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  const token = authHeader.slice(7);
+  const session = await env.DB.prepare(
+    "SELECT value FROM config WHERE key = ?"
+  ).first<{ value: string }>().bind(`session:${token}`);
+
+  if (!session) return null;
+
+  const data = JSON.parse(session.value);
+  if (data.expiresAt < Date.now()) {
+    await env.DB.prepare("DELETE FROM config WHERE key = ?").bind(`session:${token}`).run();
+    return null;
+  }
+
+  return { userId: data.userId, email: data.email, role: data.role };
 }
 
 // ─── ROUTE HANDLERS ──────────────────────────────────────────
@@ -1183,6 +1274,9 @@ ${urls.join("\n")}
 
 // ─── MAIN ROUTES ─────────────────────────────────────────────
 const routes: Route[] = [
+  // Auth
+  route("POST", "/api/auth/login", login),
+
   // Public
   route("GET", "/api/products", getProducts),
   route("GET", "/api/orders", getOrders),
@@ -1236,6 +1330,11 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
+    // Seed super admin on first request
+    if (env.ADMIN_EMAIL && env.ADMIN_PASSWORD) {
+      ctx.waitUntil(seedSuperAdmin(env.DB, env.ADMIN_EMAIL, env.ADMIN_PASSWORD));
+    }
+
     const url = new URL(req.url);
 
     // Sitemap
@@ -1250,6 +1349,12 @@ export default {
 
     // API routes
     if (url.pathname.startsWith("/api/")) {
+      // Auth check for admin routes (except login)
+      if (url.pathname.startsWith("/api/admin/")) {
+        const auth = await verifyAuth(req, env);
+        if (!auth) return jsonError("Unauthorized.", 401);
+      }
+
       const matched = matchRoute(routes, req);
       if (matched) {
         return matched.handler(req, env, ctx, matched.params);
