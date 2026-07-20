@@ -417,7 +417,7 @@ async function seedDatabase(db: D1Database): Promise<void> {
   }
 
   // Check and seed config
-  const configCount = await db.prepare("SELECT COUNT(*) as count FROM config").first<{ count: number }>();
+  const configCount = await db.prepare("SELECT COUNT(*) as count FROM config WHERE key NOT LIKE 'session:%'").first<{ count: number }>();
   if (!configCount || configCount.count === 0) {
     for (const [key, value] of Object.entries(INITIAL_CONFIG)) {
       batch.push(db.prepare(`INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)`).bind(key, JSON.stringify(value)));
@@ -456,7 +456,7 @@ async function seedDatabase(db: D1Database): Promise<void> {
     }
   }
 
-  await db.batch(batch);
+  if (batch.length > 0) await db.batch(batch);
 }
 
 // ─── SEED SUPER ADMIN ────────────────────────────────────────
@@ -607,10 +607,14 @@ async function getOrder(req: Request, env: Env, _ctx: ExecutionContext, params: 
 // GET /api/config
 async function getConfig(_req: Request, env: Env): Promise<Response> {
   await seedDatabase(env.DB);
-  const { results } = await env.DB.prepare("SELECT key, value FROM config").all();
+  const { results } = await env.DB.prepare("SELECT key, value FROM config WHERE key NOT LIKE 'session:%'").all();
   const config: Record<string, any> = {};
   for (const row of results) {
-    config[(row as any).key] = JSON.parse((row as any).value);
+    try {
+      config[(row as any).key] = JSON.parse((row as any).value);
+    } catch {
+      config[(row as any).key] = (row as any).value;
+    }
   }
   return corsResponse(config);
 }
@@ -1332,7 +1336,7 @@ export default {
 
     // Seed super admin on first request
     if (env.ADMIN_EMAIL && env.ADMIN_PASSWORD) {
-      ctx.waitUntil(seedSuperAdmin(env.DB, env.ADMIN_EMAIL, env.ADMIN_PASSWORD));
+      ctx.waitUntil(seedSuperAdmin(env.DB, env.ADMIN_EMAIL, env.ADMIN_PASSWORD).catch(() => {}));
     }
 
     const url = new URL(req.url);
