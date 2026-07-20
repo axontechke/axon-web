@@ -461,7 +461,7 @@ async function seedDatabase(db: D1Database): Promise<void> {
 
 // ─── SEED SUPER ADMIN ────────────────────────────────────────
 async function seedSuperAdmin(db: D1Database, email: string, password: string): Promise<void> {
-  const existing = await db.prepare("SELECT id FROM users WHERE email = ?").first<{ id: string }>().bind(email);
+  const existing = await db.prepare("SELECT id FROM users WHERE email = ?").bind(email).first<{ id: string }>();
   if (existing) return;
 
   const salt = generateSalt();
@@ -480,7 +480,7 @@ async function login(req: Request, env: Env): Promise<Response> {
 
   const user = await env.DB.prepare(
     "SELECT id, email, passwordHash, salt, role FROM users WHERE email = ?"
-  ).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>().bind(email);
+  ).bind(email).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>();
 
   if (!user) return jsonError("Invalid credentials.", 401);
 
@@ -505,7 +505,7 @@ async function verifyAuth(req: Request, env: Env): Promise<{ userId: string; ema
   const token = authHeader.slice(7);
   const session = await env.DB.prepare(
     "SELECT value FROM config WHERE key = ?"
-  ).first<{ value: string }>().bind(`session:${token}`);
+  ).bind(`session:${token}`).first<{ value: string }>();
 
   if (!session) return null;
 
