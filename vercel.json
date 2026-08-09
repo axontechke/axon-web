@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://axon-tech-api.kastedigitalsolutions.workers.dev/api/:path*"
+      "destination": "https://website.axontech254.workers.dev/api/:path*"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "https://axon-tech-api.kastedigitalsolutions.workers.dev/sitemap.xml"
+      "destination": "https://website.axontech254.workers.dev/sitemap.xml"
     },
     {
       "source": "/((?!assets/|.*\\..*).*)",

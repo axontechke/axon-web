@@ -461,7 +461,7 @@ async function seedDatabase(db: D1Database): Promise<void> {
 
 // ─── SEED SUPER ADMIN ────────────────────────────────────────
 async function seedSuperAdmin(db: D1Database, email: string, password: string): Promise<void> {
-  const existing = await db.prepare("SELECT id FROM users WHERE email = ?").bind(email).first<{ id: string }>();
+  const existing = await db.prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?)").bind(email).first<{ id: string }>();
   if (existing) return;
 
   const salt = generateSalt();
@@ -469,7 +469,7 @@ async function seedSuperAdmin(db: D1Database, email: string, password: string): 
   const id = crypto.randomUUID();
 
   await db.prepare(
-    "INSERT INTO users (id, email, passwordHash, salt, role) VALUES (?, ?, ?, ?, 'super_admin')"
+    "INSERT INTO users (uid, email, password_hash, salt, role) VALUES (?, ?, ?, ?, 'super-admin')"
   ).bind(id, email, passwordHash, salt).run();
 }
 
@@ -479,12 +479,12 @@ async function login(req: Request, env: Env): Promise<Response> {
   if (!email || !password) return jsonError("Email and password required.");
 
   const user = await env.DB.prepare(
-    "SELECT id, email, passwordHash, salt, role FROM users WHERE email = ?"
-  ).bind(email).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>();
+    "SELECT uid, email, password_hash, salt, role FROM users WHERE LOWER(email) = LOWER(?)"
+  ).bind(email).first<{ uid: string; email: string; password_hash: string; salt: string; role: string }>();
 
   if (!user) return jsonError("Invalid credentials.", 401);
 
-  const valid = await verifyPassword(password, user.salt, user.passwordHash);
+  const valid = await verifyPassword(password, user.salt, user.password_hash);
   if (!valid) return jsonError("Invalid credentials.", 401);
 
   const token = generateToken();
@@ -493,9 +493,9 @@ async function login(req: Request, env: Env): Promise<Response> {
   // Store session token
   await env.DB.prepare(
     "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
-  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt })).run();
+  ).bind(`session:${token}`, JSON.stringify({ userId: user.uid, email: user.email, role: user.role, expiresAt })).run();
 
-  return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
+  return corsResponse({ token, user: { id: user.uid, email: user.email, role: user.role } });
 }
 
 async function verifyAuth(req: Request, env: Env): Promise<{ userId: string; email: string; role: string } | null> {

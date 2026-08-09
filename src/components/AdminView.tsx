@@ -216,9 +216,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
   onViewWeb
 }) => {
   // Authentication State
+  const [loginEmail, setLoginEmail] = useState("");
   const [passkey, setPasskey] = useState("");
-  const isAuthenticated = isAdminAuthenticated;
-  const setIsAuthenticated = setIsAdminAuthenticated;
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("axon_admin_token"));
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem("axon_admin_token") || "");
   const [authError, setAuthError] = useState("");
 
   // Tab State
@@ -232,13 +233,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [quotaLimitInput, setQuotaLimitInput] = useState<number>(30);
 
   // Config Sub-Tab State
-  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "protocol" | "footer">("general");
+  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "protocol" | "footer" | "contact">("general");
 
   // Data States
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [ordersList, setOrdersList] = useState<any[]>([]);
   const [webConfig, setWebConfig] = useState<WebConfig | null>(null);
+  const [contactData, setContactData] = useState<any>(null);
   const [supportRequests, setSupportRequests] = useState<any[]>([]);
 
   useEffect(() => {
@@ -316,7 +318,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         .catch(err => console.error("Error loading blog posts:", err));
     }
     if (isAuthenticated && (activeTab === "reviews" || adminReviews.length === 0)) {
-      fetch("/api/admin/reviews")
+      authFetch("/api/admin/reviews")
         .then(res => res.json())
         .then(data => setAdminReviews(data))
         .catch(err => console.error("Error loading reviews:", err));
@@ -327,22 +329,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setLoading(true);
     setActionMessage(null);
     try {
-      const [analyticsRes, productsRes, ordersRes, configRes, supportRequestsRes, deliveryMethodsRes, whatsappNotifsRes, whatsappLogsRes, trackersRes] = await Promise.all([
+      const [analyticsRes, productsRes, ordersRes, configRes, contactRes, supportRequestsRes, deliveryMethodsRes, whatsappNotifsRes, whatsappLogsRes, trackersRes] = await Promise.all([
         fetch("/api/analytics"),
         fetch("/api/products"),
         fetch("/api/orders"),
         fetch("/api/config"),
-        fetch("/api/admin/support-requests"),
+        fetch("/api/contact"),
+        authFetch("/api/admin/support-requests"),
         fetch("/api/delivery-methods"),
-        fetch("/api/admin/whatsapp-notifications"),
-        fetch("/api/admin/whatsapp-api-logs"),
-        fetch("/api/admin/price-trackers")
+        authFetch("/api/admin/whatsapp-notifications"),
+        authFetch("/api/admin/whatsapp-api-logs"),
+        authFetch("/api/admin/price-trackers")
       ]);
 
       if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
       if (productsRes.ok) setProductsList(await productsRes.json());
       if (ordersRes.ok) setOrdersList(await ordersRes.json());
       if (configRes.ok) setWebConfig(await configRes.json());
+      if (contactRes.ok) setContactData(await contactRes.json());
       if (supportRequestsRes.ok) setSupportRequests(await supportRequestsRes.json());
       if (deliveryMethodsRes.ok) setDeliveryMethods(await deliveryMethodsRes.json());
       if (whatsappNotifsRes.ok) setWhatsappNotifications(await whatsappNotifsRes.json());
@@ -363,21 +367,42 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }, 4500);
   };
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passkey === "admin123" || passkey === "admin") {
+    setAuthError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginEmail, password: passkey }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAuthError(data.error || "Invalid credentials.");
+        return;
+      }
+      localStorage.setItem("axon_admin_token", data.token);
+      setAuthToken(data.token);
       setIsAuthenticated(true);
-      localStorage.setItem("axon_admin_authed", "true");
-      setAuthError("");
-    } else {
-      setAuthError("Incorrect super admin passkey. Try 'admin123'.");
+      setPasskey("");
+      setLoginEmail("");
+    } catch {
+      setAuthError("Network error. Please try again.");
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem("axon_admin_authed");
+    setAuthToken("");
+    localStorage.removeItem("axon_admin_token");
     setPasskey("");
+    setLoginEmail("");
+  };
+
+  const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    const headers = new Headers(options.headers);
+    if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+    return fetch(url, { ...options, headers });
   };
 
   // ==========================================
@@ -489,7 +514,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       const url = isNew ? "/api/admin/products" : `/api/admin/products/${editingProduct.id}`;
       const method = isNew ? "POST" : "PUT";
 
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingProduct)
@@ -513,7 +538,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     if (!window.confirm("Are you absolutely sure you want to delete this product from database?")) return;
 
     try {
-      const res = await fetch(`/api/admin/products/${id}`, {
+      const res = await authFetch(`/api/admin/products/${id}`, {
         method: "DELETE"
       });
 
@@ -534,7 +559,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   // ==========================================
   const handleUpdateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const res = await authFetch(`/api/admin/orders/${orderId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -562,7 +587,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setSyncLogs(["Initializing live scraping session...", "Resolving DNS for PhonePlace Kenya & iStreet..."]);
     setShowSyncPanel(true);
     try {
-      const res = await fetch("/api/admin/sync-realtime-products", {
+      const res = await authFetch("/api/admin/sync-realtime-products", {
         method: "POST",
         headers: { "Content-Type": "application/json" }
       });
@@ -592,7 +617,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setIsSandboxStaging(true);
     setSandboxError(null);
     try {
-      const res = await fetch("/api/admin/scrape-url", {
+      const res = await authFetch("/api/admin/scrape-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlToFetch })
@@ -645,7 +670,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         isNew: true
       };
 
-      const res = await fetch("/api/admin/products", {
+      const res = await authFetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -673,7 +698,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const handleSaveConfig = async () => {
     if (!webConfig) return;
     try {
-      const res = await fetch("/api/admin/config", {
+      const res = await authFetch("/api/admin/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(webConfig)
@@ -690,16 +715,35 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
   };
 
+  const handleSaveContact = async () => {
+    if (!contactData) return;
+    try {
+      const res = await authFetch("/api/admin/contact", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactData)
+      });
+      if (res.ok) {
+        showFeedback("Contact info synced successfully.");
+        loadAllAdminData();
+      } else {
+        throw new Error("Contact sync failed");
+      }
+    } catch (err) {
+      showFeedback("Failed to sync contact info.", true);
+    }
+  };
+
   const handleUpdateTicketStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/admin/support-requests/${id}`, {
+      const res = await authFetch(`/api/admin/support-requests/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
         showFeedback("Inquiry status updated successfully.");
-        const requestsRes = await fetch("/api/admin/support-requests");
+        const requestsRes = await authFetch("/api/admin/support-requests");
         if (requestsRes.ok) {
           setSupportRequests(await requestsRes.json());
         }
@@ -725,7 +769,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     const method = isEdit ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingMethod)
@@ -747,7 +791,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const handleDeleteDeliveryMethod = async (id: string) => {
     if (!confirm("Are you sure you want to delete this delivery method?")) return;
     try {
-      const res = await fetch(`/api/admin/delivery-methods/${id}`, {
+      const res = await authFetch(`/api/admin/delivery-methods/${id}`, {
         method: "DELETE"
       });
 
@@ -773,7 +817,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
 
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/dispatch`, {
+      const res = await authFetch(`/api/admin/orders/${orderId}/dispatch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -809,7 +853,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }];
 
     try {
-      const res = await fetch("/api/admin/config", {
+      const res = await authFetch("/api/admin/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activePromos: updatedPromos })
@@ -831,7 +875,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     const updatedPromos = webConfig.activePromos.filter(p => p.code !== codeToRemove);
 
     try {
-      const res = await fetch("/api/admin/config", {
+      const res = await authFetch("/api/admin/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activePromos: updatedPromos })
@@ -854,7 +898,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setReportError("");
     setGeneratedReport("");
     try {
-      const res = await fetch("/api/admin/reports/generate", {
+      const res = await authFetch("/api/admin/reports/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportType: selectedReportType })
@@ -880,7 +924,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       if (resetUsage) {
         body.aiCreditsUsed = 0;
       }
-      const res = await fetch("/api/admin/config", {
+      const res = await authFetch("/api/admin/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
@@ -908,7 +952,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setGeneratingBlog(true);
     showFeedback("Instructing Gemini to compose and geocode SEO post...");
     try {
-      const res = await fetch("/api/admin/blog/generate", {
+      const res = await authFetch("/api/admin/blog/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -939,7 +983,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const handleDeleteBlogPost = async (id: string) => {
     if (!window.confirm("Are you sure you want to permanently delete this article from index?")) return;
     try {
-      const res = await fetch(`/api/admin/blog/${id}`, {
+      const res = await authFetch(`/api/admin/blog/${id}`, {
         method: "DELETE"
       });
 
@@ -984,11 +1028,23 @@ export const AdminView: React.FC<AdminViewProps> = ({
           <form onSubmit={handleAuthSubmit} className="space-y-4 text-left">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                Administrator Email
+              </label>
+              <input
+                type="email"
+                placeholder="admin@email.com"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="w-full px-4 py-2.5 bg-surface border border-outline/15 rounded-xl text-xs focus:outline-none focus:border-primary text-on-surface"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
                 Enter Administration Key
               </label>
               <input
                 type="password"
-                placeholder="Password (Tip: admin123)"
+                placeholder="Password"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value)}
                 className="w-full px-4 py-2.5 bg-surface border border-outline/15 rounded-xl text-xs focus:outline-none focus:border-primary text-on-surface"
@@ -2393,6 +2449,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
               }`}
             >
               Footer Editor
+            </button>
+            <button
+              onClick={() => setConfigSubTab("contact")}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                configSubTab === "contact" ? "bg-primary text-white" : "bg-surface-container hover:bg-surface-container-high text-on-surface"
+              }`}
+            >
+              Contact Info
             </button>
           </div>
 
@@ -4053,6 +4117,230 @@ export const AdminView: React.FC<AdminViewProps> = ({
               </div>
             </div>
           )}
+
+          {/* ======================================= */}
+          {/* CONFIG SUB-TAB: CONTACT INFO           */}
+          {/* ======================================= */}
+          {configSubTab === "contact" && contactData && (
+            <div className="space-y-6">
+              <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+                <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  Contact Information Editor
+                </h3>
+                <p className="text-[10px] text-on-surface-variant/70">
+                  Manage business name, phone numbers, emails, location, social links, and WhatsApp contact. These details are displayed across the site and in the WhatsApp floating button.
+                </p>
+
+                <div className="space-y-4 pt-2">
+                  {/* Business Identity */}
+                  <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Business Identity</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Business Name</label>
+                        <input
+                          type="text"
+                          value={contactData.businessName || ""}
+                          onChange={(e) => setContactData({ ...contactData, businessName: e.target.value })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="Axon Technologies Kenya"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Tagline</label>
+                        <input
+                          type="text"
+                          value={contactData.tagline || ""}
+                          onChange={(e) => setContactData({ ...contactData, tagline: e.target.value })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="Your Trusted Technology Partner in Kenya"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phone Numbers */}
+                  <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Phone Numbers</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Primary Phone</label>
+                        <input
+                          type="text"
+                          value={contactData.phones?.primary || ""}
+                          onChange={(e) => setContactData({ ...contactData, phones: { ...contactData.phones, primary: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="+254745017979"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">WhatsApp URL</label>
+                        <input
+                          type="text"
+                          value={contactData.phones?.whatsapp || ""}
+                          onChange={(e) => setContactData({ ...contactData, phones: { ...contactData.phones, whatsapp: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="https://wa.me/254745017979"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Emails */}
+                  <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Email Addresses</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Sales</label>
+                        <input
+                          type="email"
+                          value={contactData.emails?.sales || ""}
+                          onChange={(e) => setContactData({ ...contactData, emails: { ...contactData.emails, sales: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="sales@axontechke.com"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Info</label>
+                        <input
+                          type="email"
+                          value={contactData.emails?.info || ""}
+                          onChange={(e) => setContactData({ ...contactData, emails: { ...contactData.emails, info: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="info@axontechke.com"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">General</label>
+                        <input
+                          type="email"
+                          value={contactData.emails?.general || ""}
+                          onChange={(e) => setContactData({ ...contactData, emails: { ...contactData.emails, general: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="axontechkenya@gmail.com"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Location</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">City</label>
+                        <input
+                          type="text"
+                          value={contactData.location?.city || ""}
+                          onChange={(e) => setContactData({ ...contactData, location: { ...contactData.location, city: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="Nairobi"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Country</label>
+                        <input
+                          type="text"
+                          value={contactData.location?.country || ""}
+                          onChange={(e) => setContactData({ ...contactData, location: { ...contactData.location, country: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="Kenya"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Address</label>
+                        <input
+                          type="text"
+                          value={contactData.location?.addressString || ""}
+                          onChange={(e) => setContactData({ ...contactData, location: { ...contactData.location, addressString: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="Simara Mall, Ground Floor, Shop G50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Business Hours */}
+                  <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Business Hours</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Weekdays</label>
+                        <input
+                          type="text"
+                          value={contactData.businessHours?.weekdays || ""}
+                          onChange={(e) => setContactData({ ...contactData, businessHours: { ...contactData.businessHours, weekdays: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="Monday - Saturday: 8:00 AM - 6:00 PM EAT"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">Support Call Hours</label>
+                        <input
+                          type="text"
+                          value={contactData.businessHours?.supportCall || ""}
+                          onChange={(e) => setContactData({ ...contactData, businessHours: { ...contactData.businessHours, supportCall: e.target.value } })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                          placeholder="8:00 AM - 8:00 PM EAT"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Socials */}
+                  <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Social Media Links</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {(contactData.socials || []).map((social: any, idx: number) => (
+                        <div key={idx} className="flex gap-3 items-center bg-surface-container p-2 rounded-lg">
+                          <span className="font-mono text-[9px] text-on-surface-variant w-16 truncate">{social.name}</span>
+                          <input
+                            type="text"
+                            value={social.url || ""}
+                            onChange={(e) => {
+                              const copy = [...(contactData.socials || [])];
+                              copy[idx] = { ...copy[idx], url: e.target.value };
+                              setContactData({ ...contactData, socials: copy });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
+                            placeholder="https://..."
+                          />
+                          <button
+                            onClick={() => {
+                              const copy = contactData.socials.filter((_: any, i: number) => i !== idx);
+                              setContactData({ ...contactData, socials: copy });
+                            }}
+                            className="p-1.5 text-red-500/70 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const currentSocials = contactData.socials || [];
+                        setContactData({ ...contactData, socials: [...currentSocials, { name: "New Platform", url: "https://", icon: "" }] });
+                      }}
+                      className="mt-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[10px] font-bold transition-colors"
+                    >
+                      + Add social link
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-outline/10">
+                  <button
+                    onClick={handleSaveContact}
+                    className="w-full py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md"
+                  >
+                    Save Contact Information
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -4715,7 +5003,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               </div>
               <button
                 onClick={() => {
-                  fetch("/api/admin/reviews")
+                  authFetch("/api/admin/reviews")
                     .then(res => res.json())
                     .then(data => setAdminReviews(data))
                     .catch(err => console.error("Error refreshing reviews:", err));
@@ -4783,7 +5071,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <button
                         onClick={async () => {
                           try {
-                            await fetch(`/api/admin/reviews/${review.id}`, {
+                            await authFetch(`/api/admin/reviews/${review.id}`, {
                               method: "PUT",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ approved: true })
@@ -4800,7 +5088,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <button
                         onClick={async () => {
                           try {
-                            await fetch(`/api/admin/reviews/${review.id}`, {
+                            await authFetch(`/api/admin/reviews/${review.id}`, {
                               method: "PUT",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ approved: false })
@@ -4817,7 +5105,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onClick={async () => {
                         if (!confirm("Permanently delete this review?")) return;
                         try {
-                          await fetch(`/api/admin/reviews/${review.id}`, { method: "DELETE" });
+                          await authFetch(`/api/admin/reviews/${review.id}`, { method: "DELETE" });
                           setAdminReviews((prev: any[]) => prev.filter((r: any) => r.id !== review.id));
                         } catch (err) { console.error(err); }
                       }}
@@ -4905,7 +5193,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           onClick={async () => {
                             if (!confirm("Remove this price monitor?")) return;
                             try {
-                              const res = await fetch(`/api/admin/price-trackers/${tracker.id}`, { method: "DELETE" });
+                              const res = await authFetch(`/api/admin/price-trackers/${tracker.id}`, { method: "DELETE" });
                               if (res.ok) {
                                 showFeedback("Price monitor cancelled.");
                                 loadAllAdminData();

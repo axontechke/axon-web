@@ -1,15 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "axon-tech-api",
+  "name": "website",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-07-16",
   "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": true,
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "axon-tech-db",
-      "database_id": "9298a393-f15b-4395-abbe-275ca7dc403f"
+      "database_id": "f29b9801-d7ef-4b2d-9867-77149278205c"
     }
   ],
   "observability": {

@@ -15,6 +15,7 @@ import { AdminView } from "./components/AdminView";
 import { ContactView } from "./components/ContactView";
 import { BlogView } from "./components/BlogView";
 import { SEOHead } from "./components/SEOHead";
+import { WhatsAppFloatingButton } from "./components/WhatsAppFloatingButton";
 import API_ROUTES from "./config/api-routes";
 
 // Shared app state context
@@ -496,6 +497,9 @@ function AppContent() {
 
       {/* Consistent Footer */}
       <Footer onNavigate={(screen) => navigate(`/${screen.toLowerCase()}`)} config={webConfig} />
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppFloatingButton />
     </div>
   );
 }

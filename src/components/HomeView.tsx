@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { ArrowRight, Star, Cpu, ShieldCheck, Heart, Zap, Play, Laptop, Tablet, Headphones, Smartphone, Layers, Plug, ChevronLeft, ChevronRight, Pause } from "lucide-react";
+import { ArrowRight, Star, Cpu, ShieldCheck, Heart, Zap, Laptop, Tablet, Headphones, Smartphone, Layers, Plug, ChevronLeft, ChevronRight, Pause } from "lucide-react";
 import { Product, AXON_PRODUCTS, formatProductPrice } from "../types";
 import { GoogleReviewsWidget } from "./GoogleReviewsWidget";
 
@@ -58,7 +58,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   // Hero Slideshow state
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [slideInterval, setSlideInterval] = useState(4000); // Default 4s for non-video slides
 
   const heroSlides = useMemo(() => {
     const list = config?.heroSlides;
@@ -196,30 +197,39 @@ export const HomeView: React.FC<HomeViewProps> = ({
     });
   }, [config, products, featuredHeroProduct]);
 
+  const activeSlide = heroSlides[currentSlide] || heroSlides[0];
+
+  // Update slide interval based on active slide media type
   useEffect(() => {
-    if (isAutoplayPaused || heroSlides.length === 0) return;
+    if (activeSlide?.mediaType === "video") {
+      // Videos will set their own interval via onLoadedMetadata
+      // Start with a conservative estimate, will update when video loads
+      setSlideInterval(5000);
+    } else {
+      setSlideInterval(4000);
+    }
+  }, [currentSlide, activeSlide?.mediaType]);
+
+  useEffect(() => {
+    if (isPaused || heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 9000); // 9 seconds interval for a pleasant viewing time
+    }, slideInterval);
     return () => clearInterval(timer);
-  }, [isAutoplayPaused, heroSlides]);
+  }, [isPaused, heroSlides, slideInterval]);
 
   const handleNextSlide = () => {
-    setIsAutoplayPaused(true);
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
   const handlePrevSlide = () => {
-    setIsAutoplayPaused(true);
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
   const handleDotClick = (index: number) => {
-    setIsAutoplayPaused(true);
     setCurrentSlide(index);
   };
 
-  const activeSlide = heroSlides[currentSlide] || heroSlides[0];
   const TagIcon = activeSlide?.tagIcon || Cpu;
 
   const isMediaOnly = config?.heroMode === "media-only";
@@ -243,7 +253,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
             const slideTargetProductId = activeSlide?.targetProductId || config?.heroTargetProduct || "axon-phone-1-pro";
             const highlightedProduct = products.find(p => p.id === slideTargetProductId) || products[0];
             return (
-              <div className="relative bg-black rounded-3xl overflow-hidden border border-outline/10 h-[450px] sm:h-[500px] md:h-[550px] lg:h-[600px] flex flex-col justify-end p-4 sm:p-8 lg:p-12 shadow-2xl group transition-all duration-500">
+              <div
+                className="relative bg-black rounded-3xl overflow-hidden border border-outline/10 h-[450px] sm:h-[500px] md:h-[550px] lg:h-[600px] flex flex-col justify-end p-4 sm:p-8 lg:p-12 shadow-2xl group transition-all duration-500"
+                onTouchStart={() => setIsPaused(true)}
+                onTouchEnd={() => setIsPaused(false)}
+              >
                 {/* Cinematic Background Media Container */}
                 <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`media-only-bg-${activeSlide?.id}`}>
                   {activeSlide?.mediaType === "embed" ? (
@@ -263,6 +277,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       loop
                       muted
                       playsInline
+                      onLoadedMetadata={(e) => {
+                        const video = e.currentTarget;
+                        if (video.duration && isFinite(video.duration)) {
+                          setSlideInterval(Math.ceil(video.duration * 1000) + 500);
+                        }
+                      }}
                     />
                   ) : (
                     <img
@@ -342,16 +362,121 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             );
           })()
+        ) : isMobile && activeSlide?.mediaType === "video" ? (
+          // Mobile Video Overlay Layout - video takes full width, details overlay on top
+          <div
+            className="relative min-h-[480px] sm:min-h-[520px]"
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+          >
+            {/* Full-bleed video background */}
+            <div className="absolute inset-0 z-0" key={`mobile-video-${activeSlide?.id}`}>
+              <video
+                src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                onLoadedMetadata={(e) => {
+                  const video = e.currentTarget;
+                  if (video.duration && isFinite(video.duration)) {
+                    setSlideInterval(Math.ceil(video.duration * 1000) + 500);
+                  }
+                }}
+              />
+              {/* Gradient overlay for text legibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            </div>
+
+            {/* Overlaid content */}
+            <div className="relative z-10 flex flex-col justify-end min-h-[480px] sm:min-h-[520px] p-4 pb-6">
+              {/* Tag */}
+              <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-primary/90 text-white text-[9px] font-semibold tracking-wide w-fit mb-2">
+                <TagIcon className="w-2.5 h-2.5 text-white" />
+                <span>{activeSlide?.tag}</span>
+              </div>
+
+              {/* Title & Description */}
+              <h1 className="font-display font-black text-xl text-white leading-tight mb-1.5 animate-in fade-in slide-in-from-bottom-1 duration-400">
+                {activeSlide?.title}
+              </h1>
+              <p className="text-white/80 text-[10px] leading-relaxed line-clamp-2 mb-3">
+                {activeSlide?.description}
+              </p>
+
+              {/* CTAs */}
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={activeSlide?.primaryAction}
+                  className="px-4 py-2 rounded-full text-[10px] font-bold flex items-center gap-1.5 cursor-pointer bg-white text-black hover:bg-white/90 transition-colors"
+                >
+                  {activeSlide?.primaryBtnText}
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={activeSlide?.secondaryAction}
+                  className="px-4 py-2 rounded-full text-[10px] font-bold cursor-pointer bg-white/20 text-white hover:bg-white/30 transition-colors border border-white/20"
+                >
+                  {activeSlide?.secondaryBtnText}
+                </button>
+              </div>
+
+              {/* Micro overlay tag */}
+              <div className="bg-black/50 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl text-left max-w-[200px] mb-3">
+                <div className="text-[9px] font-black text-primary uppercase tracking-wide truncate">{activeSlide?.overlayTitle}</div>
+                <div className="text-[8px] text-white/70 font-medium leading-tight truncate">{activeSlide?.overlayDesc}</div>
+              </div>
+
+              {/* Carousel Controls */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  {heroSlides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleDotClick(idx)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        idx === currentSlide ? "w-5 bg-white" : "w-1.5 bg-white/40 hover:bg-white/60"
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+                <div className="h-4 w-px bg-white/20" />
+                <div className="flex gap-1">
+                  <button
+                    onClick={handlePrevSlide}
+                    className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    aria-label="Previous slide"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={handleNextSlide}
+                    className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    aria-label="Next slide"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
-          <div className="relative bg-surface-container-low rounded-3xl overflow-hidden border border-outline/10 min-h-[210px] sm:min-h-[350px] lg:min-h-[340px]">
+          // Default layout for non-video or desktop
+          <div
+            className="relative bg-surface-container-low rounded-3xl overflow-hidden border border-outline/10 min-h-[210px] sm:min-h-[350px] lg:min-h-[340px]"
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+          >
             {/* Full-bleed background media */}
             <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`bg-media-${activeSlide?.id}`}>
               {activeSlide?.mediaType === "embed" ? (
-                <div 
+                <div
                   className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35"
                   dangerouslySetInnerHTML={{
-                    __html: (isMobile && activeSlide?.mobileMediaEmbed) 
-                      ? activeSlide?.mobileMediaEmbed 
+                    __html: (isMobile && activeSlide?.mobileMediaEmbed)
+                      ? activeSlide?.mobileMediaEmbed
                       : (activeSlide?.mediaEmbed || activeSlide?.mediaUrl)
                   }}
                 />
@@ -363,6 +488,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   loop
                   muted
                   playsInline
+                  onLoadedMetadata={(e) => {
+                    const video = e.currentTarget;
+                    if (video.duration && isFinite(video.duration)) {
+                      setSlideInterval(Math.ceil(video.duration * 1000) + 500);
+                    }
+                  }}
                 />
               ) : (
                 <img
@@ -385,11 +516,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <TagIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
                   <span>{activeSlide?.tag}</span>
                 </div>
-                
+
                 <h1 className="font-display font-black text-lg sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-on-surface leading-tight tracking-tight flex items-center animate-in fade-in slide-in-from-left-2 duration-400" key={`title-${activeSlide?.id}`}>
                   {activeSlide?.title}
                 </h1>
-                
+
                 <p className="text-on-surface-variant/85 text-[10px] sm:text-sm leading-relaxed max-w-xl line-clamp-2 sm:line-clamp-none flex items-center animate-in fade-in slide-in-from-left-2 duration-500" key={`desc-${activeSlide?.id}`}>
                   {activeSlide?.description}
                 </p>
@@ -428,7 +559,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       <span>4.8/5 Rating</span>
                     </div>
                   </div>
-                  
+
                   {/* Carousel Controllers */}
                   <div className="flex items-center gap-3 pt-1">
                     <div className="flex items-center gap-1">
@@ -459,35 +590,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
-                      {isAutoplayPaused && (
-                        <button
-                          onClick={() => setIsAutoplayPaused(false)}
-                          className="p-1 rounded-lg border border-outline/10 hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2"
-                          title="Resume Autoplay"
-                        >
-                          <Play className="w-2 h-2 fill-current" />
-                          <span>Resume</span>
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Right-side Media Showcase (hidden on mobile, shown on desktop) */}
-              <div className="hidden lg:flex lg:col-span-5 w-full items-center justify-center">
-                <div 
+              {/* Right-side Media Showcase */}
+              <div className="flex lg:col-span-5 w-full items-center justify-center">
+                <div
                   className="relative w-full max-w-sm lg:max-w-md aspect-[16/10] sm:aspect-[4/3] lg:aspect-[1.4] rounded-2xl overflow-hidden bg-surface-container-high/60 border border-outline/15 shadow-lg group/media animate-in fade-in zoom-in-95 duration-500"
                   key={`media-${activeSlide?.id}`}
                 >
                   {activeSlide?.mediaType === "embed" ? (
-                    <div 
+                    <div
                       className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
-                      dangerouslySetInnerHTML={{ __html: activeSlide?.mediaEmbed || activeSlide?.mediaUrl }}
+                      dangerouslySetInnerHTML={{ __html: (isMobile && activeSlide?.mobileMediaEmbed) ? activeSlide?.mobileMediaEmbed : (activeSlide?.mediaEmbed || activeSlide?.mediaUrl) }}
                     />
                   ) : activeSlide?.mediaType === "video" ? (
                     <video
-                      src={activeSlide?.mediaUrl}
+                      src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
                       className="w-full h-full object-cover select-none"
                       autoPlay
                       loop
@@ -497,14 +618,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     />
                   ) : (
                     <img
-                      src={activeSlide?.mediaUrl}
+                      src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
                       alt={activeSlide?.mediaAlt || activeSlide?.title}
                       className="w-full h-full object-cover select-none"
                       key={`hero-img-${activeSlide?.id}`}
                       referrerPolicy="no-referrer"
                     />
                   )}
-                  
+
                   {/* Micro glass tag displaying active device specs / capabilities */}
                   <div className="absolute bottom-3 right-3 z-10 bg-surface/85 backdrop-blur-md border border-outline/10 px-3 py-1.5 rounded-xl shadow-md text-right max-w-[200px]">
                     <div className="text-[10px] font-black text-primary uppercase tracking-wide truncate">{activeSlide?.overlayTitle}</div>
