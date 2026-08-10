@@ -59,7 +59,8 @@ function AppContent() {
       if (prodRes.ok) {
         const prodData = await prodRes.json();
         if (Array.isArray(prodData) && prodData.length > 0) {
-          setProducts(prodData);
+          // Only keep products with a valid name — shields all downstream .map() calls
+          setProducts(prodData.filter((p: any) => p && typeof p?.name === "string"));
         }
       }
       if (configRes.ok) {
