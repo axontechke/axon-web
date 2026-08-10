@@ -238,6 +238,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   // Data States
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [productsList, setProductsList] = useState<Product[]>([]);
+  // Derived: only products with valid name/id, shields all .map() calls downstream
+  const validProductsList = useMemo(() => productsList.filter(p => p && typeof p.name === "string"), [productsList]);
   const [ordersList, setOrdersList] = useState<any[]>([]);
   const [webConfig, setWebConfig] = useState<WebConfig | null>(null);
   const [contactData, setContactData] = useState<any>(null);
@@ -1002,9 +1004,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
   };
 
   // Filter products list
-  const filteredProducts = productsList.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(productSearch.toLowerCase()) || 
-                          p.brand.toLowerCase().includes(productSearch.toLowerCase());
+  const filteredProducts = validProductsList.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                          (p.brand && p.brand.toLowerCase().includes(productSearch.toLowerCase()));
     const matchesCategory = productCategoryFilter === "All" || p.category === productCategoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -2792,7 +2794,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onChange={(e) => setWebConfig({ ...webConfig, heroTargetProduct: e.target.value })}
                       className="w-full px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface font-semibold focus:outline-none focus:border-primary"
                     >
-                      {productsList.map(p => (
+                      {validProductsList.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.brand})
                         </option>
@@ -2838,7 +2840,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         description: "Configure the future of spatial computing. Built with hyper-low pipeline lag, active liquid isolation grids, and high performance graphics capability.",
                         primaryBtnText: "Explore Neural Pro",
                         primaryActionTarget: "product",
-                        primaryActionValue: productsList[0]?.id || "axon-slate-pro",
+                        primaryActionValue: validProductsList[0]?.id || "axon-slate-pro",
                         secondaryBtnText: "Browse Accessories",
                         secondaryActionTarget: "category",
                         secondaryActionValue: "Accessories",
@@ -3036,7 +3038,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                               >
                                 <option value="">-- Choose Target Product --</option>
-                                {productsList.map(p => (
+                                {validProductsList.map(p => (
                                   <option key={p.id} value={p.id}>{p.name} ({formatProductPrice(p)})</option>
                                 ))}
                               </select>
@@ -3098,7 +3100,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                               >
                                 <option value="">-- Choose Target Product --</option>
-                                {productsList.map(p => (
+                                {validProductsList.map(p => (
                                   <option key={p.id} value={p.id}>{p.name} ({formatProductPrice(p)})</option>
                                 ))}
                               </select>
@@ -3130,7 +3132,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
                               <option value="">-- Choose Product Device (Pill overlay details) --</option>
-                              {productsList.map(p => (
+                              {validProductsList.map(p => (
                                 <option key={p.id} value={p.id}>{p.name} ({p.brand})</option>
                               ))}
                             </select>
@@ -3411,7 +3413,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           onChange={(e) => setWebConfig({ ...webConfig, trendingSlot1Product: e.target.value })}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
-                          {productsList.map(p => (
+                          {validProductsList.map(p => (
                             <option key={p.id} value={p.id}>{p.name} ({formatProductPrice(p)})</option>
                           ))}
                         </select>
@@ -3452,7 +3454,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           onChange={(e) => setWebConfig({ ...webConfig, trendingSlot2Product: e.target.value })}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
-                          {productsList.map(p => (
+                          {validProductsList.map(p => (
                             <option key={p.id} value={p.id}>{p.name} ({formatProductPrice(p)})</option>
                           ))}
                         </select>
@@ -3493,7 +3495,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           onChange={(e) => setWebConfig({ ...webConfig, trendingSlot3Product: e.target.value })}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
-                          {productsList.map(p => (
+                          {validProductsList.map(p => (
                             <option key={p.id} value={p.id}>{p.name} ({formatProductPrice(p)})</option>
                           ))}
                         </select>
@@ -3534,7 +3536,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           onChange={(e) => setWebConfig({ ...webConfig, trendingSlot4Product: e.target.value })}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
-                          {productsList.map(p => (
+                          {validProductsList.map(p => (
                             <option key={p.id} value={p.id}>{p.name} ({formatProductPrice(p)})</option>
                           ))}
                         </select>
@@ -3633,7 +3635,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-[11px] text-on-surface font-mono"
                             >
                               <option value="">-- Choose Product --</option>
-                              {productsList.map(p => (
+                              {validProductsList.map(p => (
                                 <option key={p.id} value={p.id}>{p.name}</option>
                               ))}
                             </select>
