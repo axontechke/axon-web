@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { ArrowRight, Star, Cpu, ShieldCheck, Heart, Zap, Laptop, Tablet, Headphones, Smartphone, Layers, Plug, ChevronLeft, ChevronRight, Pause } from "lucide-react";
-import { Product, AXON_PRODUCTS, formatProductPrice } from "../types";
+import { Product, formatProductPrice } from "../types";
 import { GoogleReviewsWidget } from "./GoogleReviewsWidget";
 
 interface HomeViewProps {
@@ -15,11 +15,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onSelectProduct,
   onNavigateToCatalog,
   onAddToCart,
-  products = AXON_PRODUCTS,
+  products = [],
   config,
 }) => {
   // Get highlighted products
-  const featuredHeroProduct = products.find(p => p.id === "axon-slate-pro") || products[0] || AXON_PRODUCTS[0];
+  const featuredHeroProduct = products[0];
 
   const categoriesList = useMemo(() => {
     const list = config?.categoriesList;
@@ -740,7 +740,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             ];
 
             return trendingList.map((slotItem, idx) => {
-              const prod = products.find(p => p.id === slotItem.productId) || AXON_PRODUCTS[0];
+              const prod = products.find(p => p.id === slotItem.productId) || products[0];
               const isLarge = idx === 0 || idx === 3;
               const colSpanClass = isLarge ? "col-span-2 md:col-span-8" : "col-span-1 md:col-span-4";
               const flexClass = isLarge ? "flex-col md:flex-row items-center justify-between" : "flex-col justify-between";
@@ -773,7 +773,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )}
                   </div>
                   
-                  <div className="relative w-full flex justify-center items-center">
+                  <div className="relative w-full flex justify-center items-center bg-[#f5f5f5] rounded-2xl">
                     {!isLarge && <div className="absolute w-20 sm:w-32 h-20 sm:h-32 rounded-full bg-primary/5 blur-2xl pointer-events-none" />}
                     {isLarge && <div className="absolute w-32 sm:w-44 h-32 sm:h-44 rounded-full bg-primary/5 blur-2xl pointer-events-none" />}
                     <img

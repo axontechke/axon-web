@@ -210,11 +210,6 @@ const INITIAL_PRODUCTS = [
   }
 ];
 
-const INITIAL_DELIVERY_METHODS = [
-  { id: "del-dhl", name: "DHL Express Worldwide", price: 25, transitDays: "1-3 business days", carrier: "DHL Express", enabled: true, description: "Secure door-to-door express courier with real-time flight tracking." },
-  { id: "del-fedex", name: "FedEx International Priority", price: 15, transitDays: "2-4 business days", carrier: "FedEx", enabled: true, description: "Reliable international priority delivery with thermal climate protection." },
-  { id: "del-local", name: "Axon Prime Courier", price: 45, transitDays: "Same day (Nairobi / Local)", carrier: "Axon Logistics", enabled: true, description: "Dedicated white-glove direct messenger service." }
-];
 
 const INITIAL_CONFIG: Record<string, any> = {
   announcement: "AXON INTEGRATION PROTOCOL ACTIVE | GET COMPLEMENTARY LUXE CARRY SLEEVE WITH ALL CORE LAPTOPS",
@@ -294,88 +289,7 @@ const INITIAL_CONTACT: Record<string, any> = {
   ]
 };
 
-function getInitialBlogPosts(): Array<Record<string, any>> {
-  const d1 = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
-  const d2 = new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString();
-  return [
-    {
-      id: "blog-1", title: "The Future of Metrology and Calibration Nodes in East Africa",
-      slug: "future-of-metrology-calibration-nodes-east-africa",
-      excerpt: "An in-depth analysis of high-density electronic hardware certification nodes in Nairobi, Kenya.",
-      content: "## Localized Metrology: The New Backbone of Regional Hardware Ecosystems\n\nThe rise of East Africa's Silicon Savannah has driven unprecedented demand for high-fidelity hardware deployment.",
-      category: "Calibration", author: "Dr. Richard Njoroge, Metrology Director",
-      date: d1,
-      tags: ["Metrology", "Calibration", "Nairobi", "ISO-17025", "Silicon Savannah"],
-      metaTitle: "East African Metrology & Calibration Hubs | AXON",
-      metaDescription: "Explore AXON's new ISO/IEC traceable metrology nodes in Nairobi, Kenya.",
-      contentLocation: "Nairobi, Kenya", jsonLd: "{}"
-    },
-    {
-      id: "blog-2", title: "Optimizing Silicon Core Diagnostics: A Complete ISO/IEC 17025 Guide",
-      slug: "optimizing-silicon-core-diagnostics-iso-17025",
-      excerpt: "A technical guide for hardware developers and calibration laboratories.",
-      content: "## Accelerating Core Silicon Diagnoses Under ISO/IEC 17025\n\nDesigning modern computing chips requires strict, verifiable diagnostic reporting.",
-      category: "Engineering", author: "Sylvia Mitchell, Lead Systems Engineer",
-      date: d2,
-      tags: ["Silicon Core", "Diagnostics", "ISO-17025", "Systems Engineering"],
-      metaTitle: "Silicon Core Diagnostics & ISO/IEC Standards | AXON",
-      metaDescription: "Understand the metrology requirements for the Axon-X1 processor.",
-      contentLocation: "London, UK", jsonLd: "{}"
-    }
-  ];
-}
 
-function getInitialOrders(): Array<Record<string, any>> {
-  const d3 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-  const d2_8 = new Date(Date.now() - 2.8 * 24 * 60 * 60 * 1000).toISOString();
-  const d2 = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
-  const d1 = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-  const d0_8 = new Date(Date.now() - 0.8 * 24 * 60 * 60 * 1000).toISOString();
-  const d0_5 = new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000).toISOString();
-  const d4h = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
-  const d2h = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-  return [
-    {
-      id: "AXN-827103", date: d3, status: "delivered",
-      customer: { fullName: "Stephen Paul Kamau", email: "kamaustephenpaul@gmail.com", address: "100 Axon Technology Boulevard", city: "Nairobi", state: "County", zipCode: "00100" },
-      shippingMethod: "Express Overnight", shippingCost: 25, subtotal: 1148, discountAmount: 172.2, discountPercentage: 15, taxes: 58.54, total: 1059.34,
-      payment: { lastFour: "8821" },
-      items: [
-        { id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Teal" },
-        { id: "axon-buds-pro", name: "Axon Buds Pro", price: 249, quantity: 1, color: "Copper" }
-      ],
-      history: [
-        { status: "pending", time: d3, notes: "Order received and validated." },
-        { status: "packaged", time: d2_8, notes: "System verification & aerospace packaging complete." },
-        { status: "shipped", time: d2, notes: "Dispatched via Priority Air Cargo. Tracking: AX-7711289" },
-        { status: "delivered", time: d1, notes: "Safely received. Signature certified." }
-      ]
-    },
-    {
-      id: "AXN-982714", date: d1, status: "shipped",
-      customer: { fullName: "Clarissa Mitchell", email: "clarissa.m@axon.net", address: "740 Silicon Alley, Flat 4B", city: "London", state: "Greater London", zipCode: "EC1A 1BB" },
-      shippingMethod: "Priority Overnight", shippingCost: 15, subtotal: 1499, discountAmount: 0, discountPercentage: 0, taxes: 90.84, total: 1604.84,
-      payment: { lastFour: "4491" },
-      items: [{ id: "axon-book-16", name: "Axon Book 16", price: 1499, quantity: 1, color: "Space Gray" }],
-      history: [
-        { status: "pending", time: d1, notes: "Payment authorized successfully." },
-        { status: "packaged", time: d0_8, notes: "Assembled and loaded into sterile power capsule." },
-        { status: "shipped", time: d0_5, notes: "In transit with courier. Expected delivery today." }
-      ]
-    },
-    {
-      id: "AXN-312984", date: d4h, status: "packaged",
-      customer: { fullName: "Devon Chen", email: "devon.chen@coder.io", address: "12 Pine Street", city: "San Francisco", state: "CA", zipCode: "94103" },
-      shippingMethod: "Standard Express", shippingCost: 0, subtotal: 799, discountAmount: 0, discountPercentage: 0, taxes: 47.94, total: 846.94,
-      payment: { lastFour: "1098" },
-      items: [{ id: "axon-phone-1-pro", name: "Axon Phone 1 Pro", price: 799, quantity: 1, color: "Obsidian" }],
-      history: [
-        { status: "pending", time: d4h, notes: "System routing complete." },
-        { status: "packaged", time: d2h, notes: "Order finalized and sealed into anti-static container." }
-      ]
-    }
-  ];
-}
 
 // ─── SEED DATABASE ───────────────────────────────────────────
 async function seedDatabase(db: D1Database): Promise<void> {
@@ -402,20 +316,6 @@ async function seedDatabase(db: D1Database): Promise<void> {
     }
   }
 
-  // Check and seed orders
-  const orderCount = await db.prepare("SELECT COUNT(*) as count FROM orders").first<{ count: number }>();
-  if (!orderCount || orderCount.count === 0) {
-    const initialOrders = getInitialOrders();
-    for (const o of initialOrders) {
-      batch.push(db.prepare(
-        `INSERT OR IGNORE INTO orders (id, date, status, customer, shippingMethod, shippingCost, subtotal, discountAmount, discountPercentage, taxes, total, payment, items, history)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(o.id, o.date, o.status, JSON.stringify(o.customer), o.shippingMethod, o.shippingCost,
-        o.subtotal, o.discountAmount, o.discountPercentage, o.taxes, o.total,
-        JSON.stringify(o.payment), JSON.stringify(o.items), JSON.stringify(o.history)));
-    }
-  }
-
   // Check and seed config
   const configCount = await db.prepare("SELECT COUNT(*) as count FROM config WHERE key NOT LIKE 'session:%'").first<{ count: number }>();
   if (!configCount || configCount.count === 0) {
@@ -429,30 +329,6 @@ async function seedDatabase(db: D1Database): Promise<void> {
   if (!contactCount || contactCount.count === 0) {
     for (const [key, value] of Object.entries(INITIAL_CONTACT)) {
       batch.push(db.prepare(`INSERT OR IGNORE INTO contact (key, value) VALUES (?, ?)`).bind(key, JSON.stringify(value)));
-    }
-  }
-
-  // Check and seed delivery methods
-  const deliveryCount = await db.prepare("SELECT COUNT(*) as count FROM delivery_methods").first<{ count: number }>();
-  if (!deliveryCount || deliveryCount.count === 0) {
-    for (const m of INITIAL_DELIVERY_METHODS) {
-      batch.push(db.prepare(
-        `INSERT OR IGNORE INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`
-      ).bind(m.id, m.name, m.price, m.transitDays, m.carrier, m.enabled ? 1 : 0, m.description));
-    }
-  }
-
-  // Check and seed blog posts
-  const blogCount = await db.prepare("SELECT COUNT(*) as count FROM blog").first<{ count: number }>();
-  if (!blogCount || blogCount.count === 0) {
-    const initialBlogPosts = getInitialBlogPosts();
-    for (const b of initialBlogPosts) {
-      batch.push(db.prepare(
-        `INSERT OR IGNORE INTO blog (id, title, slug, excerpt, content, category, author, date, tags, metaTitle, metaDescription, contentLocation, jsonLd)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(b.id, b.title, b.slug, b.excerpt, b.content, b.category, b.author, b.date,
-        JSON.stringify(b.tags), b.metaTitle, b.metaDescription, b.contentLocation, b.jsonLd));
     }
   }
 
@@ -532,6 +408,7 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     colors: JSON.parse(p.colors || "[]"),
     storages: JSON.parse(p.storages || "[]"),
     specifications: JSON.parse(p.specifications || "{}"),
+    variants: JSON.parse(p.variants || "{}"),
   }));
   return corsResponse(products);
 }

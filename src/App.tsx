@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { Product, CartItem, AXON_PRODUCTS } from "./types";
+import { Product, CartItem } from "./types";
 import { ROUTES } from "./config/routes";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
@@ -47,7 +47,7 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Dynamic server data states
-  const [products, setProducts] = useState<Product[]>(AXON_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [webConfig, setWebConfig] = useState<any>(null);
 
   const fetchProductsAndConfig = async () => {
@@ -146,6 +146,29 @@ function AppContent() {
   const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string) => {
     const color = selectedColor || (product.colors ? product.colors[0] : undefined);
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
+
+    // Compute dynamic price from variant map
+    let dynamicPrice = product.price;
+    let dynamicPriceKsh = product.priceKsh;
+    if (product.variants && storage) {
+      const storageVariants = product.variants[storage];
+      if (storageVariants) {
+        for (const [colors, price] of Object.entries(storageVariants)) {
+          if (colors.split(',').map(c => c.trim()).includes(color || '')) {
+            dynamicPriceKsh = price;
+            dynamicPrice = parseFloat((Math.floor(price / 130) + 0.99).toFixed(2));
+            break;
+          }
+        }
+      }
+    }
+
+    // Create a price-adjusted product copy for the cart
+    const cartProduct = {
+      ...product,
+      price: dynamicPrice ?? product.price,
+      priceKsh: dynamicPriceKsh ?? product.priceKsh,
+    };
 
     setCart((prevCart) => {
       const matchIdx = prevCart.findIndex(
@@ -309,6 +332,7 @@ function AppContent() {
             console.error(e);
           }
         }}
+        products={products}
       />
 
       {/* Slideout Cart Drawer */}

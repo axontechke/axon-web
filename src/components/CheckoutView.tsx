@@ -465,7 +465,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 <div className="max-h-40 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
                   {cart.map((item, idx) => (
                     <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
-                      <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-surface p-1 border object-contain shrink-0" />
+                      <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-[#f5f5f5] p-1 border object-contain shrink-0" />
                       <div className="flex-1 min-w-0">
                         <h4 className="text-[11px] font-bold text-on-surface truncate">{item.product.name}</h4>
                         <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>

@@ -26,21 +26,34 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     setQuantity(1);
   }, [product.id, product.image]);
 
-  // Find matching variant based on currently selected storage and color
-  const matchingVariant = product.variants?.find(
-    (v) =>
-      v.storage.toLowerCase() === selectedStorage?.toLowerCase() &&
-      v.color.toLowerCase() === selectedColor?.toLowerCase()
-  );
+  // Check if product has variant-based pricing (new structure)
+  const hasVariants = product.variants && Object.keys(product.variants).length > 0;
 
-  // Determine actual stock status
-  const hasVariants = product.variants && product.variants.length > 0;
-  const isSelectedVariantInStock = hasVariants
-    ? (matchingVariant ? matchingVariant.stock > 0 : false)
-    : product.inStock;
-  const selectedVariantStock = hasVariants
-    ? (matchingVariant ? matchingVariant.stock : 0)
-    : undefined;
+  // Compute dynamic price from variants: { "512GB": { "Blue,Silver": 210000 } }
+  const getVariantPriceKsh = (storage: string | undefined, color: string | undefined): number | null => {
+    if (!hasVariants || !storage || !color) return null;
+    const storageVariants = product.variants?.[storage];
+    if (!storageVariants) return null;
+    // Try exact color match first
+    if (storageVariants[color] !== undefined) return storageVariants[color];
+    // Fallback: try color keys that contain the selected color
+    for (const key of Object.keys(storageVariants)) {
+      if (key.split(',').map(c => c.trim()).includes(color)) {
+        return storageVariants[key];
+      }
+    }
+    return null;
+  };
+
+  const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
+  const displayPriceKsh = dynamicPriceKsh ?? product.priceKsh ?? 0;
+  const displayPrice = dynamicPriceKsh
+    ? parseFloat((Math.floor(dynamicPriceKsh / 130) + 0.99).toFixed(2))
+    : product.price;
+
+  // All in-stock (variants always in stock for now)
+  const isSelectedVariantInStock = hasVariants ? true : product.inStock;
+  const selectedVariantStock = undefined;
 
   // Hover to zoom states
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({
@@ -200,8 +213,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-left">
         {/* Left Column: Premium Framing Image */}
         <div className="lg:col-span-6 space-y-4">
-          <div 
-            className="relative aspect-square rounded-[32px] bg-surface-container-low border border-outline/10 flex items-center justify-center p-8 overflow-hidden cursor-zoom-in"
+          <div
+            className="relative aspect-square rounded-[32px] bg-[#f5f5f5] border border-outline/10 flex items-center justify-center p-8 overflow-hidden cursor-zoom-in"
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -292,7 +305,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
           {/* Pricing */}
           <div className="py-2 border-y border-outline/10 flex items-center justify-between">
-            <span className="text-2xl font-black text-primary font-display">{formatProductPrice(product)}</span>
+            <span className="text-2xl font-black text-primary font-display">
+              {displayPriceKsh > 0 ? `KSh ${displayPriceKsh.toLocaleString()}${displayPrice ? ` ($${displayPrice})` : ''}` : formatProductPrice(product)}
+            </span>
             {product.inStock ? (
               <span className="text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200">
                 Ready to Ship

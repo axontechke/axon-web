@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ShoppingBag, Search, Menu, X, ChevronDown, ChevronUp, Sun, Moon, LogOut, History } from "lucide-react";
-import { AppScreen, AXON_PRODUCTS } from "../types";
+import { AppScreen, Product } from "../types";
 
 interface NavbarProps {
   currentScreen: AppScreen | string;
@@ -17,6 +17,7 @@ interface NavbarProps {
   onToggleDarkMode: () => void;
   isAdminAuthenticated?: boolean;
   onAdminLogout?: () => void;
+  products?: Product[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,6 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleDarkMode,
   isAdminAuthenticated = false,
   onAdminLogout,
+  products = [],
 }) => {
   // Helper to convert pathname to screen name for active state comparison
   const getScreenFromPath = (path: string): AppScreen => {
@@ -159,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const getBrandsForCategory = (category: string) => {
-    const filtered = AXON_PRODUCTS.filter(p => p.category === category);
+    const filtered = products.filter(p => p.category === category);
     const unique = Array.from(new Set(filtered.map(p => p.brand).filter(Boolean)));
     return unique;
   };

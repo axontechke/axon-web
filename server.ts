@@ -8,7 +8,27 @@ const app = express();
 const PORT = 3000;
 const DB_FILE = path.join(process.cwd(), "db.json");
 
+// ─── REMOTE DB FLAG ───────────────────────────────────────────
+// Set USE_REMOTE_DB=true to proxy all API calls to the Cloudflare Worker (D1)
+const USE_REMOTE_DB = true;
+const WORKER_URL = "https://website.axontech254.workers.dev";
+
 app.use(express.json());
+
+// ─── REMOTE DB HELPERS ───────────────────────────────────────
+async function remoteDB(method: string, path: string, body?: any) {
+  const opts: RequestInit = {
+    method,
+    headers: { "Content-Type": "application/json" },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${WORKER_URL}${path}`, opts);
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = text; }
+  return { ok: res.ok, status: res.status, data };
+}
+
 
 // ============================================================
 // SEO & GEO CRAWLER FILES
@@ -787,7 +807,16 @@ function saveDB(data: any) {
 // ==========================================
 
 // 1. PRODUCTS ENDPOINTS
-app.get("/api/products", (req, res) => {
+app.get("/api/products", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", "/api/products");
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+    return;
+  }
   const db = getDB();
   res.json(db.products);
 });
@@ -1631,7 +1660,16 @@ app.get("/api/analytics", (req, res) => {
 });
 
 // 4. CONFIG ENDPOINTS
-app.get("/api/config", (req, res) => {
+app.get("/api/config", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", "/api/config");
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+    return;
+  }
   const db = getDB();
   res.json(db.config);
 });
@@ -1644,7 +1682,16 @@ app.put("/api/admin/config", (req, res) => {
 });
 
 // 4b. CONTACT ENDPOINTS (Admin-editable contact page)
-app.get("/api/contact", (req, res) => {
+app.get("/api/contact", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", "/api/contact");
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+    return;
+  }
   const db = getDB();
   res.json(db.contact || INITIAL_CONTACT);
 });
@@ -1710,7 +1757,16 @@ app.put("/api/admin/support-requests/:id", (req, res) => {
 // ==========================================
 
 // Get delivery methods
-app.get("/api/delivery-methods", (req, res) => {
+app.get("/api/delivery-methods", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", "/api/delivery-methods");
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+    return;
+  }
   const db = getDB();
   res.json(db.deliveryMethods || INITIAL_DELIVERY_METHODS);
 });
@@ -1948,13 +2004,31 @@ app.post("/api/admin/orders/:id/dispatch", (req, res) => {
 // ==========================================
 
 // Get all blog posts
-app.get("/api/blog", (req, res) => {
+app.get("/api/blog", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", "/api/blog");
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+    return;
+  }
   const db = getDB();
   res.json(db.blog || []);
 });
 
 // Get individual blog post by slug
-app.get("/api/blog/:slug", (req, res) => {
+app.get("/api/blog/:slug", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", `/api/blog/${req.params.slug}`);
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(404).json({ error: "Blog post not found" });
+    }
+    return;
+  }
   const db = getDB();
   const { slug } = req.params;
   const post = (db.blog || []).find((b: any) => b.slug === slug);
@@ -2514,6 +2588,21 @@ function generateSEOMetaTags(path: string, product?: any): string {
 // ==========================================================
 // VITE DEV SERVER OR STATIC SERVING MIDDLEWARE
 // ==========================================
+
+// ─── CATCH-ALL API PROXY (when using remote DB) ──────────────
+// Proxies all unhandled /api requests to the Cloudflare Worker
+if (USE_REMOTE_DB) {
+  app.use("/api", async (req, res) => {
+    try {
+      const result = await remoteDB(req.method, req.path, req.body);
+      res.status(result.status).json(result.data);
+    } catch (err) {
+      console.error("Proxy error:", err);
+      res.status(502).json({ error: "Bad gateway" });
+    }
+  });
+}
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

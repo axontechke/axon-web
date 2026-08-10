@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Search, Filter, SlidersHorizontal, Check, Star, RefreshCw, X, Scale, Plus } from "lucide-react";
-import { Product, AXON_PRODUCTS, formatProductPrice } from "../types";
+import { Product, formatProductPrice } from "../types";
 
 interface CatalogViewProps {
   onSelectProduct: (product: Product) => void;
@@ -26,12 +26,12 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
   setSearchQuery,
   selectedBrand,
   setSelectedBrand,
-  products = AXON_PRODUCTS,
+  products = [],
   config,
 }) => {
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [maxPrice, setMaxPrice] = useState<number>(1500);
+  const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Product Comparison States
@@ -160,7 +160,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     setSelectedBrand("All");
     setSortBy("featured");
     setInStockOnly(false);
-    setMaxPrice(1500);
+    setMaxPrice(5000);
   };
 
   return (
@@ -260,7 +260,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
             <input
               type="range"
               min="50"
-              max="1500"
+              max="5000"
               step="50"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -326,7 +326,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
           </div>
 
           {/* Active filter badges */}
-          {(selectedCategory !== "All" || selectedBrand !== "All" || searchQuery || inStockOnly || maxPrice < 1500) && (
+          {(selectedCategory !== "All" || selectedBrand !== "All" || searchQuery || inStockOnly || maxPrice < 5000) && (
             <div className="flex flex-wrap gap-2 text-left" id="active-filters-row">
               {selectedCategory !== "All" && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
@@ -352,7 +352,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setInStockOnly(false)} />
                 </span>
               )}
-              {maxPrice < 1500 && (
+              {maxPrice < 5000 && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
                   Under ${maxPrice}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxPrice(1500)} />
@@ -427,7 +427,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                     className="cursor-pointer space-y-4 text-left"
                   >
                     {/* Image */}
-                    <div className="relative h-48 rounded-2xl bg-surface flex items-center justify-center p-4 border border-outline/5 overflow-hidden">
+                    <div className="relative h-48 rounded-2xl bg-[#f5f5f5] flex items-center justify-center p-4 border border-outline/5 overflow-hidden">
                       {product.isNew && (
                         <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-primary text-white text-[8px] font-bold uppercase tracking-wider">
                           New Release
@@ -745,7 +745,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                               </button>
 
                               {/* Image wrapper */}
-                              <div className="h-32 bg-surface rounded-2xl p-2 border border-outline/5 flex items-center justify-center relative group-hover:scale-102 transition-transform">
+                              <div className="h-32 bg-[#f5f5f5] rounded-2xl p-2 border border-outline/5 flex items-center justify-center relative group-hover:scale-102 transition-transform">
                                 <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain" />
                               </div>
 
