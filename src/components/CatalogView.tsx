@@ -81,7 +81,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
   const categories = useMemo(() => {
     const customList = config?.categoriesList;
     if (Array.isArray(customList) && customList.length > 0) {
-      return ["All", ...customList.map((c: any) => c.name)];
+      return ["All", ...customList.filter((c: any) => c?.name).map((c: any) => c.name)];
     }
     return ["All", "Laptops", "Tablets", "Audio", "Accessories", "Power", "Phones"];
   }, [config?.categoriesList]);
@@ -95,10 +95,11 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
 
   // Dynamically extract brands available for current selected category segment
   const availableBrands = useMemo(() => {
+    const validProducts = products.filter(p => p && typeof p.name === "string");
     const productsInCategory = selectedCategory === "All"
-      ? products
-      : products.filter(p => p.category === selectedCategory);
-    
+      ? validProducts
+      : validProducts.filter(p => p.category === selectedCategory);
+
     // Extract unique brands
     const uniqueBrands = Array.from(new Set(productsInCategory.map(p => p.brand).filter(Boolean)));
     return ["All", ...uniqueBrands];
@@ -114,7 +115,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
 
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = products.filter(p => p && typeof p.name === "string");
 
     // Category filter
     if (selectedCategory !== "All") {

@@ -84,7 +84,12 @@ function AppContent() {
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem("axon_cart");
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed: CartItem[] = JSON.parse(saved);
+      // Filter out legacy/stale items that lack a product wrapper
+      return parsed.filter((item): item is CartItem =>
+        item != null && item.product != null && typeof (item.product as any).id === "string"
+      );
     } catch {
       return [];
     }

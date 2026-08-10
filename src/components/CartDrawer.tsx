@@ -158,6 +158,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             ) : (
               <div className="space-y-4">
                 {cart.map((item, idx) => {
+                  if (!item?.product?.id) return null;
                   const uniqueId = `${item.product.id}-${item.selectedColor || ""}-${item.selectedStorage || ""}`;
                   return (
                     <div 

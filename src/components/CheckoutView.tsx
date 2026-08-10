@@ -463,7 +463,9 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               <div className="bg-surface border border-outline/10 p-4 rounded-2xl space-y-3">
                 <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Order Items</span>
                 <div className="max-h-40 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
-                  {cart.map((item, idx) => (
+                  {cart.map((item, idx) => {
+                    if (!item?.product?.id) return null;
+                    return (
                     <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
                       <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-[#f5f5f5] p-1 border object-contain shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -475,7 +477,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                         {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
               </div>
 
@@ -502,7 +505,9 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
             </h3>
 
             <div className="max-h-56 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
-              {cart.map((item, idx) => (
+              {cart.map((item, idx) => {
+                if (!item?.product?.id) return null;
+                return (
                 <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
                   <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg bg-surface p-1 border object-contain shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -514,7 +519,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="border-t border-outline/10 pt-4 space-y-2 text-xs">

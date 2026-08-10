@@ -1,0 +1,1801 @@
+[
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-i-t-b-o-r-a-n-g-e-b-l-u-",
+    "name": "1 7 P r o M a x I T B O R A N G E , B L U E , S I L V E R )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 243000,
+    "price": 1869,
+    "description": "Apple 1 7 P r o M a x I T B O R A N G E , B L U E , S I L V E R ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "1GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 243,000 - 243,000"
+    },
+    "variants": {
+      "1GB": {
+        "Orange,Blue,Silver": 243000
+      }
+    }
+  },
+  {
+    "id": "samsung-f-o-l-d-7-5-1-2-g-b",
+    "name": "F o l d 7 5 1 2 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 182000,
+    "price": 1400,
+    "description": "Samsung F o l d 7 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 182,000 - 210,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 182000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-5-1-2-g-b-o-r-a-n-g-e-b-",
+    "name": "1 7 P r o m a x 5 1 2 g b O r a n g e / B l u e / s i l v e r )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 213000,
+    "price": 1638,
+    "description": "Apple 1 7 P r o m a x 5 1 2 g b O r a n g e / B l u e / s i l v e r ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 213,000 - 213,000"
+    },
+    "variants": {
+      "512GB": {
+        "Orange,Blue,Silver": 213000
+      }
+    }
+  },
+  {
+    "id": "samsung-f-o-l-d-7-2-5-6-g-b",
+    "name": "F o l d 7 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 166000,
+    "price": 1277,
+    "description": "Samsung F o l d 7 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 166,000 - 181,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 166000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-2-5-6-g-b-o-r-a-n-g-e-b-",
+    "name": "1 7 P r o M a x 2 5 6 g b O r a n g e / B l u e / s i l v e r )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 190000,
+    "price": 1462,
+    "description": "Apple 1 7 P r o M a x 2 5 6 g b O r a n g e / B l u e / s i l v e r ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 190,000 - 190,000"
+    },
+    "variants": {
+      "256GB": {
+        "Orange,Blue,Silver": 190000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-6-u-l-t-r-a-i-t-b",
+    "name": "S 2 6 U l t r a I T B",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 190000,
+    "price": 1462,
+    "description": "Samsung S 2 6 U l t r a I T B. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "1GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 190,000 - 190,000"
+    },
+    "variants": {
+      "1GB": {
+        "Default": 190000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-1-t-b-s-i-l-v-e-r-b-l-u-e-o-r-",
+    "name": "1 7 P r o 1 t b s i l v e r , B L U E , O R A N G E )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 240000,
+    "price": 1846,
+    "description": "Apple 1 7 P r o 1 t b s i l v e r , B L U E , O R A N G E ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "1GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 240,000 - 240,000"
+    },
+    "variants": {
+      "1GB": {
+        "Orange,Blue,Silver": 240000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-6-u-l-t-r-a-5-1-2-g-b",
+    "name": "S 2 6 U l t r a 5 1 2 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 150000,
+    "price": 1154,
+    "description": "Samsung S 2 6 U l t r a 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 150,000 - 154,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 150000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-5-1-2-g-b-o-r-a-n-g-e-b-l-u-e-",
+    "name": "1 7 P r o 5 1 2 g b o r a n g e / b l u e / s i l v e r )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 196000,
+    "price": 1508,
+    "description": "Apple 1 7 P r o 5 1 2 g b o r a n g e / b l u e / s i l v e r ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 196,000 - 196,000"
+    },
+    "variants": {
+      "512GB": {
+        "Orange,Blue,Silver": 196000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-6-u-l-t-r-a-2-5-6-g-b",
+    "name": "S 2 6 U l t r a 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 122000,
+    "price": 938,
+    "description": "Samsung S 2 6 U l t r a 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 122,000 - 123,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 122000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-2-5-6-g-b-o-r-a-n-g-e-b-l-u-e-",
+    "name": "1 7 P r o 2 5 6 g b o r a n g e / b l u e / s i l v e r )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 169000,
+    "price": 1300,
+    "description": "Apple 1 7 P r o 2 5 6 g b o r a n g e / b l u e / s i l v e r ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 169,000 - 169,000"
+    },
+    "variants": {
+      "256GB": {
+        "Orange,Blue,Silver": 169000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-6-p-l-u-s-5-1-2-g-b",
+    "name": "S 2 6 P l u s 5 1 2 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 122000,
+    "price": 938,
+    "description": "Samsung S 2 6 P l u s 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 122,000 - 122,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 122000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-2-5-6-g-b-a-l-l-c-o-l-o-u-r-s",
+    "name": "1 7 2 5 6 g b a l l c o l o u r s )",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 125000,
+    "price": 962,
+    "description": "Apple 1 7 2 5 6 g b a l l c o l o u r s ). Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 125,000 - 125,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 125000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-6-p-l-u-s-2-5-6-g-b",
+    "name": "S 2 6 P l u s 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 104000,
+    "price": 800,
+    "description": "Samsung S 2 6 P l u s 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 104,000 - 106,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 104000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-e-2-5-6-g-b",
+    "name": "1 7 e 2 5 6 g b",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 94000,
+    "price": 723,
+    "description": "Apple 1 7 e 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 94,000 - 94,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 94000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-6-2-5-6-g-b",
+    "name": "S 2 6 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 98000,
+    "price": 754,
+    "description": "Samsung S 2 6 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 98,000 - 98,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 98000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-5-7-2-5-6-g-b-5-g",
+    "name": "A 5 7 2 5 6 g b 5 G",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 50500,
+    "price": 388,
+    "description": "Samsung A 5 7 2 5 6 g b 5 G. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 50,500 - 50,500"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 50500
+      }
+    }
+  },
+  {
+    "id": "samsung-a-5-7-8-1-2-8-g-b-5-g",
+    "name": "A 5 7 8 / 1 2 8 g b 5 G",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 43000,
+    "price": 331,
+    "description": "Samsung A 5 7 8 / 1 2 8 g b 5 G. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 43,000 - 43,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 43000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-3-7-8-2-5-6-g-b-5-g",
+    "name": "A 3 7 8 / 2 5 6 g b 5 G",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 43000,
+    "price": 331,
+    "description": "Samsung A 3 7 8 / 2 5 6 g b 5 G. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 43,000 - 43,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 43000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-3-7-6-1-2-8-g-b-5-g",
+    "name": "A 3 7 6 / 1 2 8 g b 5 G",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 38000,
+    "price": 292,
+    "description": "Samsung A 3 7 6 / 1 2 8 g b 5 G. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 38,000 - 38,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 38000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-2-t-b-c-o-s-m-i-c-s-i-l-",
+    "name": "1 7 p r o m a x 2 t b c o s m i c / s i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 310000,
+    "price": 2385,
+    "description": "Apple 1 7 p r o m a x 2 t b c o s m i c / s i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Silver",
+      "Cosmic"
+    ],
+    "storages": [
+      "2GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 310,000 - 310,000"
+    },
+    "variants": {
+      "2GB": {
+        "Silver,Cosmic": 310000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-2-7-6-1-2-8-g-b-5-g",
+    "name": "A 2 7 6 / 1 2 8 g b 5 G",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 31000,
+    "price": 238,
+    "description": "Samsung A 2 7 6 / 1 2 8 g b 5 G. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 31,000 - 31,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 31000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-i-t-b-o-r-a-n-g-e-b-l-u-",
+    "name": "1 7 p r o m a x I t b o r a n g e / b l u e / s i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 243000,
+    "price": 1869,
+    "description": "Apple 1 7 p r o m a x I t b o r a n g e / b l u e / s i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "1GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 243,000 - 243,000"
+    },
+    "variants": {
+      "1GB": {
+        "Orange,Blue,Silver": 243000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-1-7-8-2-5-6-g-b",
+    "name": "A 1 7 8 / 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 27800,
+    "price": 214,
+    "description": "Samsung A 1 7 8 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 27,800 - 27,800"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 27800
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-5-1-2-g-b-o-r-a-n-g-e-b-",
+    "name": "1 7 p r o m a x 5 1 2 g b O r a n g e & B l u e / S i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 210000,
+    "price": 1615,
+    "description": "Apple 1 7 p r o m a x 5 1 2 g b O r a n g e & B l u e / S i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 210,000 - 210,000"
+    },
+    "variants": {
+      "512GB": {
+        "Orange,Blue,Silver": 210000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-1-7-6-1-2-8-g-b",
+    "name": "A 1 7 6 / 1 2 8 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 22600,
+    "price": 174,
+    "description": "Samsung A 1 7 6 / 1 2 8 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 22,600 - 22,600"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 22600
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-2-5-6-g-b-o-r-a-n-g-e-b-",
+    "name": "1 7 p r o m a x 2 5 6 g b O r a n g e / B l u e / s i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 184000,
+    "price": 1415,
+    "description": "Apple 1 7 p r o m a x 2 5 6 g b O r a n g e / B l u e / s i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 184,000 - 184,000"
+    },
+    "variants": {
+      "256GB": {
+        "Orange,Blue,Silver": 184000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-1-7-4-1-2-8-g-b",
+    "name": "A 1 7 4 / 1 2 8 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 22500,
+    "price": 173,
+    "description": "Samsung A 1 7 4 / 1 2 8 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 22,500 - 22,500"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 22500
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-5-1-2-g-b-s-i-l-v-e-r-o-r-a-n-",
+    "name": "1 7 p r o 5 1 2 g b s i l v e r / o r a n g e / b l u e",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 196000,
+    "price": 1508,
+    "description": "Apple 1 7 p r o 5 1 2 g b s i l v e r / o r a n g e / b l u e. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 196,000 - 196,000"
+    },
+    "variants": {
+      "512GB": {
+        "Orange,Blue,Silver": 196000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-0-7-4-1-2-8-g-b",
+    "name": "A 0 7 4 / 1 2 8 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 15900,
+    "price": 122,
+    "description": "Samsung A 0 7 4 / 1 2 8 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 15,900 - 17,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 15900
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-2-5-6-g-b-o-r-a-n-g-e-b-l-u-e-",
+    "name": "1 7 p r o 2 5 6 g b o r a n g e / b l u e / s i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 169000,
+    "price": 1300,
+    "description": "Apple 1 7 p r o 2 5 6 g b o r a n g e / b l u e / s i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 169,000 - 169,000"
+    },
+    "variants": {
+      "256GB": {
+        "Orange,Blue,Silver": 169000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-0-7-4-6-4-g-b",
+    "name": "A 0 7 4 / 6 4 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 13500,
+    "price": 104,
+    "description": "Samsung A 0 7 4 / 6 4 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "64GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 13,500 - 16,000"
+    },
+    "variants": {
+      "64GB": {
+        "Default": 13500
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-l-a-i-n-2-5-6-g-b-b-l-k-l-a-v-e-n-",
+    "name": "1 7 P l a i n 2 5 6 g b B l k / L a v e n d e r / S a g e",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 125000,
+    "price": 962,
+    "description": "Apple 1 7 P l a i n 2 5 6 g b B l k / L a v e n d e r / S a g e. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Black",
+      "Lavender",
+      "Sage"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 125,000 - 125,000"
+    },
+    "variants": {
+      "256GB": {
+        "Black,Lavender,Sage": 125000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-i-t-b-o-r-a-n-g-e-b-l-u-",
+    "name": "1 7 p r o m a x I t b O r a n g e / B l u e / s i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 227000,
+    "price": 1746,
+    "description": "Apple 1 7 p r o m a x I t b O r a n g e / B l u e / s i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "1GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 227,000 - 227,000"
+    },
+    "variants": {
+      "1GB": {
+        "Orange,Blue,Silver": 227000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-5-1-2-g-b-s-i-l-v-e-r-b-",
+    "name": "1 7 p r o m a x 5 1 2 g b s i l v e r / b l u e / o r a n g e",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 196000,
+    "price": 1508,
+    "description": "Apple 1 7 p r o m a x 5 1 2 g b s i l v e r / b l u e / o r a n g e. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 196,000 - 196,000"
+    },
+    "variants": {
+      "512GB": {
+        "Orange,Blue,Silver": 196000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-m-a-x-2-5-6-g-b-s-i-l-v-e-r-o-",
+    "name": "1 7 P r o M a x 2 5 6 g b S i l v e r / o r a n g e / b l u e",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 168000,
+    "price": 1292,
+    "description": "Apple 1 7 P r o M a x 2 5 6 g b S i l v e r / o r a n g e / b l u e. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 168,000 - 168,000"
+    },
+    "variants": {
+      "256GB": {
+        "Orange,Blue,Silver": 168000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-5-u-l-t-r-a-5-1-2-g-b",
+    "name": "S 2 5 U l t r a 5 1 2 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 133000,
+    "price": 1023,
+    "description": "Samsung S 2 5 U l t r a 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 133,000 - 133,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 133000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-1-t-b-s-i-l-v-e-r",
+    "name": "1 7 P r o 1 T b s i l v e r",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 222000,
+    "price": 1708,
+    "description": "Apple 1 7 P r o 1 T b s i l v e r. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Silver"
+    ],
+    "storages": [
+      "1GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 222,000 - 222,000"
+    },
+    "variants": {
+      "1GB": {
+        "Silver": 222000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-5-u-l-t-r-a-2-5-6-g-b",
+    "name": "S 2 5 U l t r a 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 113000,
+    "price": 869,
+    "description": "Samsung S 2 5 U l t r a 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 113,000 - 113,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 113000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-5-1-2-g-b-s-i-l-v-e-r-o-r-a-n-",
+    "name": "1 7 P r o 5 1 2 g b s i l v e r / O r a n g e / B l u e",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 185000,
+    "price": 1423,
+    "description": "Apple 1 7 P r o 5 1 2 g b s i l v e r / O r a n g e / B l u e. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 185,000 - 185,000"
+    },
+    "variants": {
+      "512GB": {
+        "Orange,Blue,Silver": 185000
+      }
+    }
+  },
+  {
+    "id": "samsung-s-2-5-f-e-2-5-6-g-b",
+    "name": "S 2 5 f e 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 73000,
+    "price": 562,
+    "description": "Samsung S 2 5 f e 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 73,000 - 73,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 73000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-p-r-o-2-5-6-g-b-s-i-l-v-e-r-o-r-a-n-",
+    "name": "1 7 p r o 2 5 6 g b s i l v e r / o r a n g e / B l u e",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 156000,
+    "price": 1200,
+    "description": "Apple 1 7 p r o 2 5 6 g b s i l v e r / o r a n g e / B l u e. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Orange",
+      "Blue",
+      "Silver"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 156,000 - 156,000"
+    },
+    "variants": {
+      "256GB": {
+        "Orange,Blue,Silver": 156000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-5-7-8-2-5-6-g-b",
+    "name": "A 5 7 8 / 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 50500,
+    "price": 388,
+    "description": "Samsung A 5 7 8 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 50,500 - 50,500"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 50500
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-2-5-6-g-b",
+    "name": "1 7 2 5 6 g b",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 122000,
+    "price": 938,
+    "description": "Apple 1 7 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 122,000 - 122,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 122000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-3-7-8-2-5-6-g-b",
+    "name": "A 3 7 8 / 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 43000,
+    "price": 331,
+    "description": "Samsung A 3 7 8 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 43,000 - 43,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 43000
+      }
+    }
+  },
+  {
+    "id": "apple-1-7-a-i-r-2-5-6-g-b-a-l-l-c-o-l-o-u-r-s",
+    "name": "1 7 A i r 2 5 6 g b a l l c o l o u r s",
+    "brand": "Apple",
+    "category": "Phones",
+    "priceKsh": 125000,
+    "price": 962,
+    "description": "Apple 1 7 A i r 2 5 6 g b a l l c o l o u r s. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 125,000 - 125,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 125000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-3-7-6-1-2-8-g-b",
+    "name": "A 3 7 6 / 1 2 8 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 39000,
+    "price": 300,
+    "description": "Samsung A 3 7 6 / 1 2 8 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 39,000 - 39,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 39000
+      }
+    }
+  },
+  {
+    "id": "samsung-a-1-7-5-g-8-2-5-6-g-b",
+    "name": "A 1 7 5 G 8 / 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 30500,
+    "price": 235,
+    "description": "Samsung A 1 7 5 G 8 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 30,500 - 30,500"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 30500
+      }
+    }
+  },
+  {
+    "id": "samsung-p-i-x-e-l-1-0-p-r-o-f-o-l-d-2-5-6-g-b",
+    "name": "P i x e l 1 0 P r o F o l d 2 5 6 g b",
+    "brand": "Samsung",
+    "category": "Phones",
+    "priceKsh": 167000,
+    "price": 1285,
+    "description": "Samsung P i x e l 1 0 P r o F o l d 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 167,000 - 167,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 167000
+      }
+    }
+  },
+  {
+    "id": "oneplus-o-n-e-p-l-u-s-1-5-1-6-5-1-2-g-b",
+    "name": "O n e P l u s 1 5 1 6 / 5 1 2 g b",
+    "brand": "OnePlus",
+    "category": "Phones",
+    "priceKsh": 130000,
+    "price": 1000,
+    "description": "OnePlus O n e P l u s 1 5 1 6 / 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 130,000 - 130,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 130000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-p-r-o-x-l-5-1-2-g-b",
+    "name": "P i x e l 1 0 P r o X L 5 1 2 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 152000,
+    "price": 1169,
+    "description": "Google P i x e l 1 0 P r o X L 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 152,000 - 152,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 152000
+      }
+    }
+  },
+  {
+    "id": "oneplus-o-n-e-p-l-u-s-1-5-1-2-5-1-2-g-b",
+    "name": "O n e P l u s 1 5 1 2 / 5 1 2 g b",
+    "brand": "OnePlus",
+    "category": "Phones",
+    "priceKsh": 122000,
+    "price": 938,
+    "description": "OnePlus O n e P l u s 1 5 1 2 / 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 122,000 - 122,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 122000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-p-r-o-x-l-2-5-6-g-b",
+    "name": "P i x e l 1 0 P r o X L 2 5 6 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 127000,
+    "price": 977,
+    "description": "Google P i x e l 1 0 P r o X L 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 127,000 - 127,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 127000
+      }
+    }
+  },
+  {
+    "id": "oneplus-o-n-e-p-l-u-s-1-5-2-5-6-g-b",
+    "name": "O n e P l u s 1 5 2 5 6 g b",
+    "brand": "OnePlus",
+    "category": "Phones",
+    "priceKsh": 102000,
+    "price": 785,
+    "description": "OnePlus O n e P l u s 1 5 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 102,000 - 102,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 102000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-p-r-o-2-5-6-g-b",
+    "name": "P i x e l 1 0 P r o 2 5 6 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 125000,
+    "price": 962,
+    "description": "Google P i x e l 1 0 P r o 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 125,000 - 125,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 125000
+      }
+    }
+  },
+  {
+    "id": "oneplus-o-n-e-p-l-u-s-1-5-r-1-2-2-5-6-g-b",
+    "name": "O n e P l u s 1 5 R 1 2 / 2 5 6 g b",
+    "brand": "OnePlus",
+    "category": "Phones",
+    "priceKsh": 74000,
+    "price": 569,
+    "description": "OnePlus O n e P l u s 1 5 R 1 2 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 74,000 - 74,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 74000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-p-r-o-1-2-8-g-b",
+    "name": "P i x e l 1 0 P r o 1 2 8 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 106000,
+    "price": 815,
+    "description": "Google P i x e l 1 0 P r o 1 2 8 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 106,000 - 106,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 106000
+      }
+    }
+  },
+  {
+    "id": "oneplus-o-n-e-p-l-u-s-1-5-r-1-2-5-1-2-g-b",
+    "name": "O n e p l u s 1 5 R 1 2 / 5 1 2 g b",
+    "brand": "OnePlus",
+    "category": "Phones",
+    "priceKsh": 80000,
+    "price": 615,
+    "description": "OnePlus O n e p l u s 1 5 R 1 2 / 5 1 2 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "512GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 80,000 - 80,000"
+    },
+    "variants": {
+      "512GB": {
+        "Default": 80000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-2-5-6-g-b",
+    "name": "P i x e l 1 0 2 5 6 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 92000,
+    "price": 708,
+    "description": "Google P i x e l 1 0 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 92,000 - 92,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 92000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-1-2-8-g-b",
+    "name": "P i x e l 1 0 1 2 8 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 85000,
+    "price": 654,
+    "description": "Google P i x e l 1 0 1 2 8 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "128GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 85,000 - 85,000"
+    },
+    "variants": {
+      "128GB": {
+        "Default": 85000
+      }
+    }
+  },
+  {
+    "id": "google-p-i-x-e-l-1-0-a-2-5-6-g-b",
+    "name": "P i x e l 1 0 a 2 5 6 g b",
+    "brand": "Google",
+    "category": "Phones",
+    "priceKsh": 70000,
+    "price": 538,
+    "description": "Google P i x e l 1 0 a 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 70,000 - 70,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 70000
+      }
+    }
+  },
+  {
+    "id": "nothing-n-o-t-h-i-n-g-p-h-o-n-e-2-1-2-2-5-6-g-b",
+    "name": "N o t h i n g P h o n e 2 1 2 / 2 5 6 g b",
+    "brand": "Nothing",
+    "category": "Phones",
+    "priceKsh": 66000,
+    "price": 508,
+    "description": "Nothing N o t h i n g P h o n e 2 1 2 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 66,000 - 66,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 66000
+      }
+    }
+  },
+  {
+    "id": "nothing-n-o-t-h-i-n-g-p-h-o-n-e-3-1-2-2-5-6-g-b",
+    "name": "N o t h i n g p h o n e 3 1 2 / 2 5 6 g b",
+    "brand": "Nothing",
+    "category": "Phones",
+    "priceKsh": 83000,
+    "price": 638,
+    "description": "Nothing N o t h i n g p h o n e 3 1 2 / 2 5 6 g b. Best price in Kenya.",
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
+    "colors": [
+      "Default"
+    ],
+    "storages": [
+      "256GB"
+    ],
+    "rating": 4.5,
+    "reviewsCount": 10,
+    "inStock": true,
+    "specifications": {
+      "Source": "AXON TECH Price List August 2026",
+      "Price Range": "KSh 83,000 - 83,000"
+    },
+    "variants": {
+      "256GB": {
+        "Default": 83000
+      }
+    }
+  }
+]

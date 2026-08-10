@@ -32,7 +32,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       Plug: Plug,
     };
     if (Array.isArray(list) && list.length > 0) {
-      return list.map((c: any) => ({
+      return list.filter((c: any) => c?.name).map((c: any) => ({
         ...c,
         icon: iconMap[c.icon] || Layers
       }));
