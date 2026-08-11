@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, MapPin, Package, Truck, CheckCircle2, ChevronRight, Clock, ShieldCheck, ArrowLeft, Loader2, RefreshCw } from "lucide-react";
-import { Product } from "../types";
+import { Product, CURRENCY_SYMBOL } from "../types";
 
 interface OrderHistoryItem {
   status: "pending" | "packaged" | "shipped" | "delivered";
@@ -315,7 +315,7 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-on-surface block">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="text-xs font-bold text-on-surface block">{CURRENCY_SYMBOL} {(item.price * item.quantity).toLocaleString()}</span>
                         <button
                           onClick={() => onSelectProductById(item.id)}
                           className="text-[9px] text-primary hover:underline font-bold"

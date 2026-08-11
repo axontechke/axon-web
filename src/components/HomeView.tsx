@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { ArrowRight, Star, Cpu, ShieldCheck, Heart, Zap, Laptop, Tablet, Headphones, Smartphone, Layers, Plug, ChevronLeft, ChevronRight, Pause } from "lucide-react";
-import { Product, formatProductPrice } from "../types";
+import { Product, formatProductPrice, CURRENCY_SYMBOL } from "../types";
 import { GoogleReviewsWidget } from "./GoogleReviewsWidget";
 
 interface HomeViewProps {
@@ -741,6 +741,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             return trendingList.map((slotItem, idx) => {
               const prod = products.find(p => p.id === slotItem.productId) || products[0];
+              if (!prod) return null;
               const isLarge = idx === 0 || idx === 3;
               const colSpanClass = isLarge ? "col-span-2 md:col-span-8" : "col-span-1 md:col-span-4";
               const flexClass = isLarge ? "flex-col md:flex-row items-center justify-between" : "flex-col justify-between";
@@ -870,7 +871,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                 {/* Price & Add Action */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 mt-2 border-t border-outline/5">
-                  <span className="font-bold text-[10px] sm:text-xs md:text-sm text-on-surface">${product.price}</span>
+                  <span className="font-bold text-[10px] sm:text-xs md:text-sm text-on-surface">{CURRENCY_SYMBOL} {(product.priceKsh || 0).toLocaleString()}</span>
                   <button
                     onClick={() => onAddToCart(product, 1)}
                     className="px-3 py-1.5 rounded-full text-[8px] sm:text-[10px] font-bold text-center cursor-pointer glass-btn-ios"

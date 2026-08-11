@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { Product, CartItem } from "./types";
+import { Product, CartItem, Warranty } from "./types";
 import { ROUTES } from "./config/routes";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
@@ -52,9 +52,10 @@ function AppContent() {
 
   const fetchProductsAndConfig = async () => {
     try {
+      const t = Date.now();
       const [prodRes, configRes] = await Promise.all([
-        fetch(API_ROUTES.products.list),
-        fetch(API_ROUTES.config.get)
+        fetch(`${API_ROUTES.products.list}?t=${t}`),
+        fetch(`${API_ROUTES.config.get}?t=${t}`)
       ]);
       if (prodRes.ok) {
         const prodData = await prodRes.json();
@@ -149,12 +150,12 @@ function AppContent() {
   }, [couponCode, discountPercentage]);
 
   // Cart actions
-  const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string) => {
+  const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty) => {
     const color = selectedColor || (product.colors ? product.colors[0] : undefined);
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
+    const warranty = selectedWarranty || (product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
 
-    // Compute dynamic price from variant map
-    let dynamicPrice = product.price;
+    // Compute dynamic price from variant map (KSh only)
     let dynamicPriceKsh = product.priceKsh;
     if (product.variants && storage) {
       const storageVariants = product.variants[storage];
@@ -162,7 +163,6 @@ function AppContent() {
         for (const [colors, price] of Object.entries(storageVariants)) {
           if (colors.split(',').map(c => c.trim()).includes(color || '')) {
             dynamicPriceKsh = price;
-            dynamicPrice = parseFloat((Math.floor(price / 130) + 0.99).toFixed(2));
             break;
           }
         }
@@ -172,7 +172,6 @@ function AppContent() {
     // Create a price-adjusted product copy for the cart
     const cartProduct = {
       ...product,
-      price: dynamicPrice ?? product.price,
       priceKsh: dynamicPriceKsh ?? product.priceKsh,
     };
 
@@ -181,7 +180,8 @@ function AppContent() {
         (item) =>
           item.product.id === product.id &&
           item.selectedColor === color &&
-          item.selectedStorage === storage
+          item.selectedStorage === storage &&
+          item.selectedWarranty?.id === warranty?.id
       );
 
       if (matchIdx > -1) {
@@ -189,29 +189,29 @@ function AppContent() {
         updated[matchIdx].quantity += quantity;
         return updated;
       } else {
-        return [...prevCart, { product, quantity, selectedColor: color, selectedStorage: storage }];
+        return [...prevCart, { product: cartProduct, quantity, selectedColor: color, selectedStorage: storage, selectedWarranty: warranty }];
       }
     });
 
     setIsCartOpen(true);
   };
 
-  const handleUpdateCartQuantity = (productId: string, quantity: number, color?: string, storage?: string) => {
+  const handleUpdateCartQuantity = (productId: string, quantity: number, color?: string, storage?: string, warrantyId?: string) => {
     if (quantity <= 0) return;
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage
+        item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage && item.selectedWarranty?.id === warrantyId
           ? { ...item, quantity }
           : item
       )
     );
   };
 
-  const handleRemoveCartItem = (productId: string, color?: string, storage?: string) => {
+  const handleRemoveCartItem = (productId: string, color?: string, storage?: string, warrantyId?: string) => {
     setCart((prevCart) =>
       prevCart.filter(
         (item) =>
-          !(item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage)
+          !(item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage && item.selectedWarranty?.id === warrantyId)
       )
     );
   };
@@ -245,10 +245,11 @@ function AppContent() {
           items: cart.map(item => ({
             id: item.product.id,
             name: item.product.name,
-            price: item.product.price,
+            priceKsh: item.product.priceKsh,
             quantity: item.quantity,
             color: item.selectedColor,
             storage: item.selectedStorage,
+            warranty: item.selectedWarranty ? `${item.selectedWarranty.name} (${item.selectedWarranty.duration})` : undefined,
             image: item.product.image
           }))
         })
@@ -271,10 +272,11 @@ function AppContent() {
         items: cart.map(item => ({
           id: item.product.id,
           name: item.product.name,
-          price: item.product.price,
+          priceKsh: item.product.priceKsh,
           quantity: item.quantity,
           color: item.selectedColor,
           storage: item.selectedStorage,
+          warranty: item.selectedWarranty ? `${item.selectedWarranty.name} (${item.selectedWarranty.duration})` : undefined,
           image: item.product.image
         }))
       };
@@ -510,17 +512,45 @@ function AppContent() {
             } 
           />
 
-          <Route 
-            path={ROUTES.admin} 
+          <Route
+            path={ROUTES.admin}
             element={
-              <AdminView 
+              <AdminView
                 onSelectProduct={handleSelectProduct}
                 onRefreshProducts={fetchProductsAndConfig}
                 isAdminAuthenticated={isAdminAuthenticated}
                 setIsAdminAuthenticated={setIsAdminAuthenticated}
                 onViewWeb={() => navigate(ROUTES.home)}
               />
-            } 
+            }
+          />
+
+          {/* 404 Not Found */}
+          <Route
+            path="*"
+            element={
+              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                <div className="text-8xl md:text-9xl font-black text-outline/20 font-display mb-4">404</div>
+                <h1 className="text-2xl md:text-3xl font-bold text-on-surface mb-2">Page Not Found</h1>
+                <p className="text-on-surface-variant mb-8 max-w-md">
+                  Sorry, we couldn't find the page you're looking for. It may have moved or no longer exists.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => navigate(ROUTES.home)}
+                    className="px-6 py-3 bg-primary text-on-primary font-semibold rounded-full hover:bg-primary/90 transition-colors"
+                  >
+                    Go Home
+                  </button>
+                  <button
+                    onClick={() => navigate(ROUTES.catalog)}
+                    className="px-6 py-3 bg-surface-container-high text-on-surface font-semibold rounded-full hover:bg-surface-container-high/80 transition-colors"
+                  >
+                    Browse Catalog
+                  </button>
+                </div>
+              </div>
+            }
           />
         </Routes>
       </main>
@@ -541,7 +571,7 @@ function ProductDetailRoute({
   onBackToCatalog 
 }: { 
   products: Product[];
-  onAddToCart: (product: Product, quantity: number, color?: string, storage?: string) => void;
+  onAddToCart: (product: Product, quantity: number, color?: string, storage?: string, warranty?: Warranty) => void;
   onBackToCatalog: () => void;
 }) {
   const { productId } = useParams();

@@ -345,7 +345,7 @@ async function seedSuperAdmin(db: D1Database, email: string, password: string): 
   const id = crypto.randomUUID();
 
   await db.prepare(
-    "INSERT INTO users (uid, email, password_hash, salt, role) VALUES (?, ?, ?, ?, 'super-admin')"
+    "INSERT INTO users (id, email, passwordHash, salt, role) VALUES (?, ?, ?, ?, 'super-admin')"
   ).bind(id, email, passwordHash, salt).run();
 }
 
@@ -355,12 +355,12 @@ async function login(req: Request, env: Env): Promise<Response> {
   if (!email || !password) return jsonError("Email and password required.");
 
   const user = await env.DB.prepare(
-    "SELECT uid, email, password_hash, salt, role FROM users WHERE LOWER(email) = LOWER(?)"
-  ).bind(email).first<{ uid: string; email: string; password_hash: string; salt: string; role: string }>();
+    "SELECT id, email, passwordHash, salt, role FROM users WHERE LOWER(email) = LOWER(?)"
+  ).bind(email).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>();
 
   if (!user) return jsonError("Invalid credentials.", 401);
 
-  const valid = await verifyPassword(password, user.salt, user.password_hash);
+  const valid = await verifyPassword(password, user.salt, user.passwordHash);
   if (!valid) return jsonError("Invalid credentials.", 401);
 
   const token = generateToken();
@@ -369,9 +369,9 @@ async function login(req: Request, env: Env): Promise<Response> {
   // Store session token
   await env.DB.prepare(
     "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
-  ).bind(`session:${token}`, JSON.stringify({ userId: user.uid, email: user.email, role: user.role, expiresAt })).run();
+  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt })).run();
 
-  return corsResponse({ token, user: { id: user.uid, email: user.email, role: user.role } });
+  return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
 }
 
 async function verifyAuth(req: Request, env: Env): Promise<{ userId: string; email: string; role: string } | null> {

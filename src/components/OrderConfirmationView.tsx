@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckCircle, ShieldCheck, ArrowRight, MessageSquare, CreditCard, Building2, Smartphone } from "lucide-react";
+import { CURRENCY_SYMBOL } from "../types";
 
 interface OrderConfirmationViewProps {
   orderDetails: {
@@ -17,9 +18,7 @@ interface OrderConfirmationViewProps {
     subtotal: number;
     taxes: number;
     total: number;
-    totalUsd?: number;
     totalKsh?: number;
-    hasUsd?: boolean;
     hasKsh?: boolean;
     payment: {
       lastFour: string;
@@ -50,7 +49,6 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
     swiftCode: "KCBLKENA"
   };
 
-  const hasUsd = orderDetails.hasUsd ?? (orderDetails.subtotal > 0);
   const hasKsh = orderDetails.hasKsh ?? (orderDetails.totalKsh !== undefined && orderDetails.totalKsh > 0);
 
   return (
@@ -115,8 +113,7 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
             <div className="flex justify-between text-[11px]">
               <span className="text-on-surface-variant">Amount:</span>
               <span className="font-bold text-primary">
-                {hasKsh && <span>KSh {orderDetails.totalKsh?.toLocaleString() || orderDetails.total.toLocaleString()}</span>}
-                {hasUsd && !hasKsh && <span>${orderDetails.totalUsd?.toFixed(2) || orderDetails.total.toFixed(2)} USD</span>}
+                <span>{CURRENCY_SYMBOL} {orderDetails.totalKsh?.toLocaleString() || orderDetails.total.toLocaleString()}</span>
               </span>
             </div>
           </div>
@@ -203,8 +200,7 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
           <div className="space-y-1">
             <span className="text-on-surface-variant/70 font-semibold block">Total Amount:</span>
             <div className="font-black text-primary font-display text-sm">
-              {hasKsh && <span>KSh {orderDetails.totalKsh?.toLocaleString() || orderDetails.total.toLocaleString()}</span>}
-              {hasUsd && !hasKsh && <span>${orderDetails.totalUsd?.toFixed(2) || orderDetails.total.toFixed(2)} USD</span>}
+              <span>{CURRENCY_SYMBOL} {orderDetails.totalKsh?.toLocaleString() || orderDetails.total.toLocaleString()}</span>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Truck, MapPin, CheckCircle, ShoppingBag, ArrowLeft, MessageSquare, CreditCard, Banknote, Smartphone } from "lucide-react";
-import { CartItem } from "../types";
+import { CartItem, CURRENCY_SYMBOL } from "../types";
 
 interface CheckoutViewProps {
   cart: CartItem[];
@@ -34,25 +34,15 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express" | "overnight">("standard");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Totals calculations
-  const itemsSubtotalUsd = cart.reduce((acc, item) => acc + (item.product.price || 0) * item.quantity, 0);
-  const itemsSubtotalKsh = cart.reduce((acc, item) => acc + (item.product.priceKsh || 0) * item.quantity, 0);
+  // Totals calculations (KSh only)
+  const itemsSubtotalKsh = cart.reduce((acc, item) => {
+    const basePrice = (item.product.priceKsh || 0) * item.quantity;
+    const warrantyPrice = (item.selectedWarranty?.priceKsh || 0) * item.quantity;
+    return acc + basePrice + warrantyPrice;
+  }, 0);
 
-  const discountAmountUsd = itemsSubtotalUsd * (discountPercentage / 100);
   const discountAmountKsh = itemsSubtotalKsh * (discountPercentage / 100);
-
-  const subtotalUsd = itemsSubtotalUsd - discountAmountUsd;
   const subtotalKsh = itemsSubtotalKsh - discountAmountKsh;
-
-  const hasUsd = itemsSubtotalUsd > 0;
-  const hasKsh = itemsSubtotalKsh > 0;
-
-  const getShippingCostUsd = () => {
-    if (shippingMethod === "standard") return (subtotalUsd > 150 || subtotalUsd === 0) ? 0 : 15;
-    if (shippingMethod === "express") return 25;
-    if (shippingMethod === "overnight") return 45;
-    return 0;
-  };
 
   const getShippingCostKsh = () => {
     if (shippingMethod === "standard") return (subtotalKsh > 20000 || subtotalKsh === 0) ? 0 : 2000;
@@ -61,13 +51,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
     return 0;
   };
 
-  const shippingCostUsd = getShippingCostUsd();
   const shippingCostKsh = getShippingCostKsh();
-
-  const taxesUsd = subtotalUsd * 0.08;
   const taxesKsh = subtotalKsh * 0.08;
-
-  const totalUsd = subtotalUsd + shippingCostUsd + taxesUsd;
   const totalKsh = subtotalKsh + shippingCostKsh + taxesKsh;
 
   const validateShipping = () => {
@@ -116,24 +101,17 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
     const orderDetails = {
       customer: shippingForm,
       shippingMethod,
-      shippingCost: shippingCostUsd,
-      shippingCostUsd,
-      shippingCostKsh,
-      subtotal: subtotalUsd,
-      subtotalUsd,
+      shippingCost: shippingCostKsh,
+      subtotal: subtotalKsh,
       subtotalKsh,
-      discountAmount: discountAmountUsd,
-      discountAmountUsd,
+      discountAmount: discountAmountKsh,
       discountAmountKsh,
       discountPercentage,
-      taxes: taxesUsd,
-      taxesUsd,
+      taxes: taxesKsh,
       taxesKsh,
-      total: totalUsd,
-      totalUsd,
+      total: totalKsh,
       totalKsh,
-      hasUsd,
-      hasKsh,
+      hasKsh: true,
       payment: { method: "whatsapp", lastFour: "" }
     };
     onPlaceOrder(orderDetails);
@@ -352,12 +330,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     </div>
                   </div>
                   <span className="text-xs font-bold text-primary text-right">
-                    {(subtotalUsd > 150 || subtotalKsh > 20000) ? "FREE" : (
-                      <>
-                        {hasKsh && <div>KSh 2,000</div>}
-                        {hasUsd && <div>$15.00 USD</div>}
-                      </>
-                    )}
+                    {subtotalKsh > 20000 ? "FREE" : `${CURRENCY_SYMBOL} 2,000`}
                   </span>
                 </label>
 
@@ -373,10 +346,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                       <span className="text-[11px] text-on-surface-variant/70 block">Takes 2 business days. Premium safety.</span>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-primary text-right">
-                    {hasKsh && <div>KSh 3,500</div>}
-                    {hasUsd && <div>$25.00 USD</div>}
-                  </span>
+                  <span className="text-xs font-bold text-primary text-right">{CURRENCY_SYMBOL} 3,500</span>
                 </label>
 
                 <label className={`flex items-start justify-between p-4 rounded-2xl border cursor-pointer transition-colors ${
@@ -391,10 +361,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                       <span className="text-[11px] text-on-surface-variant/70 block">Next day delivery. Temperature managed.</span>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-primary text-right">
-                    {hasKsh && <div>KSh 6,000</div>}
-                    {hasUsd && <div>$45.00 USD</div>}
-                  </span>
+                  <span className="text-xs font-bold text-primary text-right">{CURRENCY_SYMBOL} 6,000</span>
                 </label>
               </div>
 
@@ -473,8 +440,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                         <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
                       </div>
                       <div className="text-[11px] font-bold text-on-surface text-right">
-                        {item.product.priceKsh !== undefined && <div>KSh {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                        {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                        {item.product.priceKsh !== undefined && <div>{CURRENCY_SYMBOL} {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
                       </div>
                     </div>
                   );
@@ -515,8 +481,9 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     <p className="text-[10px] text-on-surface-variant/70 font-medium">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
                   </div>
                   <div className="text-xs font-bold text-on-surface text-right">
-                    {item.product.priceKsh !== undefined && <div>KSh {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                    {item.product.price !== undefined && <div>${(item.product.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
+                    {item.product.priceKsh !== undefined && (
+                      <div>{CURRENCY_SYMBOL} {((item.product.priceKsh + (item.selectedWarranty?.priceKsh || 0)) * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    )}
                   </div>
                 </div>
                 );
@@ -526,44 +493,31 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
             <div className="border-t border-outline/10 pt-4 space-y-2 text-xs">
               <div className="flex justify-between text-on-surface-variant">
                 <span>Subtotal</span>
-                <div className="text-right">
-                  {hasKsh && <div>KSh {subtotalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                  {hasUsd && <div>${subtotalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                </div>
+                <div className="text-right">{CURRENCY_SYMBOL} {subtotalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
-              
+
               {discountPercentage > 0 && (
                 <div className="flex justify-between text-green-700 font-medium bg-green-50/50 px-2 py-0.5 rounded">
                   <span>Discount ({discountPercentage}%)</span>
-                  <div className="text-right">
-                    {hasKsh && <div>-KSh {discountAmountKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                    {hasUsd && <div>-${discountAmountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                  </div>
+                  <div className="text-right">-{CURRENCY_SYMBOL} {discountAmountKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 </div>
               )}
 
               <div className="flex justify-between text-on-surface-variant">
                 <span>Shipping ({shippingMethod})</span>
                 <div className="text-right">
-                  {hasKsh && <div>{shippingCostKsh === 0 ? <span className="text-green-700 font-bold">FREE</span> : `KSh ${shippingCostKsh.toLocaleString()}`}</div>}
-                  {hasUsd && <div>{shippingCostUsd === 0 ? <span className="text-green-700 font-bold">FREE</span> : `$${shippingCostUsd.toFixed(2)} USD`}</div>}
+                  {shippingCostKsh === 0 ? <span className="text-green-700 font-bold">FREE</span> : `${CURRENCY_SYMBOL} ${shippingCostKsh.toLocaleString()}`}
                 </div>
               </div>
 
               <div className="flex justify-between text-on-surface-variant">
                 <span>Taxes (8%)</span>
-                <div className="text-right">
-                  {hasKsh && <div>KSh {taxesKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                  {hasUsd && <div>${taxesUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                </div>
+                <div className="text-right">{CURRENCY_SYMBOL} {taxesKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
 
               <div className="border-t border-outline/10 pt-3 flex justify-between text-sm font-black text-on-surface font-display">
                 <span>Total</span>
-                <div className="text-right font-bold text-primary">
-                  {hasKsh && <div>KSh {totalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                  {hasUsd && <div>${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                </div>
+                <div className="text-right font-bold text-primary">{CURRENCY_SYMBOL} {totalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
             </div>
           </div>

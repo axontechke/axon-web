@@ -9,3 +9,4 @@ coverage/
 db.json
 .wrangler/
 .dev.vars
+wrangler.toml

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Star, ShieldCheck, ArrowLeft, Heart, Plus, Minus, CheckCircle, MessageSquare, ZoomIn, Bell, TrendingDown } from "lucide-react";
-import { Product, Review, formatProductPrice } from "../types";
+import { Product, Review, Warranty, formatProductPrice, CURRENCY_SYMBOL } from "../types";
 
 interface ProductDetailViewProps {
   product: Product;
   onBackToCatalog: () => void;
-  onAddToCart: (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string) => void;
+  onAddToCart: (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty) => void;
 }
 
 export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
@@ -15,6 +15,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 }) => {
   const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : undefined);
   const [selectedStorage, setSelectedStorage] = useState(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
+  const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(
+    product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined
+  );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
   const [activeImage, setActiveImage] = useState(product.image);
@@ -23,6 +26,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     setActiveImage(product.image);
     setSelectedColor(product.colors && product.colors.length > 0 ? product.colors[0] : undefined);
     setSelectedStorage(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
+    setSelectedWarranty(product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
     setQuantity(1);
   }, [product.id, product.image]);
 
@@ -47,9 +51,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
   const displayPriceKsh = dynamicPriceKsh ?? product.priceKsh ?? 0;
-  const displayPrice = dynamicPriceKsh
-    ? parseFloat((Math.floor(dynamicPriceKsh / 130) + 0.99).toFixed(2))
-    : product.price;
 
   // All in-stock (variants always in stock for now)
   const isSelectedVariantInStock = hasVariants ? true : product.inStock;
@@ -84,7 +85,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         body: JSON.stringify({
           productId: product.id,
           email: trackerEmail,
-          initialPrice: product.price,
+          initialPrice: product.priceKsh,
         }),
       });
 
@@ -192,7 +193,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
 
   const handleAddToCartClick = () => {
-    onAddToCart(product, quantity, selectedColor, selectedStorage);
+    onAddToCart(product, quantity, selectedColor, selectedStorage, selectedWarranty);
   };
 
   return (
@@ -306,7 +307,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           {/* Pricing */}
           <div className="py-2 border-y border-outline/10 flex items-center justify-between">
             <span className="text-2xl font-black text-primary font-display">
-              {displayPriceKsh > 0 ? `KSh ${displayPriceKsh.toLocaleString()}${displayPrice ? ` ($${displayPrice})` : ''}` : formatProductPrice(product)}
+              {displayPriceKsh > 0 ? `${CURRENCY_SYMBOL} ${displayPriceKsh.toLocaleString()}` : formatProductPrice(product)}
             </span>
             {product.inStock ? (
               <span className="text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200">
@@ -379,6 +380,50 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       {storage}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Warranty Selection */}
+            {product.warranties && product.warranties.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                  Protection Plan
+                </span>
+                <div className="flex flex-col gap-2">
+                  {product.warranties.map((warranty) => {
+                    const isSelected = selectedWarranty?.id === warranty.id;
+                    const isFree = warranty.priceKsh === 0;
+                    return (
+                      <button
+                        key={warranty.id}
+                        onClick={() => setSelectedWarranty(warranty)}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs border transition-all ${
+                          isSelected
+                            ? "bg-primary/5 border-primary text-on-surface"
+                            : "bg-surface border-outline/20 text-on-surface-variant hover:border-outline/40"
+                        }`}
+                        id={`warranty-btn-${warranty.id}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            isSelected ? "border-primary bg-primary" : "border-outline/40"
+                          }`}>
+                            {isSelected && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <div className="text-left">
+                            <span className="font-semibold text-on-surface">{warranty.name}</span>
+                            <span className="ml-2 text-[10px] text-on-surface-variant/70">{warranty.duration}</span>
+                          </div>
+                        </div>
+                        <span className={`font-bold ${isFree ? "text-green-600" : "text-primary"}`}>
+                          {isFree ? "Free" : `+${CURRENCY_SYMBOL} ${warranty.priceKsh.toLocaleString()}`}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

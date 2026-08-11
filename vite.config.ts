@@ -20,7 +20,7 @@ export default defineConfig(() => {
       // Proxy API calls to Cloudflare Worker for development
       proxy: {
         '/api': {
-          target: 'https://website.axontech254.workers.dev',
+          target: 'https://axon-tech.axontech254.workers.dev',
           changeOrigin: true,
         },
       },

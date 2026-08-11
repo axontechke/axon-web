@@ -8,6 +8,13 @@ export interface Review {
   verified: boolean;
 }
 
+export interface Warranty {
+  id: string;
+  name: string;
+  duration: string; // e.g. "1 Year", "2 Years"
+  priceKsh: number;
+}
+
 export interface ProductVariant {
   storage: string;
   color: string;
@@ -17,15 +24,13 @@ export interface ProductVariant {
 // New flat variant map: { "512GB": { "Blue,Silver": 210000 } }
 export type VariantMap = Record<string, Record<string, number>>;
 
-export function formatProductPrice(product: { price?: number; priceKsh?: number }): string {
-  const parts: string[] = [];
+export const CURRENCY_SYMBOL = "KSh";
+
+export function formatProductPrice(product: { priceKsh?: number }): string {
   if (product.priceKsh !== undefined && product.priceKsh !== null && product.priceKsh !== 0) {
-    parts.push(`KSh ${product.priceKsh.toLocaleString()}`);
+    return `${CURRENCY_SYMBOL} ${product.priceKsh.toLocaleString()}`;
   }
-  if (product.price !== undefined && product.price !== null && product.price !== 0) {
-    parts.push(`$${product.price.toLocaleString()} USD`);
-  }
-  return parts.length > 0 ? parts.join(" / ") : "Contact for Price";
+  return "Contact for Price";
 }
 
 export interface Product {
@@ -49,6 +54,7 @@ export interface Product {
   isBestSeller?: boolean;
   specifications?: Record<string, string>;
   reviews?: Review[];
+  warranties?: Warranty[]; // available warranty plans; first one is the default/free
 }
 
 export interface CartItem {
@@ -56,6 +62,7 @@ export interface CartItem {
   quantity: number;
   selectedColor?: string;
   selectedStorage?: string;
+  selectedWarranty?: Warranty;
 }
 
 export type AppScreen = "Home" | "Catalog" | "ProductDetail" | "Checkout" | "Confirmation" | "TrackOrder" | "Admin" | "Contact" | "Blog";

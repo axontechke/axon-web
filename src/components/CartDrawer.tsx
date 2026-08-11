@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag } from "lucide-react";
-import { CartItem, formatProductPrice } from "../types";
+import { CartItem, Warranty, formatProductPrice, CURRENCY_SYMBOL } from "../types";
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   cart: CartItem[];
-  onUpdateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedStorage?: string) => void;
-  onRemoveItem: (productId: string, selectedColor?: string, selectedStorage?: string) => void;
+  onUpdateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedStorage?: string, warrantyId?: string) => void;
+  onRemoveItem: (productId: string, selectedColor?: string, selectedStorage?: string, warrantyId?: string) => void;
   onCheckout: () => void;
   onExploreEcosystem: () => void;
   couponCode: string;
@@ -49,35 +49,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   if (!isOpen) return null;
 
-  // Totals calculations
-  const itemsSubtotalUsd = cart.reduce((acc, item) => acc + (item.product.price || 0) * item.quantity, 0);
-  const itemsSubtotalKsh = cart.reduce((acc, item) => acc + (item.product.priceKsh || 0) * item.quantity, 0);
+  // Totals calculations (KSh only)
+  const itemsSubtotalKsh = cart.reduce((acc, item) => {
+    const basePrice = (item.product.priceKsh || 0) * item.quantity;
+    const warrantyPrice = (item.selectedWarranty?.priceKsh || 0) * item.quantity;
+    return acc + basePrice + warrantyPrice;
+  }, 0);
 
-  const discountUsd = itemsSubtotalUsd * (discountPercentage / 100);
   const discountKsh = itemsSubtotalKsh * (discountPercentage / 100);
-
-  const subtotalUsd = itemsSubtotalUsd - discountUsd;
   const subtotalKsh = itemsSubtotalKsh - discountKsh;
 
-  const hasUsd = itemsSubtotalUsd > 0;
-  const hasKsh = itemsSubtotalKsh > 0;
-
-  const isFreeShipping = (subtotalUsd > 150) || (subtotalKsh > 20000) || (itemsSubtotalUsd === 0 && itemsSubtotalKsh === 0);
-  const shippingUsd = isFreeShipping ? 0 : 15;
+  const isFreeShipping = subtotalKsh > 20000 || itemsSubtotalKsh === 0;
   const shippingKsh = isFreeShipping ? 0 : 2000;
-
-  const taxesUsd = subtotalUsd * 0.08;
   const taxesKsh = subtotalKsh * 0.08;
-
-  const totalUsd = subtotalUsd + shippingUsd + taxesUsd;
   const totalKsh = subtotalKsh + shippingKsh + taxesKsh;
-
-  // Keep single variables for general layouts
-  const itemsSubtotal = itemsSubtotalUsd || (itemsSubtotalKsh / 130);
-  const subtotal = subtotalUsd || (subtotalKsh / 130);
-  const shipping = isFreeShipping ? 0 : 15;
-  const taxes = taxesUsd || (taxesKsh / 130);
-  const total = totalUsd || (totalKsh / 130);
 
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,7 +144,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="space-y-4">
                 {cart.map((item, idx) => {
                   if (!item?.product?.id) return null;
-                  const uniqueId = `${item.product.id}-${item.selectedColor || ""}-${item.selectedStorage || ""}`;
+                  const uniqueId = `${item.product.id}-${item.selectedColor || ""}-${item.selectedStorage || ""}-${item.selectedWarranty?.id || ""}`;
                   return (
                     <div 
                       key={uniqueId} 
@@ -187,6 +172,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                               Capacity: {item.selectedStorage}
                             </span>
                           )}
+                          {item.selectedWarranty && (
+                            <span className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-semibold">
+                              {item.selectedWarranty.name} ({item.selectedWarranty.duration})
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs font-semibold text-primary mt-1">
                           {formatProductPrice(item.product)}
@@ -196,7 +186,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         <div className="flex items-center justify-between pt-2">
                           <div className="flex items-center bg-surface border border-outline/25 rounded-full">
                             <button
-                              onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selectedColor, item.selectedStorage)}
+                              onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id)}
                               disabled={item.quantity <= 1}
                               className="p-1 px-2.5 text-on-surface-variant disabled:opacity-40 hover:text-primary transition-colors"
                               aria-label="Decrease quantity"
@@ -205,7 +195,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             </button>
                             <span className="text-xs font-bold px-2 text-on-surface">{item.quantity}</span>
                             <button
-                              onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedStorage)}
+                              onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id)}
                               className="p-1 px-2.5 text-on-surface-variant hover:text-primary transition-colors"
                               aria-label="Increase quantity"
                             >
@@ -213,7 +203,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             </button>
                           </div>
                           <button
-                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedStorage)}
+                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id)}
                             className="p-1.5 text-on-surface-variant/80 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                             aria-label="Delete item"
                           >
@@ -262,50 +252,33 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Subtotal</span>
-                  <div className="text-right">
-                    {hasKsh && <div>KSh {itemsSubtotalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                    {hasUsd && <div>${itemsSubtotalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                  </div>
+                  <div className="text-right">{CURRENCY_SYMBOL} {itemsSubtotalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 </div>
                 {discountPercentage > 0 && (
                   <div className="flex justify-between text-green-600 font-medium">
                     <span>Discount ({discountPercentage}%)</span>
-                    <div className="text-right">
-                      {hasKsh && <div>-KSh {discountKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                      {hasUsd && <div>-${discountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                    </div>
+                    <div className="text-right">-{CURRENCY_SYMBOL} {discountKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   </div>
                 )}
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Estimated Shipping</span>
                   <div className="text-right">
-                    {hasKsh && (
-                      <div>{shippingKsh === 0 ? <span className="text-green-600 font-medium">Free</span> : `KSh ${shippingKsh.toLocaleString()}`}</div>
-                    )}
-                    {hasUsd && (
-                      <div>{shippingUsd === 0 ? <span className="text-green-600 font-medium">Free</span> : `$${shippingUsd.toFixed(2)} USD`}</div>
-                    )}
+                    {shippingKsh === 0 ? <span className="text-green-600 font-medium">Free</span> : `${CURRENCY_SYMBOL} ${shippingKsh.toLocaleString()}`}
                   </div>
                 </div>
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Estimated Tax (8%)</span>
-                  <div className="text-right">
-                    {hasKsh && <div>KSh {taxesKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                    {hasUsd && <div>${taxesUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                  </div>
+                  <div className="text-right">{CURRENCY_SYMBOL} {taxesKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 </div>
                 <div className="border-t border-outline/10 my-2 pt-2 flex justify-between text-sm font-bold text-on-surface">
                   <span>Total</span>
-                  <div className="text-right">
-                    {hasKsh && <div className="text-primary">KSh {totalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
-                    {hasUsd && <div className="text-primary">${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</div>}
-                  </div>
+                  <div className="text-right text-primary">{CURRENCY_SYMBOL} {totalKsh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 </div>
               </div>
 
               {!isFreeShipping && (
                 <div className="text-[10px] text-center text-on-surface-variant/60">
-                  Add {hasKsh && <strong>KSh {(20000 - subtotalKsh).toLocaleString()}</strong>} {hasKsh && hasUsd && "or"} {hasUsd && <strong>${(150 - subtotalUsd).toFixed(2)} USD</strong>} more to unlock <strong>Free Shipping</strong>!
+                  Add <strong>{CURRENCY_SYMBOL} {(20000 - subtotalKsh).toLocaleString()}</strong> more to unlock <strong>Free Shipping</strong>!
                 </div>
               )}
 

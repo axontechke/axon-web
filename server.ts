@@ -10,16 +10,18 @@ const DB_FILE = path.join(process.cwd(), "db.json");
 
 // ─── REMOTE DB FLAG ───────────────────────────────────────────
 // Set USE_REMOTE_DB=true to proxy all API calls to the Cloudflare Worker (D1)
-const USE_REMOTE_DB = process.env.USE_REMOTE_DB === "true";
-const WORKER_URL = process.env.WORKER_URL || "https://website.axontech254.workers.dev";
+const USE_REMOTE_DB = process.env.USE_REMOTE_DB !== "false"; // Default true, proxy to worker
+const WORKER_URL = process.env.WORKER_URL || "https://axon-tech.axontech254.workers.dev";
 
 app.use(express.json());
 
 // ─── REMOTE DB HELPERS ───────────────────────────────────────
-async function remoteDB(method: string, path: string, body?: any) {
+async function remoteDB(method: string, path: string, body?: any, authHeader?: string) {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (authHeader) headers["Authorization"] = authHeader;
   const opts: RequestInit = {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers,
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${WORKER_URL}${path}`, opts);
@@ -1674,7 +1676,17 @@ app.get("/api/config", async (req, res) => {
   res.json(db.config);
 });
 
-app.put("/api/admin/config", (req, res) => {
+app.put("/api/admin/config", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const authHeader = req.headers.authorization || "";
+    const result = await remoteDB("PUT", "/api/admin/config", req.body, authHeader);
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+    return;
+  }
   const db = getDB();
   db.config = { ...db.config, ...req.body };
   saveDB(db);
@@ -2594,7 +2606,8 @@ function generateSEOMetaTags(path: string, product?: any): string {
 if (USE_REMOTE_DB) {
   app.use("/api", async (req, res) => {
     try {
-      const result = await remoteDB(req.method, req.path, req.body);
+      const authHeader = req.headers.authorization || "";
+      const result = await remoteDB(req.method, "/api" + req.path, req.body, authHeader);
       res.status(result.status).json(result.data);
     } catch (err) {
       console.error("Proxy error:", err);

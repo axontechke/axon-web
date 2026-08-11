@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   BarChart3, 
   Package, 
@@ -335,7 +335,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         fetch("/api/analytics"),
         fetch("/api/products"),
         fetch("/api/orders"),
-        fetch("/api/config"),
+        fetch(`/api/config?t=${Date.now()}`),
         fetch("/api/contact"),
         authFetch("/api/admin/support-requests"),
         fetch("/api/delivery-methods"),
@@ -384,6 +384,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         return;
       }
       localStorage.setItem("axon_admin_token", data.token);
+      localStorage.setItem("axon_admin_authed", "true");
       setAuthToken(data.token);
       setIsAuthenticated(true);
       setPasskey("");
@@ -397,6 +398,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setIsAuthenticated(false);
     setAuthToken("");
     localStorage.removeItem("axon_admin_token");
+    localStorage.removeItem("axon_admin_authed");
     setPasskey("");
     setLoginEmail("");
   };
@@ -700,19 +702,26 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const handleSaveConfig = async () => {
     if (!webConfig) return;
     try {
+      const payload = JSON.stringify(webConfig);
+      console.log("[CONFIG SAVE] Sending with authToken:", authToken ? "YES" : "NO");
+      console.log("[CONFIG SAVE] URL:", "/api/admin/config");
       const res = await authFetch("/api/admin/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(webConfig)
+        body: payload
       });
+      console.log("[CONFIG SAVE] Response status:", res.status);
 
-      if (res.ok) {
-        showFeedback("Ecosystem configuration synced successfully.");
-        loadAllAdminData();
-      } else {
-        throw new Error("Config sync failed");
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("[CONFIG SAVE FAILED]", res.status, errorText);
+        throw new Error(`Config sync failed: ${res.status} ${errorText}`);
       }
+
+      showFeedback("Ecosystem configuration synced successfully.");
+      loadAllAdminData();
     } catch (err) {
+      console.error("[CONFIG SAVE ERROR]", err);
       showFeedback("Failed to sync layout parameters.", true);
     }
   };
@@ -2320,7 +2329,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <option value="">-- Select Delivery Method --</option>
                             {deliveryMethods.map((method) => (
                               <option key={method.id} value={method.id}>
-                                {method.carrier} - {method.name} (${method.price.toFixed(2)})
+                                {method.carrier} - {method.name} (KSh {method.price.toLocaleString()})
                               </option>
                             ))}
                           </select>
@@ -4492,7 +4501,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   <div className="border-t border-outline/10 pt-3 flex items-center justify-between">
                     <div>
                       <span className="text-[9px] text-on-surface-variant block uppercase leading-none font-bold">Price / Transit</span>
-                      <strong className="text-on-surface text-xs block mt-1">${method.price.toFixed(2)} <span className="text-[10px] text-on-surface-variant font-normal">({method.transitDays})</span></strong>
+                      <strong className="text-on-surface text-xs block mt-1">KSh {method.price.toLocaleString()} <span className="text-[10px] text-on-surface-variant font-normal">({method.transitDays})</span></strong>
                     </div>
 
                     <div className="flex gap-1.5">

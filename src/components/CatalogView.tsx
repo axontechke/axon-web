@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Search, Filter, SlidersHorizontal, Check, Star, RefreshCw, X, Scale, Plus } from "lucide-react";
-import { Product, formatProductPrice } from "../types";
+import { Product, formatProductPrice, CURRENCY_SYMBOL } from "../types";
 
 interface CatalogViewProps {
   onSelectProduct: (product: Product) => void;
@@ -141,7 +141,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     }
 
     // Max Price filter
-    result = result.filter(p => p.price <= maxPrice);
+    result = result.filter(p => (p.priceKsh || 0) <= maxPrice);
 
     // Sorting
     if (sortBy === "price-asc") {
@@ -161,7 +161,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     setSelectedBrand("All");
     setSortBy("featured");
     setInStockOnly(false);
-    setMaxPrice(5000);
+    setMaxPrice(500000);
   };
 
   return (
@@ -256,20 +256,20 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
               <span className="font-bold text-on-surface-variant/80 uppercase tracking-wider">Max Budget</span>
-              <span className="font-bold text-primary">${maxPrice} USD</span>
+              <span className="font-bold text-primary">{CURRENCY_SYMBOL} {maxPrice.toLocaleString()}</span>
             </div>
             <input
               type="range"
-              min="50"
-              max="5000"
-              step="50"
+              min="1000"
+              max="500000"
+              step="1000"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="w-full accent-primary bg-surface-container"
             />
             <div className="flex justify-between text-[9px] text-on-surface-variant/65">
-              <span>$50</span>
-              <span>$1500+</span>
+              <span>{CURRENCY_SYMBOL} 1,000</span>
+              <span>{CURRENCY_SYMBOL} 500,000+</span>
             </div>
           </div>
 
@@ -600,7 +600,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-on-surface-variant/80 uppercase tracking-wider">Max Budget</span>
-                  <span className="font-bold text-primary">${maxPrice} USD</span>
+                  <span className="font-bold text-primary">{CURRENCY_SYMBOL} {maxPrice.toLocaleString()}</span>
                 </div>
                 <input
                   type="range"
