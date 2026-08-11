@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
-import { Product, CartItem, Warranty } from "./types";
+import { Product, CartItem, Warranty, CURRENCY_SYMBOL } from "./types";
 import { ROUTES } from "./config/routes";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
@@ -583,10 +583,49 @@ function ProductDetailRoute({
 
   return (
     <>
-      <SEOHead 
+      <SEOHead
         dynamicTitle={`${product.name} | AXON TECH Kenya`}
         dynamicDescription={product.description}
         dynamicImage={product.image}
+        dynamicJsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "image": [product.image, ...(product.images || [])],
+          "description": product.description,
+          "brand": {
+            "@type": "Brand",
+            "name": product.brand || "AXON TECH"
+          },
+          "sku": product.id,
+          "mpn": product.id,
+          "offers": {
+            "@type": "Offer",
+            "price": (product.priceKsh || 0).toString(),
+            "priceCurrency": "KES",
+            "availability": product.inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            "url": `https://axontechnologies.co.ke/product/${product.id}`,
+            "seller": {
+              "@type": "Organization",
+              "name": "AXON TECH Kenya"
+            }
+          },
+          "aggregateRating": product.rating
+            ? {
+                "@type": "AggregateRating",
+                "ratingValue": product.rating.toString(),
+                "reviewCount": (product.reviewsCount || 0).toString(),
+                "bestRating": "5",
+                "worstRating": "1"
+              }
+            : undefined,
+          "manufacturer": {
+            "@type": "Organization",
+            "name": product.brand || "AXON TECH"
+          }
+        }}
       />
       <ProductDetailView
         product={product}

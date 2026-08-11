@@ -12,6 +12,7 @@ export interface SEOConfig {
   ogDescription?: string;
   ogImage?: string;
   ogType?: 'website' | 'product' | 'article';
+  ogLocaleAlternate?: string;
   twitterCard?: 'summary' | 'summary_large_image';
   canonical?: string;
   jsonLd?: object;
@@ -29,6 +30,7 @@ export const SEO_DEFAULTS: SEOConfig = {
   ogDescription: 'Your Trusted Technology Partner in Kenya - Premium Hardware & Electronics',
   ogImage: DEFAULT_OG_IMAGE,
   ogType: 'website',
+  ogLocaleAlternate: 'en_US',
   twitterCard: 'summary_large_image',
 };
 
@@ -146,6 +148,10 @@ export function generateMetaTagsHtml(seo: SEOConfig, pageUrl: string): string {
     tags.push(`<meta property="og:image" content="${seo.ogImage}" />`);
     tags.push(`<meta property="og:image:width" content="1200" />`);
     tags.push(`<meta property="og:image:height" content="630" />`);
+  }
+
+  if (seo.ogLocaleAlternate) {
+    tags.push(`<meta property="og:locale:alternate" content="${seo.ogLocaleAlternate}" />`);
   }
 
   // Twitter Card tags

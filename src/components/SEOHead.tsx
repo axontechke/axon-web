@@ -7,6 +7,7 @@ interface SEOHeadProps {
   dynamicTitle?: string;
   dynamicDescription?: string;
   dynamicImage?: string;
+  dynamicJsonLd?: object | object[];
 }
 
 /**
@@ -15,11 +16,12 @@ interface SEOHeadProps {
  * Dynamically updates document head with meta tags for each route.
  * Use this component at the top of each page component.
  */
-export function SEOHead({ 
-  config, 
-  dynamicTitle, 
-  dynamicDescription, 
-  dynamicImage 
+export function SEOHead({
+  config,
+  dynamicTitle,
+  dynamicDescription,
+  dynamicImage,
+  dynamicJsonLd,
 }: SEOHeadProps) {
   const location = useLocation();
   const path = location.pathname;
@@ -52,6 +54,15 @@ export function SEOHead({
     canonical: canonicalUrl,
   };
 
+  // Merge page-level JSON-LD with dynamic product JSON-LD
+  const mergedJsonLd = dynamicJsonLd
+    ? Array.isArray(dynamicJsonLd)
+      ? [baseConfig.jsonLd, ...dynamicJsonLd].filter(Boolean)
+      : [baseConfig.jsonLd, dynamicJsonLd].filter(Boolean)
+    : baseConfig.jsonLd
+    ? [baseConfig.jsonLd]
+    : null;
+
   useEffect(() => {
     // Update document title
     document.title = finalConfig.title;
@@ -77,6 +88,11 @@ export function SEOHead({
       updateMetaTag('og:image:height', '630', true);
     }
 
+    // Locale alternate
+    if (finalConfig.ogLocaleAlternate) {
+      updateMetaTag('og:locale:alternate', finalConfig.ogLocaleAlternate, true);
+    }
+
     // Twitter Card
     updateMetaTag('twitter:card', finalConfig.twitterCard || 'summary_large_image');
     updateMetaTag('twitter:title', finalConfig.ogTitle || finalConfig.title);
@@ -95,15 +111,18 @@ export function SEOHead({
     }
     canonicalLink.href = canonicalUrl;
 
-    // JSON-LD
-    if (finalConfig.jsonLd) {
-      let jsonLdScript = document.querySelector("script[type='application/ld+json']") as HTMLScriptElement | null;
-      if (!jsonLdScript) {
-        jsonLdScript = document.createElement('script');
-        jsonLdScript.type = 'application/ld+json';
-        document.head.appendChild(jsonLdScript);
-      }
-      jsonLdScript.textContent = JSON.stringify(finalConfig.jsonLd);
+    // JSON-LD (supports multiple schemas)
+    const existingLdScripts = document.querySelectorAll("script[type='application/ld+json']");
+    existingLdScripts.forEach(s => s.remove());
+
+    if (mergedJsonLd && mergedJsonLd.length > 0) {
+      mergedJsonLd.forEach((schema, idx) => {
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.id = `json-ld-${idx}`;
+        script.textContent = JSON.stringify(schema);
+        document.head.appendChild(script);
+      });
     }
   }, [path, finalConfig]);
 

@@ -80,6 +80,7 @@ Allow: /
 # OpenAI — Trains future GPT models
 User-agent: GPTBot
 Allow: /
+Crawl-delay: 2
 
 # Meta — Trains Llama / Meta AI
 User-agent: Meta-ExternalAgent
@@ -140,8 +141,6 @@ User-agent: Exabot
 Disallow: /
 
 # AI crawlers that are non-compliant or low-value
-User-agent: GPTBot
-Crawl-delay: 2
 
 # ============================================================
 # SECTION 5: PROTECTED PATHS (Apply to all remaining crawlers)
