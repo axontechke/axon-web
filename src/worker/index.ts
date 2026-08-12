@@ -1187,7 +1187,7 @@ async function syncRealtimeProducts(_req: Request, env: Env): Promise<Response> 
 // ─── SITEMAP & SEO ───────────────────────────────────────────
 async function generateSitemap(env: Env): Promise<Response> {
   await seedDatabase(env.DB);
-  const SITE_URL = "https://axontechnologies.co.ke";
+  const SITE_URL = "https://axontech.co.ke";
   const today = new Date().toISOString().split("T")[0];
 
   const urls: string[] = [

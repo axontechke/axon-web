@@ -606,7 +606,7 @@ function ProductDetailRoute({
             "availability": product.inStock
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
-            "url": `https://axontechnologies.co.ke/product/${product.id}`,
+            "url": `https://axontech.co.ke/product/${product.id}`,
             "seller": {
               "@type": "Organization",
               "name": "AXON TECH Kenya"

@@ -62,7 +62,7 @@ app.get("/llms.txt", (req, res) => {
 app.get("/sitemap.xml", (req, res) => {
   try {
     const db = getDB();
-    const SITE_URL = "https://axontechnologies.co.ke";
+    const SITE_URL = "https://axontech.co.ke";
     const now = new Date().toISOString().split("T")[0];
 
     const urls: string[] = [];
@@ -2476,7 +2476,7 @@ Instructions:
 // ==========================================
 
 const SITE_NAME = 'AXON TECH Kenya';
-const SITE_URL = 'https://axontechnologies.co.ke';
+const SITE_URL = 'https://axontech.co.ke';
 
 interface PageSEO {
   title: string;
