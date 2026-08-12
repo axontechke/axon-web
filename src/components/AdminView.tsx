@@ -289,6 +289,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarStorage, setNewVarStorage] = useState("");
   const [newVarColor, setNewVarColor] = useState("");
   const [newVarStock, setNewVarStock] = useState<number>(10);
+  const [newColorName, setNewColorName] = useState("");
+  const [newColorImageUrl, setNewColorImageUrl] = useState("");
 
   // Form states for Promo Manager
   const [newPromoCode, setNewPromoCode] = useState("");
@@ -362,6 +364,26 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
   };
 
+  // Auto-detect a color name from an image URL (e.g. "teal" from ".../teal-iphone.jpg")
+  const extractColorFromUrl = (url: string): string => {
+    if (!url) return "";
+    const lower = url.toLowerCase();
+    const knownColors = [
+      "black", "white", "silver", "gray", "grey", "slate", "charcoal",
+      "blue", "navy", "royal blue", "teal", "cyan", "turquoise",
+      "green", "emerald", "olive", "coral", "red", "pink", "rose",
+      "gold", "yellow", "orange", "copper", "bronze", "purple", "violet",
+      "obsidian", "pearl", "ivory", "cream", "beige", "lavender",
+    ];
+    for (const color of knownColors) {
+      if (lower.includes(color)) {
+        // Capitalize first letter
+        return color.charAt(0).toUpperCase() + color.slice(1);
+      }
+    }
+    return "";
+  };
+
   const showFeedback = (text: string, isError = false) => {
     setActionMessage({ text, isError });
     setTimeout(() => {
@@ -425,6 +447,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       reviewsCount: 1,
       inStock: true,
       colors: ["Black", "Silver"],
+      colorImages: {},
       storages: ["128GB"],
       images: [],
       variants: [],
@@ -436,18 +459,23 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
+    setNewColorName("");
+    setNewColorImageUrl("");
     setIsProductFormOpen(true);
   };
 
   const handleOpenEditProduct = (prod: Product) => {
-    setEditingProduct({ 
+    setEditingProduct({
       ...prod,
       images: prod.images || [],
+      colorImages: prod.colorImages || {},
       variants: prod.variants || []
     });
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
+    setNewColorName("");
+    setNewColorImageUrl("");
     setIsProductFormOpen(true);
   };
 
@@ -1927,6 +1955,104 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         placeholder="https://images.unsplash.com/example-1.jpg&#10;https://images.unsplash.com/example-2.jpg"
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none h-20"
                       />
+                    </div>
+
+                    {/* Color → Image URL Mapping */}
+                    <div className="border-t border-outline/10 pt-4 space-y-3">
+                      <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Color Swatch Images</h4>
+                      <p className="text-[10px] text-on-surface-variant/70 -mt-1">
+                        Assign a unique product photo to each colorway. The system auto-detects the color name from the image URL; you can override it manually.
+                      </p>
+
+                      {/* Existing color→image mappings */}
+                      {editingProduct.colorImages && Object.keys(editingProduct.colorImages).length > 0 ? (
+                        <div className="border border-outline/10 rounded-xl overflow-hidden bg-surface-container-low max-h-40 overflow-y-auto">
+                          <table className="w-full text-left text-[11px] border-collapse">
+                            <thead>
+                              <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
+                                <th className="p-2">Color</th>
+                                <th className="p-2">Image URL</th>
+                                <th className="p-2 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-outline/10 font-medium">
+                              {Object.entries(editingProduct.colorImages).map(([color, url]) => (
+                                <tr key={color} className="hover:bg-surface-container-high/30">
+                                  <td className="p-2">{color}</td>
+                                  <td className="p-2">
+                                    <div className="flex items-center gap-2">
+                                      <img src={url} alt={color} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-outline/10" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                      <span className="text-[10px] text-on-surface-variant/60 truncate max-w-[120px] font-mono">{url}</span>
+                                    </div>
+                                  </td>
+                                  <td className="p-2 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = { ...editingProduct.colorImages };
+                                        delete updated[color];
+                                        setEditingProduct({ ...editingProduct, colorImages: updated });
+                                      }}
+                                      className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
+                                    >
+                                      Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
+                          No color swatch images assigned yet.
+                        </div>
+                      )}
+
+                      {/* Add new color swatch */}
+                      <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
+                        <span className="text-[10px] font-bold text-on-surface uppercase block">Assign Swatch Image</span>
+                        <div className="grid grid-cols-5 gap-2">
+                          <div className="col-span-2 space-y-1">
+                            <input
+                              type="text"
+                              value={newColorName}
+                              onChange={(e) => setNewColorName(e.target.value)}
+                              placeholder="Color name (e.g. Teal)"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="col-span-3 space-y-1">
+                            <input
+                              type="text"
+                              value={newColorImageUrl}
+                              onChange={(e) => setNewColorImageUrl(e.target.value)}
+                              placeholder="Image URL (auto-detects color from URL)"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newColorName.trim() || !newColorImageUrl.trim()) return;
+                            // Auto-detect: extract last path segment and use as color if field is still the auto-generated placeholder
+                            const detected = extractColorFromUrl(newColorImageUrl);
+                            const finalColor = newColorName.trim() || detected;
+                            const updated = {
+                              ...editingProduct.colorImages,
+                              [finalColor]: newColorImageUrl.trim()
+                            };
+                            setEditingProduct({ ...editingProduct, colorImages: updated });
+                            setNewColorName("");
+                            setNewColorImageUrl("");
+                          }}
+                          disabled={!newColorName.trim() || !newColorImageUrl.trim()}
+                          className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add Color Swatch
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-1">

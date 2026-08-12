@@ -45,6 +45,7 @@ export interface Product {
   images?: string[];
   colors?: string[];
   storages?: string[];
+  colorImages?: Record<string, string>; // { "Royal Blue": "https://...", "Silver": "https://..." }
   variants?: VariantMap;
   rating: number;
   reviewsCount: number;

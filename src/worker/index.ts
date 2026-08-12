@@ -289,6 +289,56 @@ const INITIAL_CONTACT: Record<string, any> = {
   ]
 };
 
+const INITIAL_ORDERS = [
+  {
+    id: "AXN-827103",
+    status: "delivered",
+    customer: JSON.stringify({ fullName: "Stephen Paul Kamau", email: "stephen@example.com", address: "Kenyatta Avenue", city: "Nairobi", state: "Nairobi", zipCode: "00100", phone: "254745017979" }),
+    shippingMethod: "Express Air",
+    shippingCost: 0,
+    subtotal: 899,
+    discountAmount: 0,
+    discountPercentage: 0,
+    taxes: 89.9,
+    total: 988.9,
+    totalKsh: 129050,
+    totalUsd: 988.9,
+    hasKsh: 1,
+    payment: JSON.stringify({ lastFour: "4242" }),
+    items: JSON.stringify([{ id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Space Gray", storage: "256GB", image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4" }]),
+    history: JSON.stringify([
+      { status: "pending", time: "2024-01-15T10:30:00Z", notes: "Order placed. Awaiting payment confirmation." },
+      { status: "packaged", time: "2024-01-15T14:00:00Z", notes: "Order sealed and quality checked." },
+      { status: "shipped", time: "2024-01-16T08:00:00Z", notes: "Dispatched via Air Cargo. In transit." },
+      { status: "delivered", time: "2024-01-17T11:00:00Z", notes: "Package delivered and signed for." }
+    ])
+  },
+  {
+    id: "AXN-982714",
+    status: "shipped",
+    customer: JSON.stringify({ fullName: "Clarissa Mitchell", email: "clarissa@example.com", address: "Mombasa Road", city: "Mombasa", state: "Mombasa", zipCode: "80100", phone: "254712345678" }),
+    shippingMethod: "Standard Air",
+    shippingCost: 15,
+    subtotal: 1798,
+    discountAmount: 179.8,
+    discountPercentage: 10,
+    taxes: 161.82,
+    total: 1795.02,
+    totalKsh: 233365,
+    totalUsd: 1795.02,
+    hasKsh: 1,
+    payment: JSON.stringify({ lastFour: "1234" }),
+    items: JSON.stringify([
+      { id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Space Gray", storage: "256GB", image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4" },
+      { id: "axon-pen-pro", name: "Axon Pen Pro", price: 899, quantity: 1, color: "White", storage: "128GB", image: "" }
+    ]),
+    history: JSON.stringify([
+      { status: "pending", time: "2024-02-01T09:00:00Z", notes: "Order placed. Awaiting payment confirmation." },
+      { status: "packaged", time: "2024-02-01T13:00:00Z", notes: "Order sealed and quality checked." },
+      { status: "shipped", time: "2024-02-02T07:30:00Z", notes: "Dispatched via Air Cargo. Tracking: AXN-TRK-982714." }
+    ])
+  }
+];
 
 
 // ─── SEED DATABASE ───────────────────────────────────────────
@@ -329,6 +379,19 @@ async function seedDatabase(db: D1Database): Promise<void> {
   if (!contactCount || contactCount.count === 0) {
     for (const [key, value] of Object.entries(INITIAL_CONTACT)) {
       batch.push(db.prepare(`INSERT OR IGNORE INTO contact (key, value) VALUES (?, ?)`).bind(key, JSON.stringify(value)));
+    }
+  }
+
+  // Check and seed sample orders
+  const orderCount = await db.prepare("SELECT COUNT(*) as count FROM orders").first<{ count: number }>();
+  if (!orderCount || orderCount.count === 0) {
+    for (const o of INITIAL_ORDERS) {
+      batch.push(db.prepare(
+        `INSERT OR IGNORE INTO orders (id, date, status, customer, shippingMethod, shippingCost, subtotal, discountAmount, discountPercentage, taxes, total, totalKsh, totalUsd, hasKsh, payment, items, history)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(o.id, new Date().toISOString(), o.status, o.customer, o.shippingMethod, o.shippingCost,
+        o.subtotal, o.discountAmount, o.discountPercentage, o.taxes, o.total, o.totalKsh, o.totalUsd,
+        o.hasKsh, o.payment, o.items, o.history));
     }
   }
 
@@ -407,6 +470,7 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     isBestSeller: !!p.isBestSeller,
     colors: JSON.parse(p.colors || "[]"),
     storages: JSON.parse(p.storages || "[]"),
+    colorImages: JSON.parse(p.colorImages || "{}"),
     specifications: JSON.parse(p.specifications || "{}"),
     variants: JSON.parse(p.variants || "{}"),
   }));
@@ -668,12 +732,12 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
   const data = await req.json();
   const id = data.id || generateId("product");
   await env.DB.prepare(
-    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(id, data.name || "", data.price || 0, data.priceKsh || 0, data.description || "", data.category || "",
     data.brand || "", data.image || "", JSON.stringify(data.colors || []), JSON.stringify(data.storages || []),
     data.rating || 0, data.reviewsCount || 0, data.inStock ? 1 : 0, data.isNew ? 1 : 0, data.isBestSeller ? 1 : 0,
-    JSON.stringify(data.specifications || {})).run();
+    JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {})).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -694,6 +758,7 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   }
   if (data.colors !== undefined) { fields.push("colors = ?"); values.push(JSON.stringify(data.colors)); }
   if (data.storages !== undefined) { fields.push("storages = ?"); values.push(JSON.stringify(data.storages)); }
+  if (data.colorImages !== undefined) { fields.push("colorImages = ?"); values.push(JSON.stringify(data.colorImages)); }
   if (data.specifications !== undefined) { fields.push("specifications = ?"); values.push(JSON.stringify(data.specifications)); }
   if (data.inStock !== undefined) { fields.push("inStock = ?"); values.push(data.inStock ? 1 : 0); }
   if (data.isNew !== undefined) { fields.push("isNew = ?"); values.push(data.isNew ? 1 : 0); }
@@ -731,6 +796,7 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   return corsResponse(updated ? {
     ...updated, inStock: !!updated.inStock, isNew: !!updated.isNew, isBestSeller: !!updated.isBestSeller,
     colors: JSON.parse((updated as any).colors || "[]"), storages: JSON.parse((updated as any).storages || "[]"),
+    colorImages: JSON.parse((updated as any).colorImages || "{}"),
     specifications: JSON.parse((updated as any).specifications || "{}"),
   } : { id: params.id, ...data });
 }

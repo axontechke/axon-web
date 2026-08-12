@@ -30,6 +30,18 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     setQuantity(1);
   }, [product.id, product.image]);
 
+  // Switch displayed image when a color with a mapped URL is selected
+  React.useEffect(() => {
+    if (!selectedColor) return;
+    const colorImage = product.colorImages?.[selectedColor];
+    if (colorImage) {
+      setActiveImage(colorImage);
+    } else {
+      // Fall back to the base product image if no color-specific image exists
+      setActiveImage(product.image);
+    }
+  }, [selectedColor, product.colorImages, product.image]);
+
   // Check if product has variant-based pricing (new structure)
   const hasVariants = product.variants && Object.keys(product.variants).length > 0;
 
