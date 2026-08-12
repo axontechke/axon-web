@@ -169,7 +169,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
       {/* Header and Summary */}
       <div className="text-left space-y-2 border-b border-outline/10 pb-6">
         <h1 className="font-display font-black text-3xl md:text-4xl text-on-surface tracking-tight">
-          Explore the Ecosystem
+          Browse Products
         </h1>
         <p className="text-xs text-on-surface-variant/80 max-w-xl">
           Configure, synchronize, and extend your hardware layout. Search and organize through our premium products database.
@@ -211,7 +211,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
 
           {/* Categories list */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider">Ecosystem Segment</h4>
+            <h4 className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider">Category</h4>
             <div className="space-y-1.5">
               {categories.map((cat) => (
                 <div key={cat} className="space-y-1">
@@ -317,7 +317,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                   className="bg-surface border border-outline/15 rounded-xl px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:border-primary"
                   id="sort-select-catalog"
                 >
-                  <option value="featured">Ecosystem Choice</option>
+                  <option value="featured">Featured</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
                   <option value="rating">Highest Customer Core</option>
@@ -550,7 +550,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
 
                {/* Categories list */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider">Ecosystem Segment</h4>
+                <h4 className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider">Category</h4>
                 <div className="space-y-2">
                   {categories.map((cat) => (
                     <div key={cat} className="space-y-1">

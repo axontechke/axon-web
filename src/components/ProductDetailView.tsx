@@ -296,7 +296,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         {/* Right Column: Information & Configuration (Sticky on Desktop) */}
         <div className="lg:col-span-6 space-y-6 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">{product.category} Ecosystem</span>
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">{product.category}</span>
             <h1 className="font-display font-black text-3xl md:text-4xl text-on-surface leading-tight" id="detail-product-name">
               {product.name}
             </h1>
@@ -467,7 +467,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 className="flex-1 py-3.5 px-6 rounded-full text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed glass-btn-ios-primary"
                 id="add-to-cart-detail-btn"
               >
-                {product.inStock ? "Add to Ecosystem Layout" : "Temporarily Sold Out"}
+                {product.inStock ? "Add to Cart" : "Temporarily Sold Out"}
               </button>
             </div>
 
@@ -479,7 +479,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-xs font-black text-on-surface uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Ecosystem Price Monitor</span>
+                    <span>Price Alert</span>
                     <span className="flex items-center text-[10px] text-green-700 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-normal">
                       <TrendingDown className="w-2.5 h-2.5 mr-0.5 text-green-600" />
                       Active
@@ -568,7 +568,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                     ) : (
                       <>
                         <tr className="border-b border-outline/5 bg-white/40">
-                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">Ecosystem Code</th>
+                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">SKU</th>
                           <td className="py-3.5 px-4 text-on-surface font-medium">AXN-{product.id.toUpperCase().replace(/-/g, "_")}</td>
                         </tr>
                         <tr className="border-b border-outline/5">
@@ -622,7 +622,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               {/* Left Column: Review Stats and Add Review Form */}
               <div className="lg:col-span-5 space-y-6 bg-surface-container-low border border-outline/10 p-6 rounded-3xl">
                 <div className="space-y-2">
-                  <h3 className="font-display font-bold text-base text-on-surface">Ecosystem Satisfaction</h3>
+                  <h3 className="font-display font-bold text-base text-on-surface">Customer Reviews</h3>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-black text-on-surface font-display">{averageRating}</span>
                     <div className="space-y-0.5">
@@ -646,7 +646,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   {formSuccess && (
                     <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 p-2.5 rounded-xl text-xs font-semibold animate-bounce">
                       <CheckCircle className="w-4 h-4" />
-                      <span>Review logged! Recalculated ecosystem stats.</span>
+                      <span>Review submitted! Thank you.</span>
                     </div>
                   )}
 

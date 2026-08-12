@@ -336,7 +336,7 @@ const INITIAL_CONFIG = {
       tagIcon: "Cpu",
       title: "Integrated Form & Function.",
       description: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 silicon chip, a liquid Infinity Display, and multi-device cross-talk. Powering your ultimate creative studio anywhere.",
-      primaryBtnText: "Explore Slate Pro",
+      primaryBtnText: "Shop Now",
       primaryActionTarget: "product",
       primaryActionValue: "axon-slate-pro",
       secondaryBtnText: "Shop all hardware",
@@ -357,7 +357,7 @@ const INITIAL_CONFIG = {
       tagIcon: "Zap",
       title: "Axon Phone 1 Pro",
       description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 neural processor, customizable Action controls, and ultra-high dynamic triple lenses.",
-      primaryBtnText: "Explore Phone 1 Pro",
+      primaryBtnText: "Shop Now",
       primaryActionTarget: "product",
       primaryActionValue: "axon-phone-1-pro",
       secondaryBtnText: "View Phones",
@@ -378,10 +378,10 @@ const INITIAL_CONFIG = {
       tagIcon: "Laptop",
       title: "Axon Book 16 Ultra.",
       description: "Uncompromised computational throughput. Configured with a high-fidelity liquid-vapor cooling array, and outstanding operational compiler performance.",
-      primaryBtnText: "Explore Book 16",
+      primaryBtnText: "Shop Now",
       primaryActionTarget: "product",
       primaryActionValue: "axon-book-16",
-      secondaryBtnText: "Configure Laptops",
+      secondaryBtnText: "Shop Laptops",
       secondaryActionTarget: "category",
       secondaryActionValue: "Laptops",
       mediaType: "video",
@@ -396,7 +396,7 @@ const INITIAL_CONFIG = {
   ],
   activePromos: [
     { code: "AXON15", discount: 15, description: "15% discount on products" },
-    { code: "ECOCORE", discount: 20, description: "20% off ecosystem accessories" }
+    { code: "SAVE20", discount: 20, description: "20% off all accessories" }
   ],
   socialTwitter: "https://twitter.com/axontech",
   socialGithub: "https://github.com/axontech",
@@ -413,9 +413,9 @@ const INITIAL_CONFIG = {
   footerBrandName: "AXON",
   footerBrandSuffix: "TECH",
   footerBrandLogoUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png",
-  footerDescription: "Crafting precise premium hardware and accessories harmonized into a seamless high-performance lifestyle ecosystem.",
+  footerDescription: "Your trusted online store for premium tech and accessories across Kenya.",
   footerWarrantyText: "Authorized Retailer warranty included",
-  footerCol1Title: "Ecosystem",
+  footerCol1Title: "Shop",
   footerCol1Links: [
     { text: "Axon Slate Series", target: "terms" },
     { text: "Axon Books (Laptops)", target: "terms" },
@@ -429,15 +429,15 @@ const INITIAL_CONFIG = {
     { text: "Delivery & Shipping", target: "delivery" },
     { text: "Refund & Return Policy", target: "refund" },
     { text: "Cookie Settings", target: "cookies" },
-    { text: "Ecosystem Security", target: "privacy" }
+    { text: "Privacy & Security", target: "privacy" }
   ],
   footerCopyrightText: "",
-  footerNewsletterTitle: "Ecosystem Brief",
+  footerNewsletterTitle: "Stay Updated",
   footerNewsletterDescription: "Subscribe to receive priority notifications of limited hardware drops, system updates, and custom product bundles.",
   footerBottomLinks: [
     { text: "Privacy Policy", target: "privacy" },
     { text: "Cookie Policy", target: "cookies" },
-    { text: "Terms of Ecosystem", target: "terms" },
+    { text: "Terms of Service", target: "terms" },
     { text: "Refund Policy", target: "refund" },
     { text: "Delivery Logistics", target: "delivery" },
     { text: "Do Not Sell My Info", target: "dns" }

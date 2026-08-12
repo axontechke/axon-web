@@ -107,7 +107,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="px-6 py-5 border-b border-outline/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-primary" />
-              <h2 className="font-display font-bold text-lg text-on-surface">Your Ecosystem Cart</h2>
+              <h2 className="font-display font-bold text-lg text-on-surface">Your Cart</h2>
             </div>
             <button 
               onClick={onClose}
@@ -128,7 +128,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className="space-y-1">
                   <h3 className="font-display font-semibold text-base text-on-surface">Your cart is empty</h3>
                   <p className="text-xs text-on-surface-variant/70 max-w-[240px]">
-                    You haven't integrated any premium Axon items into your hardware ecosystem yet.
+                    Your cart is empty. Start shopping to add items.
                   </p>
                 </div>
                 <button
@@ -136,7 +136,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   className="px-6 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer glass-btn-ios-primary"
                   id="cart-explore-btn"
                 >
-                  Explore Ecosystem
+                  Browse Products
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

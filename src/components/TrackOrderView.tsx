@@ -117,10 +117,10 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
             <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog
           </button>
           <h1 className="font-display font-black text-2xl sm:text-3xl text-on-surface tracking-tight">
-            Package Telemetry Tracker
+            Track Your Order
           </h1>
           <p className="text-xs text-on-surface-variant/70">
-            Real-time status updates and delivery routing logistics.
+            Get real-time updates on your delivery status.
           </p>
         </div>
 
@@ -150,7 +150,7 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
       {loading && (
         <div className="py-24 flex flex-col items-center justify-center gap-3">
           <RefreshCw className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-xs font-medium text-on-surface-variant">Connecting to telemetry satellite...</p>
+          <p className="text-xs font-medium text-on-surface-variant">Finding your order...</p>
         </div>
       )}
 
@@ -162,7 +162,7 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
           </div>
           <h3 className="font-display font-bold text-base text-on-surface">Order Not Found</h3>
           <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-            We couldn't locate tracking ID <strong className="text-on-surface">{trackingId}</strong>. Please ensure the code is formatted correctly (e.g. AXN-XXXXXX).
+            We couldn't find order <strong className="text-on-surface">{trackingId}</strong>. Please check your order confirmation email for the correct tracking number.
           </p>
           <div className="flex justify-center gap-3 pt-2">
             <button
@@ -172,7 +172,7 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
               }}
               className="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer glass-btn-ios"
             >
-              Try Sample Code
+              Use Demo Order
             </button>
           </div>
         </div>
@@ -185,13 +185,13 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
             <Truck className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h2 className="font-display font-bold text-base text-on-surface">No Tracked Package</h2>
+            <h2 className="font-display font-bold text-base text-on-surface">Track Your Package</h2>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Enter your Axon tracking number from your confirmation receipt to inspect its physical progress and logistics logs.
+              Enter your order tracking number from your confirmation email to see delivery updates.
             </p>
           </div>
           <div className="bg-surface-container-low border border-outline/10 p-4 rounded-2xl text-left space-y-2">
-            <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase block">Active Sandbox Tracking Codes</span>
+            <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase block">Sample Tracking Numbers</span>
             <div className="grid grid-cols-1 gap-2 text-xs">
               <button
                 onClick={() => {
@@ -320,7 +320,7 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
                           onClick={() => onSelectProductById(item.id)}
                           className="text-[9px] text-primary hover:underline font-bold"
                         >
-                          View Product
+                          View Item
                         </button>
                       </div>
                     </div>
@@ -332,7 +332,7 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
               <div className="bg-surface-container-low border border-outline/10 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-primary" />
-                  <span>Logistics Chronicle Feed</span>
+                  <span>Delivery Timeline</span>
                 </h3>
 
                 <div className="relative border-l border-outline/15 ml-3 pl-6 space-y-6 py-2">

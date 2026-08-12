@@ -287,7 +287,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <form onSubmit={handleSearchSubmit} className="relative hidden sm:block max-w-[200px] lg:max-w-[260px] w-full" id="nav-search-form">
             <input
               type="text"
-              placeholder="Search Axon ecosystem..."
+              placeholder="Search products..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               onFocus={() => setIsInputFocused(true)}
@@ -420,7 +420,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <form onSubmit={handleSearchSubmit} className="relative w-full" id="nav-mobile-search-form">
               <input
                 type="text"
-                placeholder="Search ecosystem..."
+                placeholder="Search products..."
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 onFocus={() => setIsMobileInputFocused(true)}
@@ -569,7 +569,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
 
               <span className="text-[9px] font-bold text-on-surface-variant/40 uppercase tracking-wider px-3 mt-4 mb-1 block">
-                Categories &amp; Ecosystems
+                Categories
               </span>
 
               {/* Collapsible Categories */}

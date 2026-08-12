@@ -78,11 +78,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
     const defaultRaw = [
       {
         id: "ecosystem",
-        tag: "THE AXON ECOSYSTEM DEBUT",
+        tag: "NEW ARRIVALS",
         tagIcon: "Cpu",
         title: config?.heroTitle || "Integrated Form & Function.",
-        description: config?.heroDescription || "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 silicon chip, a liquid Infinity Display, and multi-device cross-talk. Powering your ultimate creative studio anywhere.",
-        primaryBtnText: "Explore Slate Pro",
+        description: config?.heroDescription || "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 chip, a stunning Liquid Infinity Display, and all-day battery life.",
+        primaryBtnText: "Shop Now",
         primaryActionTarget: "product",
         primaryActionValue: "axon-slate-pro",
         secondaryBtnText: "Shop all hardware",
@@ -103,7 +103,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         tagIcon: "Zap",
         title: "Axon Phone 1 Pro",
         description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 neural processor, customizable Action controls, and ultra-high dynamic triple lenses.",
-        primaryBtnText: "Explore Phone 1 Pro",
+        primaryBtnText: "Shop Now",
         primaryActionTarget: "product",
         primaryActionValue: "axon-phone-1-pro",
         secondaryBtnText: "View Phones",
@@ -120,14 +120,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
       },
       {
         id: "book-laptop",
-        tag: "THE M3 SILICON BEAST",
+        tag: "LAPTOP LAUNCH",
         tagIcon: "Laptop",
         title: "Axon Book 16 Ultra.",
-        description: "Uncompromised computational throughput. Configured with a high-fidelity liquid-vapor cooling array, and outstanding operational compiler performance.",
-        primaryBtnText: "Explore Book 16",
+        description: "Uncompromised performance. With high-speed processing, stunning display, and all-day battery life.",
+        primaryBtnText: "Shop Now",
         primaryActionTarget: "product",
         primaryActionValue: "axon-book-16",
-        secondaryBtnText: "Configure Laptops",
+        secondaryBtnText: "Shop Laptops",
         secondaryActionTarget: "category",
         secondaryActionValue: "Laptops",
         mediaType: "video",
@@ -638,16 +638,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
         )}
       </section>
 
-      {/* Curated Ecosystem Categories */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4" id="curated-ecosystems">
+      {/* Curated Categories */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4" id="curated-categories">
         <div className="flex justify-between items-end">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-bold text-primary uppercase tracking-wider block">Ecosystem Core</span>
+              <span className="text-[9px] font-bold text-primary uppercase tracking-wider block">Shop by Category</span>
               <span className="px-1.5 py-0.2 rounded text-[7px] font-bold bg-primary/10 text-primary uppercase tracking-wide">Live</span>
             </div>
-            <h2 className="font-display font-black text-lg sm:text-xl text-on-surface tracking-tight">Explore Core Ecosystems</h2>
-            <p className="text-[10px] sm:text-xs text-on-surface-variant/70">Engineered to work beautifully as individual systems or a unified core.</p>
+            <h2 className="font-display font-black text-lg sm:text-xl text-on-surface tracking-tight">Browse Products</h2>
+            <p className="text-[10px] sm:text-xs text-on-surface-variant/70">Find the perfect tech for your needs.</p>
           </div>
           <button 
             onClick={() => onNavigateToCatalog("All")}

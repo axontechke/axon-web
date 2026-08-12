@@ -217,13 +217,13 @@ const INITIAL_CONFIG: Record<string, any> = {
   heroTitle: "Integrated Form & Function.",
   heroDescription: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 silicon chip, a liquid Infinity Display, and multi-device cross-talk. Powering your ultimate creative studio anywhere.",
   heroSlides: [
-    { id: "ecosystem", tag: "THE AXON ECOSYSTEM DEBUT", tagIcon: "Cpu", title: "Integrated Form & Function.", description: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 silicon chip, a liquid Infinity Display, and multi-device cross-talk. Powering your ultimate creative studio anywhere.", primaryBtnText: "Explore Slate Pro", primaryActionTarget: "product", primaryActionValue: "axon-slate-pro", secondaryBtnText: "Shop all hardware", secondaryActionTarget: "category", secondaryActionValue: "All", mediaType: "image", mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png", mobileMediaUrl: "", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "Infinity Screen", overlayDesc: "12.9\" ProMotion Touchscreen", targetProductId: "axon-slate-pro" },
-    { id: "phone-video", tag: "CINEMATIC HARDWARE PREVIEW", tagIcon: "Zap", title: "Axon Phone 1 Pro", description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 neural processor, customizable Action controls, and ultra-high dynamic triple lenses.", primaryBtnText: "Explore Phone 1 Pro", primaryActionTarget: "product", primaryActionValue: "axon-phone-1-pro", secondaryBtnText: "View Phones", secondaryActionTarget: "category", secondaryActionValue: "Phones", mediaType: "video", mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4", mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "M1 Neural", overlayDesc: "Titanium Chassis", targetProductId: "axon-phone-1-pro" },
-    { id: "book-laptop", tag: "THE M3 SILICON BEAST", tagIcon: "Laptop", title: "Axon Book 16 Ultra.", description: "Uncompromised computational throughput. Configured with a high-fidelity liquid-vapor cooling array, and outstanding operational compiler performance.", primaryBtnText: "Explore Book 16", primaryActionTarget: "product", primaryActionValue: "axon-book-16", secondaryBtnText: "Configure Laptops", secondaryActionTarget: "category", secondaryActionValue: "Laptops", mediaType: "video", mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mobileMediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "Silicon Core", overlayDesc: "Unified Memory Capable", targetProductId: "axon-book-16" }
+    { id: "ecosystem", tag: "NEW ARRIVALS", tagIcon: "Cpu", title: "Integrated Form & Function.", description: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 chip, a stunning Liquid Infinity Display, and all-day battery life. Your ultimate creative studio, anywhere.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-slate-pro", secondaryBtnText: "Shop all products", secondaryActionTarget: "category", secondaryActionValue: "All", mediaType: "image", mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png", mobileMediaUrl: "", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "Infinity Screen", overlayDesc: "12.9\" ProMotion Touchscreen", targetProductId: "axon-slate-pro" },
+    { id: "phone-video", tag: "MOBILE LAUNCH", tagIcon: "Zap", title: "Axon Phone 1 Pro", description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 processor, customizable Action controls, and ultra-high dynamic triple lenses.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-phone-1-pro", secondaryBtnText: "View Phones", secondaryActionTarget: "category", secondaryActionValue: "Phones", mediaType: "video", mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4", mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "M1 Neural", overlayDesc: "Titanium Chassis", targetProductId: "axon-phone-1-pro" },
+    { id: "book-laptop", tag: "LAPTOP LAUNCH", tagIcon: "Laptop", title: "Axon Book 16 Ultra.", description: "Uncompromised performance. With high-speed processing, stunning display, and all-day battery life.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-book-16", secondaryBtnText: "Shop Laptops", secondaryActionTarget: "category", secondaryActionValue: "Laptops", mediaType: "video", mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mobileMediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "Silicon Core", overlayDesc: "Unified Memory Capable", targetProductId: "axon-book-16" }
   ],
   activePromos: [
     { code: "AXON15", discount: 15, description: "15% discount on products" },
-    { code: "ECOCORE", discount: 20, description: "20% off ecosystem accessories" }
+    { code: "SAVE20", discount: 20, description: "20% off all accessories" }
   ],
   socialTwitter: "https://twitter.com/axontech",
   socialGithub: "https://github.com/axontech",
@@ -231,7 +231,7 @@ const INITIAL_CONFIG: Record<string, any> = {
   contactEmail: "synergy@axon.net",
   supportEmail: "support@axon.net",
   privacyPolicy: "AXON TECH collects information directly relevant to fulfilling your physical hardware logistics and ensuring high-fidelity system diagnostics.",
-  termsOfUse: "These Terms of Ecosystem govern all visual, functional, and tangible systems built by AXON TECH INC.",
+  termsOfUse: "These Terms of Service govern all purchases and use of the AXON TECH online store.",
   cookiePolicy: "AXON TECH uses cookies and persistent browser key-value sets (localStorage) strictly to provide core e-commerce capabilities.",
   refundPolicy: "We offer a complete 30-day, risk-free guarantee.",
   deliveryPolicy: "AXON TECH ships all premium hardware in dual-box structural armors.",
@@ -240,9 +240,9 @@ const INITIAL_CONFIG: Record<string, any> = {
   footerBrandName: "AXON",
   footerBrandSuffix: "TECH",
   footerBrandLogoUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png",
-  footerDescription: "Crafting precise premium hardware and accessories harmonized into a seamless high-performance lifestyle ecosystem.",
+  footerDescription: "Your trusted online store for premium tech and accessories across Kenya.",
   footerWarrantyText: "Authorized Retailer warranty included",
-  footerCol1Title: "Ecosystem",
+  footerCol1Title: "Shop",
   footerCol1Links: [
     { text: "Axon Slate Series", target: "terms" },
     { text: "Axon Books (Laptops)", target: "terms" },
@@ -256,15 +256,15 @@ const INITIAL_CONFIG: Record<string, any> = {
     { text: "Delivery & Shipping", target: "delivery" },
     { text: "Refund & Return Policy", target: "refund" },
     { text: "Cookie Settings", target: "cookies" },
-    { text: "Ecosystem Security", target: "privacy" }
+    { text: "Privacy & Security", target: "privacy" }
   ],
   footerCopyrightText: "",
-  footerNewsletterTitle: "Ecosystem Brief",
-  footerNewsletterDescription: "Subscribe to receive priority notifications of limited hardware drops, system updates, and custom product bundles.",
+  footerNewsletterTitle: "Stay Updated",
+  footerNewsletterDescription: "Subscribe to receive notifications on new arrivals, deals, and exclusive bundles.",
   footerBottomLinks: [
     { text: "Privacy Policy", target: "privacy" },
     { text: "Cookie Policy", target: "cookies" },
-    { text: "Terms of Ecosystem", target: "terms" },
+    { text: "Terms of Service", target: "terms" },
     { text: "Refund Policy", target: "refund" },
     { text: "Delivery Logistics", target: "delivery" },
     { text: "Do Not Sell My Info", target: "dns" }
@@ -985,10 +985,10 @@ async function generateBlogPost(req: Request, env: Env): Promise<Response> {
   if (used >= limit) return jsonError(`AI Credit Quota Exceeded (${used}/${limit})`, 403);
 
   const prompt = `Write a highly engaging, professional, and SEO/GEO-optimized blog post for AXON TECH.
-Topic: ${topic || "Next-generation silicon core metrology"}
+Topic: ${topic || "Latest tech products and accessories"}
 Category: ${category || "Technology"}
 Location: ${location || "Nairobi, Kenya"}
-Keywords: ${keywords || "accredited metrology, ISO/IEC 17025 calibration"}
+Keywords: ${keywords || "tech store, buy electronics online, Kenya gadgets"}
 
 Write in a technical, authoritative tone. Include ISO standards references. Use Markdown with headers, lists, and tables. Ground geographically in ${location || "Nairobi, Kenya"}.
 

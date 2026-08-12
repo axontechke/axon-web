@@ -325,7 +325,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                   <div className="flex gap-3 items-start text-left">
                     <input type="radio" name="shipping-method" checked={shippingMethod === "standard"} onChange={() => setShippingMethod("standard")} className="mt-1 accent-primary w-4 h-4" />
                     <div className="space-y-1">
-                      <span className="text-xs font-bold text-on-surface block">Ecosystem Standard Delivery</span>
+                      <span className="text-xs font-bold text-on-surface block">Standard Delivery</span>
                       <span className="text-[11px] text-on-surface-variant/70 block">Takes 3 - 5 business days for transit.</span>
                     </div>
                   </div>
