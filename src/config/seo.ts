@@ -40,17 +40,70 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
     description: 'Discover cutting-edge technology hardware from AXON TECH Kenya. Shop premium Axon Slate Pro tablets, Book laptops, Phone 1 Pro, and Buds Pro audio devices. Free delivery in Nairobi.',
     keywords: ['Axon Kenya', 'technology hardware Nairobi', 'premium laptops Kenya', 'tablets Kenya', 'smartphones Nairobi'],
     ogType: 'website',
-    jsonLd: {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: SITE_NAME,
-      url: SITE_URL,
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: `${SITE_URL}/catalog?q={search_term_string}`,
-        'query-input': 'required name=search_term_string'
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        url: SITE_URL,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${SITE_URL}/catalog?q={search_term_string}`,
+          'query-input': 'required name=search_term_string'
+        }
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: SITE_URL,
+        logo: 'https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png',
+        description: 'Premium technology hardware store in Nairobi, Kenya.',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Simara Mall, Ground Floor, Shop G50',
+          addressLocality: 'Nairobi',
+          addressCountry: 'KE'
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+254-745-017-979',
+          contactType: 'customer service',
+          availableLanguage: ['English', 'Swahili']
+        },
+        sameAs: [
+          'https://www.instagram.com/axontechke',
+          'https://www.facebook.com/axontechke',
+          'https://wa.me/254745017979'
+        ]
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        name: SITE_NAME,
+        image: 'https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Simara Mall, Ground Floor, Shop G50',
+          addressLocality: 'Nairobi',
+          addressRegion: 'Nairobi County',
+          postalCode: '00100',
+          addressCountry: 'KE'
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: -1.2921,
+          longitude: 36.8219
+        },
+        openingHoursSpecification: {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+          opens: '08:00',
+          closes: '18:00'
+        },
+        priceRange: '$$'
       }
-    }
+    ]
   },
 
   catalog: {
@@ -111,8 +164,8 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
 
   blog: {
     title: `Blog & Insights | ${SITE_NAME}`,
-    description: 'Read the latest insights on technology, metrology, calibration, and engineering from AXON TECH Kenya.',
-    keywords: ['technology blog', 'metrology Kenya', 'calibration standards', 'engineering insights'],
+    description: 'Read the latest tech news, product reviews, and buying guides from AXON TECH Kenya. Expert advice on laptops, tablets, phones, and accessories.',
+    keywords: ['technology blog', 'tech reviews Kenya', 'buying guide', 'product reviews Nairobi'],
     ogType: 'article',
   },
 

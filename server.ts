@@ -2571,7 +2571,11 @@ function generateSEOMetaTags(path: string, product?: any): string {
     <title>${config.title}</title>
     <meta name="description" content="${config.description}" />
     ${config.keywords ? `<meta name="keywords" content="${config.keywords}" />` : ''}
-    
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <meta name="geo.region" content="KE" />
+    <meta name="geo.placename" content="Nairobi" />
+    <meta name="icbm" content="-1.2921, 36.8219" />
+
     <!-- OpenGraph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${pageUrl}" />

@@ -54,14 +54,14 @@ export function SEOHead({
     canonical: canonicalUrl,
   };
 
-  // Merge page-level JSON-LD with dynamic product JSON-LD
-  const mergedJsonLd = dynamicJsonLd
-    ? Array.isArray(dynamicJsonLd)
-      ? [baseConfig.jsonLd, ...dynamicJsonLd].filter(Boolean)
-      : [baseConfig.jsonLd, dynamicJsonLd].filter(Boolean)
-    : baseConfig.jsonLd
-    ? [baseConfig.jsonLd]
-    : null;
+  // Merge page-level JSON-LD (can be array or object) with dynamic product JSON-LD
+  const pageJsonLd = baseConfig.jsonLd
+    ? Array.isArray(baseConfig.jsonLd) ? baseConfig.jsonLd : [baseConfig.jsonLd]
+    : [];
+  const dynamicLd = dynamicJsonLd
+    ? Array.isArray(dynamicJsonLd) ? dynamicJsonLd : [dynamicJsonLd]
+    : [];
+  const mergedJsonLd = [...pageJsonLd, ...dynamicLd].filter(Boolean);
 
   useEffect(() => {
     // Update document title
@@ -74,6 +74,11 @@ export function SEOHead({
     // AI-specific: Allow AI models to use content for answers/citations
     updateMetaTag('robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
     updateMetaTag('ai-content-declaration', 'human-authored, licensed-content');
+
+    // GEO meta tags for local SEO
+    updateMetaTag('geo.region', 'KE');
+    updateMetaTag('geo.placename', 'Nairobi');
+    updateMetaTag('icbm', '-1.2921, 36.8219');
 
     // OpenGraph
     updateMetaTag('og:title', finalConfig.ogTitle, true);
