@@ -9,7 +9,7 @@
       "destination": "https://website.axontech254.workers.dev/sitemap.xml"
     },
     {
-      "source": "/((?!assets/|.*\\..*).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
