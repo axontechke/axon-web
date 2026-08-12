@@ -340,6 +340,15 @@ const INITIAL_ORDERS = [
   }
 ];
 
+const INITIAL_DELIVERY_METHODS = [
+  { id: "nairobi-same-day", name: "Nairobi Same-Day", price: 0, transitDays: "Same day", carrier: "AXON Rider", enabled: 1, description: "Free same-day delivery within Nairobi CBD and suburbs. Order before 2 PM." },
+  { id: "nairobi-next-day", name: "Nairobi Next-Day", price: 0, transitDays: "1 day", carrier: "AXON Rider", enabled: 1, description: "Free next-day delivery across Nairobi. Delivered by 6 PM." },
+  { id: "kenya-nationwide", name: "Kenya Nationwide", price: 350, transitDays: "2-3 days", carrier: "DHL Kenya / G4S", enabled: 1, description: "Reliable delivery across Kenya via DHL or G4S. Tracking provided." },
+  { id: "east-africa-economy", name: "East Africa Economy", price: 1200, transitDays: "5-7 days", carrier: "DHL / Regional Courier", enabled: 1, description: "Affordable delivery to Uganda, Tanzania, Sudan, Ethiopia, Rwanda, Burundi, and South Sudan." },
+  { id: "east-africa-express", name: "East Africa Express", price: 2500, transitDays: "2-3 days", carrier: "DHL Express", enabled: 1, description: "Fast express delivery to Uganda, Tanzania, Sudan, Ethiopia, Rwanda, Burundi, and South Sudan." },
+  { id: "international", name: "International", price: 5000, transitDays: "7-14 days", carrier: "DHL International", enabled: 1, description: "Worldwide delivery. Contact us for exact rates to your country." },
+];
+
 
 // ─── SEED DATABASE ───────────────────────────────────────────
 async function seedDatabase(db: D1Database): Promise<void> {
@@ -392,6 +401,16 @@ async function seedDatabase(db: D1Database): Promise<void> {
       ).bind(o.id, new Date().toISOString(), o.status, o.customer, o.shippingMethod, o.shippingCost,
         o.subtotal, o.discountAmount, o.discountPercentage, o.taxes, o.total, o.totalKsh, o.totalUsd,
         o.hasKsh, o.payment, o.items, o.history));
+    }
+  }
+
+  // Check and seed delivery methods
+  const deliveryCount = await db.prepare("SELECT COUNT(*) as count FROM delivery_methods").first<{ count: number }>();
+  if (!deliveryCount || deliveryCount.count === 0) {
+    for (const m of INITIAL_DELIVERY_METHODS) {
+      batch.push(db.prepare(
+        `INSERT OR IGNORE INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description) VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(m.id, m.name, m.price, m.transitDays, m.carrier, m.enabled, m.description));
     }
   }
 
