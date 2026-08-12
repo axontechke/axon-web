@@ -341,12 +341,12 @@ const INITIAL_ORDERS = [
 ];
 
 const INITIAL_DELIVERY_METHODS = [
-  { id: "nairobi-same-day", name: "Nairobi Same-Day", price: 0, transitDays: "Same day", carrier: "AXON Rider", enabled: 1, description: "Free same-day delivery within Nairobi CBD and suburbs. Order before 2 PM." },
-  { id: "nairobi-next-day", name: "Nairobi Next-Day", price: 0, transitDays: "1 day", carrier: "AXON Rider", enabled: 1, description: "Free next-day delivery across Nairobi. Delivered by 6 PM." },
-  { id: "kenya-nationwide", name: "Kenya Nationwide", price: 350, transitDays: "2-3 days", carrier: "DHL Kenya / G4S", enabled: 1, description: "Reliable delivery across Kenya via DHL or G4S. Tracking provided." },
-  { id: "east-africa-economy", name: "East Africa Economy", price: 1200, transitDays: "5-7 days", carrier: "DHL / Regional Courier", enabled: 1, description: "Affordable delivery to Uganda, Tanzania, Sudan, Ethiopia, Rwanda, Burundi, and South Sudan." },
-  { id: "east-africa-express", name: "East Africa Express", price: 2500, transitDays: "2-3 days", carrier: "DHL Express", enabled: 1, description: "Fast express delivery to Uganda, Tanzania, Sudan, Ethiopia, Rwanda, Burundi, and South Sudan." },
-  { id: "international", name: "International", price: 5000, transitDays: "7-14 days", carrier: "DHL International", enabled: 1, description: "Worldwide delivery. Contact us for exact rates to your country." },
+  { id: "nairobi-same-day", name: "Nairobi Same-Day", price: 0, transitDays: "Same day", carrier: "AXON Rider", enabled: 1, description: "Free same-day delivery within Nairobi CBD and suburbs. Order before 2 PM.", locations: ["Kenya", "Nairobi"] },
+  { id: "nairobi-next-day", name: "Nairobi Next-Day", price: 0, transitDays: "1 day", carrier: "AXON Rider", enabled: 1, description: "Free next-day delivery across Nairobi. Delivered by 6 PM.", locations: ["Kenya", "Nairobi"] },
+  { id: "kenya-nationwide", name: "Kenya Nationwide", price: 350, transitDays: "2-3 days", carrier: "DHL Kenya / G4S", enabled: 1, description: "Reliable delivery across Kenya via DHL or G4S. Tracking provided.", locations: ["Kenya"] },
+  { id: "east-africa-economy", name: "East Africa Economy", price: 1200, transitDays: "5-7 days", carrier: "DHL / Regional Courier", enabled: 1, description: "Affordable delivery to Uganda, Tanzania, Sudan, Ethiopia, Rwanda, Burundi, and South Sudan.", locations: ["Uganda", "Tanzania", "Sudan", "Ethiopia", "Rwanda", "Burundi", "South Sudan"] },
+  { id: "east-africa-express", name: "East Africa Express", price: 2500, transitDays: "2-3 days", carrier: "DHL Express", enabled: 1, description: "Fast express delivery to Uganda, Tanzania, Sudan, Ethiopia, Rwanda, Burundi, and South Sudan.", locations: ["Uganda", "Tanzania", "Sudan", "Ethiopia", "Rwanda", "Burundi", "South Sudan"] },
+  { id: "international", name: "International", price: 5000, transitDays: "7-14 days", carrier: "DHL International", enabled: 1, description: "Worldwide delivery. Contact us for exact rates to your country.", locations: ["International"] },
 ];
 
 
@@ -409,8 +409,8 @@ async function seedDatabase(db: D1Database): Promise<void> {
   if (!deliveryCount || deliveryCount.count === 0) {
     for (const m of INITIAL_DELIVERY_METHODS) {
       batch.push(db.prepare(
-        `INSERT OR IGNORE INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description) VALUES (?, ?, ?, ?, ?, ?, ?)`
-      ).bind(m.id, m.name, m.price, m.transitDays, m.carrier, m.enabled, m.description));
+        `INSERT OR IGNORE INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description, locations) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(m.id, m.name, m.price, m.transitDays, m.carrier, m.enabled, m.description, JSON.stringify(m.locations || [])));
     }
   }
 
@@ -616,7 +616,7 @@ async function updateContact(req: Request, env: Env): Promise<Response> {
 async function getDeliveryMethods(_req: Request, env: Env): Promise<Response> {
   await seedDatabase(env.DB);
   const { results } = await env.DB.prepare("SELECT * FROM delivery_methods ORDER BY price ASC").all();
-  return corsResponse(results.map((m: any) => ({ ...m, enabled: !!m.enabled })));
+  return corsResponse(results.map((m: any) => ({ ...m, enabled: !!m.enabled, locations: JSON.parse(m.locations || "[]") })));
 }
 
 // POST /api/admin/delivery-methods
@@ -624,8 +624,8 @@ async function createDeliveryMethod(req: Request, env: Env): Promise<Response> {
   const data = await req.json();
   const id = data.id || generateId("del");
   await env.DB.prepare(
-    `INSERT INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description) VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).bind(id, data.name, data.price || 0, data.transitDays || "", data.carrier || "", data.enabled ? 1 : 1, data.description || "").run();
+    `INSERT INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description, locations) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(id, data.name, data.price || 0, data.transitDays || "", data.carrier || "", data.enabled ? 1 : 1, data.description || "", JSON.stringify(data.locations || [])).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -640,6 +640,7 @@ async function updateDeliveryMethod(req: Request, env: Env, _ctx: ExecutionConte
   if (data.carrier !== undefined) { fields.push("carrier = ?"); values.push(data.carrier); }
   if (data.enabled !== undefined) { fields.push("enabled = ?"); values.push(data.enabled ? 1 : 0); }
   if (data.description !== undefined) { fields.push("description = ?"); values.push(data.description); }
+  if (data.locations !== undefined) { fields.push("locations = ?"); values.push(JSON.stringify(data.locations)); }
   if (fields.length === 0) return jsonError("No fields to update");
   values.push(params.id);
   await env.DB.prepare(`UPDATE delivery_methods SET ${fields.join(", ")} WHERE id = ?`).bind(...values).run();

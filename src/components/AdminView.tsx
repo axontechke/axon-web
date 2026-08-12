@@ -4592,10 +4592,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     id: "",
                     name: "",
                     carrier: "",
-                    price: 15,
+                    price: 0,
                     transitDays: "2-3 days",
-                    description: "High priority carrier dispatch.",
-                    enabled: true
+                    description: "",
+                    enabled: true,
+                    locations: []
                   });
                   setIsMethodFormOpen(true);
                 }}
@@ -4622,6 +4623,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                     <h4 className="font-display font-black text-sm text-on-surface leading-tight">{method.name}</h4>
                     <p className="text-[10px] text-on-surface-variant/70 leading-relaxed min-h-[32px]">{method.description}</p>
+                    {(method.locations || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(Array.isArray(method.locations) ? method.locations : JSON.parse(method.locations || '[]')).map((loc: string) => (
+                          <span key={loc} className="px-1.5 py-0.5 bg-primary/10 text-primary text-[8px] font-bold rounded uppercase">{loc}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="border-t border-outline/10 pt-3 flex items-center justify-between">
@@ -4634,7 +4642,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setEditingMethod({ ...method });
+                          setEditingMethod({ ...method, locations: typeof method.locations === 'string' ? JSON.parse(method.locations || '[]') : (method.locations || []) });
                           setIsMethodFormOpen(true);
                         }}
                         className="p-1.5 bg-surface-container hover:bg-surface-container-high border border-outline/10 rounded-lg text-primary transition-colors cursor-pointer"
@@ -4733,11 +4741,34 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   <div className="space-y-1.5 text-left">
                     <label className="text-[10px] font-bold text-on-surface-variant block uppercase">Method Description</label>
                     <textarea
-                      placeholder="e.g. Premium delivery handled by our premium calibrations air team with fully insulated protective packing."
+                      placeholder="e.g. Fast and reliable delivery to your region."
                       value={editingMethod.description || ""}
                       onChange={(e) => setEditingMethod({ ...editingMethod, description: e.target.value })}
                       className="w-full h-20 px-3 py-2 bg-surface border border-outline/15 rounded-xl focus:outline-none text-xs"
                     />
+                  </div>
+
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-bold text-on-surface-variant block uppercase">Covered Regions</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Kenya", "Nairobi", "Uganda", "Tanzania", "Sudan", "Ethiopia", "Rwanda", "Burundi", "South Sudan", "Somalia", "International"].map((loc) => (
+                        <label key={loc} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(editingMethod.locations || []).includes(loc)}
+                            onChange={(e) => {
+                              const current = editingMethod.locations || [];
+                              const next = e.target.checked
+                                ? [...current, loc]
+                                : current.filter((l: string) => l !== loc);
+                              setEditingMethod({ ...editingMethod, locations: next });
+                            }}
+                            className="w-3.5 h-3.5 rounded text-primary border-outline/20 focus:ring-0"
+                          />
+                          <span className="text-xs text-on-surface">{loc}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
