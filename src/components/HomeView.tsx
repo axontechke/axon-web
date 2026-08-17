@@ -103,12 +103,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
         tagIcon: "Zap",
         title: "Axon Phone 1 Pro",
         description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 neural processor, customizable Action controls, and ultra-high dynamic triple lenses.",
-        primaryBtnText: "Shop Now",
+        primaryBtnText: "Explore",
         primaryActionTarget: "product",
         primaryActionValue: "axon-phone-1-pro",
-        secondaryBtnText: "View Phones",
-        secondaryActionTarget: "category",
-        secondaryActionValue: "Phones",
+        secondaryBtnText: "",
+        secondaryActionTarget: "",
+        secondaryActionValue: "",
         mediaType: "video",
         mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4",
         mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4",
@@ -130,9 +130,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
         secondaryBtnText: "Shop Laptops",
         secondaryActionTarget: "category",
         secondaryActionValue: "Laptops",
-        mediaType: "video",
-        mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761",
-        mobileMediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761",
+        mediaType: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1920&q=80",
+        mobileMediaUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
         mediaEmbed: "",
         mobileMediaEmbed: "",
         overlayTitle: "Silicon Core",
@@ -254,7 +254,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             const highlightedProduct = products.find(p => p.id === slideTargetProductId) || products[0];
             return (
               <div
-                className="relative bg-black rounded-3xl overflow-hidden border border-outline/10 h-[450px] sm:h-[500px] md:h-[550px] lg:h-[600px] flex flex-col justify-end p-4 sm:p-8 lg:p-12 shadow-2xl group transition-all duration-500"
+                className="relative bg-black rounded-3xl overflow-hidden border border-outline/10 h-[250px] sm:h-[500px] md:h-[550px] lg:h-[600px] flex flex-col justify-end p-4 sm:p-8 lg:p-12 shadow-2xl group transition-all duration-500"
                 onTouchStart={() => setIsPaused(true)}
                 onTouchEnd={() => setIsPaused(false)}
               >
@@ -316,7 +316,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       onClick={handleMediaOnlyCTA}
                       className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-white/90 text-black active:scale-95 rounded-xl sm:rounded-full text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-lg animate-in fade-in duration-300"
                     >
-                      <span>View Details</span>
+                      <span>Explore</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -509,7 +509,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="absolute inset-0 bg-radial-gradient from-primary/5 via-transparent to-transparent opacity-60 pointer-events-none" />
             </div>
 
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-8 p-3 sm:p-8 lg:p-10 items-center min-h-[210px] sm:min-h-[350px] lg:min-h-[340px]">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-8 p-3 sm:p-8 lg:p-10 items-center min-h-[160px] sm:min-h-[350px] lg:min-h-[340px]">
               {/* Hero Text Content */}
               <div className="lg:col-span-7 xl:col-span-7 space-y-2.5 sm:space-y-4 text-left flex flex-col justify-center h-full">
                 <div className="inline-flex items-center gap-2 px-3 py-0.5 sm:py-1 rounded-full bg-primary-fixed/60 text-on-primary-fixed text-[8px] sm:text-[10px] font-semibold tracking-wide w-fit animate-in fade-in slide-in-from-top-1 duration-300" key={`tag-${activeSlide?.id}`}>
@@ -527,19 +527,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                 <div className="flex flex-wrap gap-1.5 sm:gap-3 pt-0.5 sm:pt-1">
                   <button
-                    onClick={activeSlide?.primaryAction}
+                    onClick={activeSlide?.secondaryAction}
                     className="px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-2 cursor-pointer glass-btn-ios-primary"
                     id="hero-cta-primary"
                   >
-                    {activeSlide?.primaryBtnText}
+                    Explore
                     <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  </button>
-                  <button
-                    onClick={activeSlide?.secondaryAction}
-                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[11px] sm:text-xs font-bold cursor-pointer glass-btn-ios"
-                    id="hero-cta-secondary"
-                  >
-                    {activeSlide?.secondaryBtnText}
                   </button>
                 </div>
 
@@ -710,7 +703,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* Bento Grid: Trending Now */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6" id="trending-bento-section">
         <div className="space-y-1">
-          <h2 className="font-display font-black text-2xl text-on-surface tracking-tight">Trending Now</h2>
+          <h2 className="font-display font-black text-2xl text-on-surface tracking-tight">New Arrivals</h2>
           <p className="text-xs text-on-surface-variant/70">What others in the Axon community are actively configuring.</p>
         </div>
 

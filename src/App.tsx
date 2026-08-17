@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation, Navigate } from "react-router-dom";
 import { Product, CartItem, Warranty, CURRENCY_SYMBOL } from "./types";
 import { ROUTES } from "./config/routes";
 import { Navbar } from "./components/Navbar";
@@ -524,6 +524,12 @@ function AppContent() {
               />
             }
           />
+
+          {/* Redirect /home to / */}
+          <Route path="/home" element={<Navigate to="/" replace />} />
+
+          {/* Redirect /track-order variant to /track-order */}
+          <Route path="/track-order" element={<Navigate to={ROUTES.trackOrder} replace />} />
 
           {/* 404 Not Found */}
           <Route

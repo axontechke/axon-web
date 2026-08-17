@@ -169,15 +169,25 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <nav className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-outline/10 px-4 py-3 md:px-8">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        {/* Mobile Menu Button — leftmost */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden p-2 text-on-surface/90 hover:bg-surface-container-low rounded-full transition-colors"
+          id="nav-mobile-menu-btn"
+          aria-label="Toggle Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {/* Logo */}
-        <div 
-          onClick={() => handleNavClick("Home")} 
+        <div
+          onClick={() => handleNavClick("Home")}
           className="flex flex-row items-center cursor-pointer group shrink-0"
           id="nav-logo-container"
         >
-          <img 
-            src="https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png" 
-            alt="Axon Logo" 
+          <img
+            src="https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png"
+            alt="Axon Logo"
             className="w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
             referrerPolicy="no-referrer"
           />
@@ -367,16 +377,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {cartCount}
               </span>
             )}
-          </button>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-on-surface/90 hover:bg-surface-container-low rounded-full transition-colors"
-            id="nav-mobile-menu-btn"
-            aria-label="Toggle Menu"
-          >
-            <Menu className="w-5 h-5" />
           </button>
         </div>
       </div>

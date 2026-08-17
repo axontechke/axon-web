@@ -184,8 +184,8 @@ const defaultSlides = [
     secondaryBtnText: "Configure Laptops",
     secondaryActionTarget: "category",
     secondaryActionValue: "Laptops",
-    mediaType: "video",
-    mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761",
+    mediaType: "image",
+    mediaUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1920&q=80",
     mediaAlt: "Axon Book 16 Ultra Internal Architecture",
     overlayTitle: "Silicon Core",
     overlayDesc: "Unified Memory Capable"
