@@ -150,6 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       setSelectedCategory(category);
     } else {
       setSelectedCategory("All");
+      setSearchQuery(""); // clear search so no "Reset Filters" button shows
     }
     setSelectedBrand("All");
     setScreen(screen);
@@ -194,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+        <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
           <button
             onClick={() => handleNavClick("Home")}
             className={`transition-colors hover:text-primary ${
@@ -268,6 +269,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Blog
           </button>
+          {/* Tablet-only nav links (hidden lg+, hidden md-) */}
+          <div className="hidden md:flex lg:hidden items-center gap-4 text-xs font-medium shrink-0">
+            <button onClick={() => handleNavClick("Home")} className={`transition-colors hover:text-primary ${activeScreen === "Home" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Home</button>
+            <button onClick={() => handleNavClick("Catalog")} className={`transition-colors hover:text-primary ${activeScreen === "Catalog" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Shop All</button>
+            <button onClick={() => handleNavClick("Catalog", "Laptops")} className="text-on-surface/80 hover:text-primary transition-colors">Laptops</button>
+            <button onClick={() => handleNavClick("Catalog", "Tablets")} className="text-on-surface/80 hover:text-primary transition-colors">Tablets</button>
+            <button onClick={() => handleNavClick("Catalog", "Audio")} className="text-on-surface/80 hover:text-primary transition-colors">Audio</button>
+            <button onClick={() => handleNavClick("Catalog", "Phones")} className="text-on-surface/80 hover:text-primary transition-colors">Phones</button>
+            <button onClick={() => handleNavClick("TrackOrder")} className={`transition-colors hover:text-primary ${activeScreen === "TrackOrder" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Track</button>
+            <button onClick={() => handleNavClick("Contact")} className={`transition-colors hover:text-primary ${activeScreen === "Contact" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Contact</button>
+            <button onClick={() => handleNavClick("Blog")} className={`transition-colors hover:text-primary ${activeScreen === "Blog" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Blog</button>
+          </div>
           {isAdminAuthenticated && (
             <div className="flex items-center gap-1.5">
               <button

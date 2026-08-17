@@ -111,79 +111,86 @@ export const ContactView: React.FC = () => {
               Direct Contact Channels
             </h2>
             
-            <div className="space-y-4">
-              <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
-                  <Mail className="w-4 h-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              {/* Ecosystem Registry */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                  <Mail className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-on-surface-variant uppercase tracking-wider">Ecosystem Registry</h4>
-                  <a href={`mailto:${contactEmail}`} className="text-sm text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
+                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Ecosystem Registry</h4>
+                  <a href={`mailto:${contactEmail}`} className="text-xs text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
                     {contactEmail}
                   </a>
                   {infoEmail && (
-                    <a href={`mailto:${infoEmail}`} className="text-xs text-on-surface-variant hover:text-primary transition-colors block mt-0.5">
+                    <a href={`mailto:${infoEmail}`} className="text-[11px] text-on-surface-variant hover:text-primary transition-colors block mt-0.5">
                       {infoEmail}
                     </a>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
-                  <MessageSquare className="w-4 h-4" />
+              {/* Support Despatch */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                  <MessageSquare className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-on-surface-variant uppercase tracking-wider">Support Despatch</h4>
-                  <a href={`mailto:${supportEmail}`} className="text-sm text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
+                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Support Despatch</h4>
+                  <a href={`mailto:${supportEmail}`} className="text-xs text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
                     {supportEmail}
                   </a>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
-                  <Phone className="w-4 h-4" />
+              {/* Hotline & WhatsApp */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                  <Phone className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-on-surface-variant uppercase tracking-wider">Hotline &amp; WhatsApp</h4>
-                  <a href={`tel:${rawPhone}`} className="text-sm text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
+                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Hotline &amp; WhatsApp</h4>
+                  <a href={`tel:${rawPhone}`} className="text-xs text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
                     {formattedPhone}
                   </a>
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-500 font-bold hover:underline block mt-0.5">
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] text-emerald-500 font-bold hover:underline block mt-0.5">
                     Chat on WhatsApp
                   </a>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                  <img src={locationIcon} alt="Location Icon" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
+              {/* Location Headquarters */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                  <img src={locationIcon} alt="Location Icon" className="w-4 h-4 object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-on-surface-variant uppercase tracking-wider">Location Headquarters</h4>
-                  <span className="text-sm text-on-surface block mt-0.5 font-medium leading-relaxed">
+                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Location HQ</h4>
+                  <span className="text-xs text-on-surface block mt-0.5 font-medium leading-relaxed">
                     {address}
                   </span>
                   <button
                     onClick={() => setShowMobileMap(!showMobileMap)}
-                    className="sm:hidden text-xs text-primary font-bold hover:underline flex items-center gap-1 mt-1.5"
+                    className="sm:hidden text-[11px] text-primary font-bold hover:underline flex items-center gap-1 mt-1"
                     type="button"
                   >
-                    {showMobileMap ? "Hide Map View" : "View Map Inline"}
+                    {showMobileMap ? "Hide Map" : "View Map"}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
-                  <Clock className="w-4 h-4" />
+              {/* Operational Cycles */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                  <Clock className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-on-surface-variant uppercase tracking-wider">Operational Cycles</h4>
-                  <span className="text-sm text-on-surface block mt-0.5 leading-relaxed">
-                    Weekdays: {businessHours.weekdays}<br />
-                    Call Support: {businessHours.supportCall}
+                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Operational Cycles</h4>
+                  <span className="text-xs text-on-surface block mt-0.5 leading-relaxed">
+                    {businessHours.weekdays}
+                  </span>
+                  <span className="text-[11px] text-on-surface-variant block mt-0.5 leading-relaxed">
+                    Support: {businessHours.supportCall}
                   </span>
                 </div>
               </div>
