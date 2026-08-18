@@ -99,17 +99,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   const salesEmail = contact?.emails?.sales || "";
   const socials = contact?.socials || [];
   const warrantyText = config?.footerWarrantyText || "Authorized Retailer warranty included";
-  const col1Title = config?.footerCol1Title || "Ecosystem";
+  const col1Title = config?.footerCol1Title || "Shop";
   const col1Links = config?.footerCol1Links || [];
   const col2Title = config?.footerCol2Title || "Support & Care";
   const col2Links = config?.footerCol2Links || [];
-  const copyrightText = config?.footerCopyrightText || `© ${new Date().getFullYear()} ${businessName.toUpperCase()}. ALL RIGHTS RESERVED. DESIGNED FOR INTUITIVE SYNERGY.`;
-  const newsletterTitle = config?.footerNewsletterTitle || "Ecosystem Brief";
-  const newsletterDesc = config?.footerNewsletterDescription || "Subscribe to receive priority notifications of limited hardware drops, system updates, and custom product bundles.";
+  const copyrightText = config?.footerCopyrightText || `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`;
+  const newsletterTitle = config?.footerNewsletterTitle || "Stay Updated";
+  const newsletterDesc = config?.footerNewsletterDescription || "Subscribe to receive notifications on new arrivals, deals, and exclusive bundles.";
   const bottomLinks = config?.footerBottomLinks || [
     { text: "Privacy Policy", target: "privacy" },
     { text: "Cookie Policy", target: "cookies" },
-    { text: "Terms of Ecosystem", target: "terms" },
+    { text: "Terms of Service", target: "terms" },
     { text: "Refund Policy", target: "refund" },
     { text: "Delivery Logistics", target: "delivery" },
     { text: "Do Not Sell My Info", target: "dns" }
@@ -282,7 +282,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
                 <div>
                   <h2 className="font-display font-black text-lg text-white tracking-tight">
                     {activeDoc === "privacy" && "AXON Privacy Charter"}
-                    {activeDoc === "terms" && "Terms of Ecosystem & Use"}
+                    {activeDoc === "terms" && "Terms of Service"}
                     {activeDoc === "cookies" && "Cookie & Local Storage Policy"}
                     {activeDoc === "dns" && "CCPA Do Not Sell Request"}
                     {activeDoc === "refund" && "Refund & Return Logistics"}
@@ -309,11 +309,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
                   <div className="bg-primary/5 border border-primary/10 p-4 rounded-2xl flex items-start gap-3">
                     <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <p className="text-[#ffdbce] font-medium leading-normal">
-                      We believe premium hardware should respect human privacy by default. We do not engage in persistent cross-app tracking, keylogging, or ambient audio monitoring.
+                      We keep your data private and only use it to process your orders. We don't sell or share your personal information.
                     </p>
                   </div>
                   <p className="whitespace-pre-wrap leading-relaxed text-[#e2d5cf]/90">
-                    {config?.privacyPolicy || `AXON TECH collects information directly relevant to fulfilling your physical hardware logistics and ensuring high-fidelity system diagnostics. This includes your contact name, verified delivery address, payment transaction log token, and any voluntary telemetry you transmit during hardware registration.\n\nWe keep your active shopping cart state, applied ecosystem promotion percentages, and interface options cached inside your secure browser localStorage environment.`}
+                    {config?.privacyPolicy || `AXON TECH only collects information needed to process your order — your name, delivery address, phone number, and payment details. We do not share your data with third parties except for order fulfillment (courier and payment processor).`}
                   </p>
                 </div>
               )}
@@ -321,7 +321,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
               {activeDoc === "terms" && (
                 <div className="space-y-4">
                   <p className="whitespace-pre-wrap leading-relaxed text-[#e2d5cf]/90">
-                    {config?.termsOfUse || `These Terms of Ecosystem govern all visual, functional, and tangible systems built by AXON TECH INC. This includes active physical notebooks (Axon Book Series), tablets (Slate Series), digital audio converters (Audio Engine DAC), companion charging arrays, and simulated development interfaces.\n\nOur hardware contours, modular cooling assemblies, internal chip alignments, and companion UI architectures are protected under strict international design patents and code registries.`}
+                    {config?.termsOfUse || `These Terms of Service govern all purchases and use of the AXON TECH online store. By placing an order you agree to our pricing, delivery timelines, and return policy.`}
                   </p>
                 </div>
               )}
@@ -338,7 +338,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
                     </div>
                   </div>
                   <p className="whitespace-pre-wrap leading-relaxed text-[#e2d5cf]/90">
-                    {config?.cookiePolicy || `AXON TECH uses cookies and persistent browser key-value sets (localStorage) strictly to provide core e-commerce capabilities. These cookies remember which premium items are currently in your cart drawer, track temporary ecosystem coupons, and hold active delivery tracking queries.\n\nWe do not integrate heavy third-party surveillance scripts. Your personal files remain uncompromised.`}
+                    {config?.cookiePolicy || `We use cookies and localStorage to remember what's in your cart, save your preferences, and provide a smooth shopping experience. We don't use tracking cookies or share your browsing data with third parties.`}
                   </p>
                 </div>
               )}
@@ -439,9 +439,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
                   <div className="bg-primary/5 border border-primary/10 p-4 rounded-2xl flex items-start gap-3">
                     <RefreshCw className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-bold text-white text-xs">The AXON Ecosystem Harmony Guarantee</h4>
+                      <h4 className="font-bold text-white text-xs">AXON 30-Day Guarantee</h4>
                       <p className="text-[#e2d5cf] text-[11px] leading-normal mt-1">
-                        We offer a complete 30-day, risk-free guarantee. If your newly integrated devices do not synergize with your creative workspace layout, we provide full return shipping services.
+                        We offer a complete 30-day, risk-free guarantee. If you're not happy with your purchase, contact us and we'll arrange a return or exchange.
                       </p>
                     </div>
                   </div>

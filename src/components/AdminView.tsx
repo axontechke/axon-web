@@ -3979,7 +3979,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-primary" />
-                  The Axon Integration Protocol Section Editor
+                  Why Shop With Us Section Editor
                 </h3>
                 <p className="text-[10px] text-on-surface-variant/70">
                   Edit the core branding values and parameters representing the sync encryption protocols block at the bottom of the Home screen.
@@ -3990,17 +3990,17 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] text-on-surface-variant uppercase block">Section Branding Title</label>
                     <input
                       type="text"
-                      value={webConfig.protocolTitle || "The Axon Integration Protocol"}
+                      value={webConfig.protocolTitle || "Why Shop With Us"}
                       onChange={(e) => setWebConfig({ ...webConfig, protocolTitle: e.target.value })}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
-                      placeholder="The Axon Integration Protocol"
+                      placeholder="Why Shop With Us"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-on-surface-variant uppercase block">Detailed Protocol Description</label>
                     <textarea
-                      value={webConfig.protocolDescription || "Every device you add into your personal cluster automatically synchronizes credentials, audio feeds, battery telemetry, and mechanical click states via secure near-field frequencies."}
+                      value={webConfig.protocolDescription || "We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support."}
                       onChange={(e) => setWebConfig({ ...webConfig, protocolDescription: e.target.value })}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface h-20"
                       placeholder="Protocol value statement details..."
@@ -4036,7 +4036,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <label className="text-[9px] text-on-surface-variant block uppercase">Badge Label Text</label>
                           <input
                             type="text"
-                            value={webConfig.protocolBadge1Text || "0.02ms Sync Latency"}
+                            value={webConfig.protocolBadge1Text || "Fast Delivery"}
                             onChange={(e) => setWebConfig({ ...webConfig, protocolBadge1Text: e.target.value })}
                             className="w-full px-3 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                             placeholder="0.02ms Sync Latency"
@@ -4073,10 +4073,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <label className="text-[9px] text-on-surface-variant block uppercase">Badge Label Text</label>
                           <input
                             type="text"
-                            value={webConfig.protocolBadge2Text || "Ecosystem Encrypted"}
+                            value={webConfig.protocolBadge2Text || "Secure Checkout"}
                             onChange={(e) => setWebConfig({ ...webConfig, protocolBadge2Text: e.target.value })}
                             className="w-full px-3 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
-                            placeholder="Ecosystem Encrypted"
+                            placeholder="Secure Checkout"
                           />
                         </div>
                       </div>
@@ -5659,7 +5659,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   <div className="grid grid-cols-1 gap-2.5">
                     {[
                       { id: "sales", title: "Sales & Order Matrix", desc: "Gross income audits, conversion tracking, pending dispatches, and East African logistical hubs." },
-                      { id: "catalog", title: "Catalog & Metrology Audit", desc: "SKU health evaluation, stock levels warnings, pricing metrics, and precision equipment suggestions." },
+                      { id: "catalog", title: "Product Catalog Report", desc: "Stock levels, pricing, and product listing health." },
                       { id: "support", title: "Support Backlog & Care Nodes", desc: "Inquiry volumes, unresolved diagnostics logs, and customer experience optimizations." },
                       { id: "system", title: "Promotions & Branding Health", desc: "Active promo codes usage, banner alignment, metadata policies, and content velocity." }
                     ].map((opt) => (

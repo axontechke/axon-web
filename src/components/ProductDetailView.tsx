@@ -587,47 +587,30 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                         </tr>
                       ))
                     ) : (
-                      <>
-                        <tr className="border-b border-outline/5 bg-white/40">
-                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">SKU</th>
-                          <td className="py-3.5 px-4 text-on-surface font-medium">AXN-{product.id.toUpperCase().replace(/-/g, "_")}</td>
-                        </tr>
-                        <tr className="border-b border-outline/5">
-                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">Segment</th>
-                          <td className="py-3.5 px-4 text-on-surface font-medium">{product.category}</td>
-                        </tr>
-                        <tr className="border-b border-outline/5 bg-white/40">
-                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">Warranty Duration</th>
-                          <td className="py-3.5 px-4 text-on-surface font-medium">3 Years Manufacturer</td>
-                        </tr>
-                        <tr className="border-b border-outline/5">
-                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">Security Certification</th>
-                          <td className="py-3.5 px-4 text-on-surface font-medium">Authorized Encrypted Core (AEC)</td>
-                        </tr>
                       </>
                     )}
                   </tbody>
                 </table>
               </div>
 
-              {/* Extra specifications marketing text */}
+              {/* Honest why-buy this product box */}
               <div className="space-y-4 bg-primary-fixed/30 p-6 rounded-2xl border border-primary/10">
-                <h3 className="font-display font-bold text-sm text-primary">Harmonized Integration Protocol</h3>
+                <h3 className="font-display font-bold text-sm text-primary">Why Buy From Us</h3>
                 <p className="text-xs text-on-surface-variant/90 leading-relaxed">
-                  Engineered strictly under the Axon 2.0 framework. This device has integrated resonant frequency sensors that allow real-time latency monitoring and battery levels sharing instantly with companion desktop docks or tablet panels.
+                  We source genuine products, ship fast across Kenya, and include a warranty on every device. Our team is available on WhatsApp if you need help choosing or tracking your order.
                 </p>
                 <ul className="text-xs text-on-surface-variant/85 space-y-2 pt-1">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>0.02ms system-sync capability</span>
+                    <span>Original, genuine products only</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>Active spatial sound feedback and balancing</span>
+                    <span>Fast dispatch — usually same day</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>Low standby power leakage configuration</span>
+                    <span>WhatsApp support before and after purchase</span>
                   </li>
                 </ul>
               </div>

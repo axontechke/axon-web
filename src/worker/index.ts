@@ -116,7 +116,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: "axon-buds-pro", name: "Axon Buds Pro", price: 249,
-    description: "Immersive spatial audio with clinical-grade noise cancellation. Experience crystal clear sound signature with deep resonant bass.",
+    description: "Great sounding earbuds with active noise cancellation. Comfortable fit, clear calls, and all-day battery.",
     category: "Audio", brand: "Axon",
     image: "https://lh3.googleusercontent.com/aida/AP1WRLveukNAEEoaiw0J0ZyTdRXCDLDQeVriO8RPSO07VqG6LHuiZKbAt4Dg2sTdEfKEVFdO33e963etV-9ywn6q-U126LftC3Q0kB_aQMU-EKLMckpd2aCFL_Pyyl2-AkanE_okTJuZzBGlzw5tb32ajPvIu5lS3mfVY_RnFsbf6v3XkJV5QJbbqsVdId9xnP2Q0qRYv7txovrj2FlvoymhwrD79wh7gY8qUKTseKN2eKJVclJ_JtsDptLGO2E",
     colors: ["Teal", "White", "Copper"], storages: [],
@@ -150,7 +150,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: "axon-slate-air", name: "Axon Slate Air", price: 899,
-    description: "Ultra-thin, featherweight tablet for pure mobility. Immersive liquid Retina display combined with highly efficient Axon power-saving architectures.",
+    description: "Ultra-thin and lightweight tablet for work and entertainment. Sharp display and long battery life.",
     category: "Tablets", brand: "Axon",
     image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4",
     colors: [], storages: [], rating: 4.6, reviewsCount: 37, inStock: true, isNew: true,
@@ -167,7 +167,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: "axon-studio-pro", name: "Axon Studio Pro", price: 349,
-    description: "Elite over-ear headphones featuring bespoke dynamic drivers, adaptive sound matching, and premium hybrid active noise-control materials.",
+    description: "Premium over-ear headphones with clear sound, comfortable ear cushions, and long battery life.",
     category: "Audio", brand: "Axon",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBRvwmNNr252qjRvYpv41anXkgHswtvsh4_oBZIetnYKzgmb8H1iuxt6POQV6hHTL8DIVJ_tQlo9Tn05GU6-Cwqz28ZWhQKTNuI2ODbutDc1ajs-hlXalwSxA8kyTkAYfYsV91t-mXIzVZLGrybfx1_3mUmuuB3UuhPp9W7m741ILGht_3BbzvQ8tgoET9AtRBzRvqvGHgNBKYTdsWfJBjjgvQaW3Ihb4qQ1siyjGUfkIELAIsnSsQFLzBlWPHKEq29bqg_cL8yYzQ",
     colors: ["Teal", "Charcoal"], storages: [],
@@ -176,7 +176,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: "power-hub-pro", name: "Power Hub Pro", price: 79,
-    description: "Precision-milled aluminum desktop dock and continuous induction charging hub. Charges computers, tablets, and buds simultaneously with intelligent power allocation.",
+    description: "Desktop charging hub with multiple ports. Charges your laptop, phone, and earbuds at the same time.",
     category: "Power", brand: "Volt",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAguwcGqjb9LoFvkQuoLm9PyB-YiY9rpSLZGrIQTjKs9iyoPeAp_QJAlMjS9rgLQox3XCd2W5TvnFvjtjK4lao6dD3MoInlv8qzTiLo_BRBQbDDBuHPr7x_vnhcKvxe3yHk_eLN-7fjBpm4TH7snY3pybXL5p7oHbfR9-VWOEW_W3RngotoNwCOIWuVbozQSldd3RKirANbfJX2PnYrq3BEeqZc91-xaeIFKSPF1W_GXKdzPU5sA1AufKx7T9wkjcDBrERR57PXi4I",
     colors: [], storages: [], rating: 4.7, reviewsCount: 39, inStock: true,
@@ -184,7 +184,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: "axon-click-2", name: "Axon Click 2", price: 129,
-    description: "Low profile, highly mechanical precision keyboard with fully custom tactile response switches. Finished in high-grade aluminum plate.",
+    description: "Slim mechanical keyboard with satisfying clicky keys and solid build quality. Great for typing and gaming.",
     category: "Accessories", brand: "Aero",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD4iPQ0lE17HRf94txHDCGvmGV2gQGxREcuM873it2hytM15adF2iJYLPOjT2Dc85gi6pmDnL1RqzDfCHE5Y4I9KbKh5TX8nWue3VyClX7zPRnTFLpy3e7KWSTFUvXNU3GLmW2Aj39YRcL3CeBYzKT6BlsKo9ULLrUlbmgZm7xxeFJFLFtBg5KyhboMWIzV8T41ymBIDKt-6bLpAKRDH9SumOIxcon3t9UpYCZLLfBd2-LZtrOV8SdSys42DkWgVQgjJV-V-dmjoNw",
     colors: [], storages: [], rating: 4.6, reviewsCount: 71, inStock: true,
@@ -212,14 +212,14 @@ const INITIAL_PRODUCTS = [
 
 
 const INITIAL_CONFIG: Record<string, any> = {
-  announcement: "AXON INTEGRATION PROTOCOL ACTIVE | GET COMPLEMENTARY LUXE CARRY SLEEVE WITH ALL CORE LAPTOPS",
+  announcement: "FREE CARRY SLEEVE WITH ALL LAPTOPS | NAIROBI SAME-DAY DELIVERY AVAILABLE",
   showAnnouncement: true,
-  heroTitle: "Integrated Form & Function.",
-  heroDescription: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 silicon chip, a liquid Infinity Display, and multi-device cross-talk. Powering your ultimate creative studio anywhere.",
+  heroTitle: "Tech Gadgets & Accessories.",
+  heroDescription: "Phones, tablets, laptops, earphones and more. Genuine products, fast delivery across Kenya, and warranty included.",
   heroSlides: [
-    { id: "ecosystem", tag: "NEW ARRIVALS", tagIcon: "Cpu", title: "Integrated Form & Function.", description: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 chip, a stunning Liquid Infinity Display, and all-day battery life. Your ultimate creative studio, anywhere.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-slate-pro", secondaryBtnText: "Shop all products", secondaryActionTarget: "category", secondaryActionValue: "All", mediaType: "image", mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png", mobileMediaUrl: "", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "Infinity Screen", overlayDesc: "12.9\" ProMotion Touchscreen", targetProductId: "axon-slate-pro" },
-    { id: "phone-video", tag: "MOBILE LAUNCH", tagIcon: "Zap", title: "Axon Phone 1 Pro", description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 processor, customizable Action controls, and ultra-high dynamic triple lenses.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-phone-1-pro", secondaryBtnText: "View Phones", secondaryActionTarget: "category", secondaryActionValue: "Phones", mediaType: "video", mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4", mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "M1 Neural", overlayDesc: "Titanium Chassis", targetProductId: "axon-phone-1-pro" },
-    { id: "book-laptop", tag: "LAPTOP LAUNCH", tagIcon: "Laptop", title: "Axon Book 16 Ultra.", description: "Uncompromised performance. With high-speed processing, stunning display, and all-day battery life.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-book-16", secondaryBtnText: "Shop Laptops", secondaryActionTarget: "category", secondaryActionValue: "Laptops", mediaType: "video", mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mobileMediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "Silicon Core", overlayDesc: "Unified Memory Capable", targetProductId: "axon-book-16" }
+    { id: "ecosystem", tag: "NEW ARRIVALS", tagIcon: "Cpu", title: "Tablets for Work & Play.", description: "Meet the Axon Slate Pro. Beautiful display, fast processor, and all-day battery life. Perfect for students, professionals, and creatives.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-slate-pro", secondaryBtnText: "Shop all products", secondaryActionTarget: "category", secondaryActionValue: "All", mediaType: "image", mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png", mobileMediaUrl: "", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "12.9\" Display", overlayDesc: "120Hz Touchscreen", targetProductId: "axon-slate-pro" },
+    { id: "phone-video", tag: "MOBILE LAUNCH", tagIcon: "Zap", title: "Axon Phone 1 Pro", description: "Beautiful OLED display, amazing cameras, and long battery life. The phone that just works — no fuss.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-phone-1-pro", secondaryBtnText: "View Phones", secondaryActionTarget: "category", secondaryActionValue: "Phones", mediaType: "video", mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4", mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "OLED Display", overlayDesc: "120Hz Refresh Rate", targetProductId: "axon-phone-1-pro" },
+    { id: "book-laptop", tag: "LAPTOP LAUNCH", tagIcon: "Laptop", title: "Axon Book 16 Laptop.", description: "Fast, light, and reliable. Great for work, school, and everything in between.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-book-16", secondaryBtnText: "Shop Laptops", secondaryActionTarget: "category", secondaryActionValue: "Laptops", mediaType: "video", mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mobileMediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "16\" Display", overlayDesc: "All-Day Battery", targetProductId: "axon-book-16" }
   ],
   activePromos: [
     { code: "AXON15", discount: 15, description: "15% discount on products" },
