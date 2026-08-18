@@ -493,6 +493,29 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     specifications: JSON.parse(p.specifications || "{}"),
     variants: JSON.parse(p.variants || "{}"),
   }));
+
+  // Fetch all variant images
+  const { results: variantImages } = await env.DB.prepare(
+    "SELECT * FROM product_variant_images ORDER BY productId, storage, color, sortOrder"
+  ).all();
+  const variantImageMap: Record<string, any[]> = {};
+  for (const vi of variantImages) {
+    const v = vi as any;
+    const key = `${v.productId}|${v.storage}|${v.color}`;
+    if (!variantImageMap[key]) variantImageMap[key] = [];
+    variantImageMap[key].push({ id: v.id, imageUrl: v.imageUrl, sortOrder: v.sortOrder });
+  }
+
+  // Attach variant images keyed by "storage|color" onto each product
+  for (const prod of products) {
+    const byVariantKey: Record<string, any[]> = {};
+    for (const [key, imgs] of Object.entries(variantImageMap)) {
+      const [, storage, color] = key.split("|");
+      const mapKey = storage && color ? `${storage}|${color}` : "base";
+      byVariantKey[mapKey] = imgs as any[];
+    }
+    (prod as any).variantImages = byVariantKey;
+  }
   return corsResponse(products);
 }
 
@@ -752,12 +775,12 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
   const data = await req.json();
   const id = data.id || generateId("product");
   await env.DB.prepare(
-    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, variants)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(id, data.name || "", data.price || 0, data.priceKsh || 0, data.description || "", data.category || "",
     data.brand || "", data.image || "", JSON.stringify(data.colors || []), JSON.stringify(data.storages || []),
     data.rating || 0, data.reviewsCount || 0, data.inStock ? 1 : 0, data.isNew ? 1 : 0, data.isBestSeller ? 1 : 0,
-    JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {})).run();
+    JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {}), JSON.stringify(data.variants || {})).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -780,6 +803,7 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   if (data.storages !== undefined) { fields.push("storages = ?"); values.push(JSON.stringify(data.storages)); }
   if (data.colorImages !== undefined) { fields.push("colorImages = ?"); values.push(JSON.stringify(data.colorImages)); }
   if (data.specifications !== undefined) { fields.push("specifications = ?"); values.push(JSON.stringify(data.specifications)); }
+  if (data.variants !== undefined) { fields.push("variants = ?"); values.push(JSON.stringify(data.variants)); }
   if (data.inStock !== undefined) { fields.push("inStock = ?"); values.push(data.inStock ? 1 : 0); }
   if (data.isNew !== undefined) { fields.push("isNew = ?"); values.push(data.isNew ? 1 : 0); }
   if (data.isBestSeller !== undefined) { fields.push("isBestSeller = ?"); values.push(data.isBestSeller ? 1 : 0); }
@@ -1204,6 +1228,53 @@ async function syncRealtimeProducts(_req: Request, env: Env): Promise<Response> 
   return corsResponse({ success: true, syncedCount, logs });
 }
 
+// GET /api/admin/product-variant-images?productId=xxx
+async function getProductVariantImages(_req: Request, env: Env): Promise<Response> {
+  const url = new URL(_req.url);
+  const productId = url.searchParams.get("productId");
+  let query = "SELECT * FROM product_variant_images";
+  const bindings: string[] = [];
+  if (productId) {
+    query += " WHERE productId = ?";
+    bindings.push(productId);
+  }
+  query += " ORDER BY productId, storage, color, sortOrder";
+  const { results } = await env.DB.prepare(query).bind(...bindings).all();
+  return corsResponse(results.map((r: any) => ({ ...r, sortOrder: r.sortOrder || 0 })));
+}
+
+// POST /api/admin/product-variant-images
+async function createProductVariantImage(req: Request, env: Env): Promise<Response> {
+  const { productId, storage, color, imageUrl, sortOrder } = await req.json();
+  if (!productId || !imageUrl) return jsonError("productId and imageUrl are required");
+  const id = generateId("pvi");
+  await env.DB.prepare(
+    `INSERT INTO product_variant_images (id, productId, storage, color, imageUrl, sortOrder) VALUES (?, ?, ?, ?, ?, ?)`
+  ).bind(id, productId, storage || "", color || "", imageUrl, sortOrder || 0).run();
+  return corsResponse({ id, productId, storage: storage || "", color: color || "", imageUrl, sortOrder: sortOrder || 0 }, 201);
+}
+
+// PUT /api/admin/product-variant-images/:id
+async function updateProductVariantImage(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const { imageUrl, sortOrder } = await req.json();
+  const fields: string[] = [];
+  const values: any[] = [];
+  if (imageUrl !== undefined) { fields.push("imageUrl = ?"); values.push(imageUrl); }
+  if (sortOrder !== undefined) { fields.push("sortOrder = ?"); values.push(sortOrder); }
+  if (fields.length === 0) return jsonError("No fields to update");
+  values.push(params.id);
+  await env.DB.prepare(`UPDATE product_variant_images SET ${fields.join(", ")} WHERE id = ?`).bind(...values).run();
+  const updated = await env.DB.prepare("SELECT * FROM product_variant_images WHERE id = ?").bind(params.id).first();
+  return corsResponse(updated);
+}
+
+// DELETE /api/admin/product-variant-images/:id
+async function deleteProductVariantImage(_req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const result = await env.DB.prepare("DELETE FROM product_variant_images WHERE id = ?").bind(params.id).run();
+  if (result.meta?.changes === 0) return jsonError("Image not found", 404);
+  return corsResponse({ success: true, id: params.id });
+}
+
 // ─── SITEMAP & SEO ───────────────────────────────────────────
 async function generateSitemap(env: Env): Promise<Response> {
   await seedDatabase(env.DB);
@@ -1287,6 +1358,10 @@ const routes: Route[] = [
   route("POST", "/api/admin/reports/generate", generateReport),
   route("POST", "/api/admin/scrape-url", scrapeUrl),
   route("POST", "/api/admin/sync-realtime-products", syncRealtimeProducts),
+  route("GET", "/api/admin/product-variant-images", getProductVariantImages),
+  route("POST", "/api/admin/product-variant-images", createProductVariantImage),
+  route("PUT", "/api/admin/product-variant-images/:id", updateProductVariantImage),
+  route("DELETE", "/api/admin/product-variant-images/:id", deleteProductVariantImage),
 ];
 
 // ─── ENTRY ───────────────────────────────────────────────────

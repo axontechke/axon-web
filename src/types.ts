@@ -19,10 +19,21 @@ export interface ProductVariant {
   storage: string;
   color: string;
   stock: number;
+  priceKsh?: number; // optional override price for this combination
 }
 
 // New flat variant map: { "512GB": { "Blue,Silver": 210000 } }
 export type VariantMap = Record<string, Record<string, number>>;
+
+// Stored in DB: multiple images per (storage, color) combo
+export interface VariantImageEntry {
+  id: string;
+  imageUrl: string;
+  sortOrder: number;
+}
+
+// Frontend: variantImages is keyed by "storage|color" or "base" for product-level
+export type VariantImagesMap = Record<string, VariantImageEntry[]>;
 
 export const CURRENCY_SYMBOL = "KSh";
 
@@ -46,7 +57,8 @@ export interface Product {
   colors?: string[];
   storages?: string[];
   colorImages?: Record<string, string>; // { "Royal Blue": "https://...", "Silver": "https://..." }
-  variants?: VariantMap;
+  variants?: ProductVariant[];       // legacy + new: per-combo variants with stock & price
+  variantImages?: VariantImagesMap;   // { "128GB|Obsidian": [...images], "base": [...] }
   rating: number;
   reviewsCount: number;
   inStock: boolean;

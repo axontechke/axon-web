@@ -155,18 +155,14 @@ function AppContent() {
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
     const warranty = selectedWarranty || (product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
 
-    // Compute dynamic price from variant map (KSh only)
+    // Compute dynamic price from ProductVariant[] (storage + color match)
     let dynamicPriceKsh = product.priceKsh;
-    if (product.variants && storage) {
-      const storageVariants = product.variants[storage];
-      if (storageVariants) {
-        for (const [colors, price] of Object.entries(storageVariants)) {
-          if (colors.split(',').map(c => c.trim()).includes(color || '')) {
-            dynamicPriceKsh = price;
-            break;
-          }
-        }
-      }
+    if (product.variants && storage && color) {
+      const match = product.variants.find(
+        v => v.storage.toLowerCase() === storage.toLowerCase() &&
+             v.color.toLowerCase() === color.toLowerCase()
+      );
+      if (match?.priceKsh) dynamicPriceKsh = match.priceKsh;
     }
 
     // Create a price-adjusted product copy for the cart

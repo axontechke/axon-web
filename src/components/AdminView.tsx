@@ -48,7 +48,7 @@ import {
   Pie, 
   Cell 
 } from "recharts";
-import { Product, formatProductPrice } from "../types";
+import { Product, formatProductPrice, VariantImagesMap } from "../types";
 
 interface AdminViewProps {
   onSelectProduct: (product: Product) => void;
@@ -289,8 +289,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarStorage, setNewVarStorage] = useState("");
   const [newVarColor, setNewVarColor] = useState("");
   const [newVarStock, setNewVarStock] = useState<number>(10);
+  const [newVarPriceKsh, setNewVarPriceKsh] = useState<number>(0);
   const [newColorName, setNewColorName] = useState("");
   const [newColorImageUrl, setNewColorImageUrl] = useState("");
+  // Variant image management: keyed by "storage|color"
+  const [variantImgMap, setVariantImgMap] = useState<Record<string, any[]>>({});
+  const [newVarImgStorage, setNewVarImgStorage] = useState("");
+  const [newVarImgColor, setNewVarImgColor] = useState("");
+  const [newVarImgUrl, setNewVarImgUrl] = useState("");
 
   // Form states for Promo Manager
   const [newPromoCode, setNewPromoCode] = useState("");
@@ -474,8 +480,25 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
+    setNewVarPriceKsh(0);
     setNewColorName("");
     setNewColorImageUrl("");
+    setNewVarImgStorage(prod.storages?.[0] || "");
+    setNewVarImgColor(prod.colors?.[0] || "");
+    setNewVarImgUrl("");
+    // Load existing variant images from DB
+    authFetch(`/api/admin/product-variant-images?productId=${prod.id}`)
+      .then(res => res.ok ? res.json() : [])
+      .then((imgs: any[]) => {
+        const grouped: Record<string, any[]> = {};
+        for (const img of imgs) {
+          const key = img.storage && img.color ? `${img.storage}|${img.color}` : "base";
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(img);
+        }
+        setVariantImgMap(grouped);
+      })
+      .catch(() => setVariantImgMap({}));
     setIsProductFormOpen(true);
   };
 
@@ -499,7 +522,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {
         storage: newVarStorage.trim(),
         color: newVarColor.trim(),
-        stock: Number(newVarStock) || 0
+        stock: Number(newVarStock) || 0,
+        priceKsh: newVarPriceKsh || undefined,
       }
     ];
 
@@ -516,6 +540,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
+    setNewVarPriceKsh(0);
   };
 
   const handleRemoveVariant = (index: number) => {
@@ -2055,6 +2080,147 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       </div>
                     </div>
 
+                    {/* Variant Images: multiple images per (storage + color) combination */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-on-surface-variant block uppercase">
+                        Variant Images (Storage + Color)
+                      </label>
+                      <p className="text-[10px] text-on-surface-variant/60 -mt-1">
+                        Assign multiple images to specific storage+color combos. Shown when user selects that variant.
+                      </p>
+
+                      {/* Show images grouped by storage|color key */}
+                      {Object.keys(variantImgMap).length > 0 ? (
+                        <div className="border border-outline/10 rounded-xl overflow-hidden bg-surface-container-low max-h-48 overflow-y-auto">
+                          <table className="w-full text-left text-[11px] border-collapse">
+                            <thead>
+                              <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
+                                <th className="p-2">Storage</th>
+                                <th className="p-2">Color</th>
+                                <th className="p-2">Image</th>
+                                <th className="p-2 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-outline/10">
+                              {Object.entries(variantImgMap).map(([key, imgs]) =>
+                                imgs.map(img => {
+                                  const [storage, color] = key.split("|");
+                                  return (
+                                    <tr key={img.id} className="hover:bg-surface-container-high/30">
+                                      <td className="p-2">{storage || "—"}</td>
+                                      <td className="p-2">{color || "—"}</td>
+                                      <td className="p-2">
+                                        <div className="flex items-center gap-2">
+                                          <img src={img.imageUrl} alt="" className="w-10 h-10 object-cover rounded border border-outline/10" referrerPolicy="no-referrer" />
+                                          <span className="text-[10px] text-on-surface-variant/60 truncate max-w-[160px]">{img.imageUrl}</span>
+                                        </div>
+                                      </td>
+                                      <td className="p-2 text-right">
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            await authFetch(`/api/admin/product-variant-images/${img.id}`, { method: "DELETE" });
+                                            setVariantImgMap(prev => {
+                                              const updated = { ...prev };
+                                              updated[key] = updated[key].filter(i => i.id !== img.id);
+                                              if (updated[key].length === 0) delete updated[key];
+                                              return updated;
+                                            });
+                                          }}
+                                          className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
+                                        >
+                                          Remove
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
+                          No variant images assigned yet.
+                        </div>
+                      )}
+
+                      {/* Add new variant image: storage + color + URL */}
+                      <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
+                        <span className="text-[10px] font-bold text-on-surface uppercase block">Add Image to Variant</span>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Storage</label>
+                            <select
+                              value={newVarImgStorage}
+                              onChange={(e) => setNewVarImgStorage(e.target.value)}
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            >
+                              <option value="">— Base (no variant) —</option>
+                              {(editingProduct?.storages || []).map(s => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Color</label>
+                            <select
+                              value={newVarImgColor}
+                              onChange={(e) => setNewVarImgColor(e.target.value)}
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            >
+                              <option value="">— Base (no variant) —</option>
+                              {(editingProduct?.colors || []).map(c => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Image URL</label>
+                            <input
+                              type="text"
+                              value={newVarImgUrl}
+                              onChange={(e) => setNewVarImgUrl(e.target.value)}
+                              placeholder="https://..."
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!newVarImgUrl.trim() || !editingProduct?.id) return;
+                            const key = `${newVarImgStorage}|${newVarImgColor}`;
+                            const res = await authFetch("/api/admin/product-variant-images", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                productId: editingProduct.id,
+                                storage: newVarImgStorage,
+                                color: newVarImgColor,
+                                imageUrl: newVarImgUrl.trim(),
+                                sortOrder: 0,
+                              })
+                            });
+                            if (res.ok) {
+                              const saved: any = await res.json();
+                              setVariantImgMap(prev => {
+                                const updated = { ...prev };
+                                if (!updated[key]) updated[key] = [];
+                                updated[key] = [...updated[key], saved];
+                                return updated;
+                              });
+                              setNewVarImgUrl("");
+                            }
+                          }}
+                          disabled={!newVarImgUrl.trim() || !editingProduct?.id}
+                          className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add Variant Image
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="space-y-1">
                       <label className="text-[10px] text-on-surface-variant block uppercase">Short Description</label>
                       <textarea
@@ -2104,6 +2270,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
                                 <th className="p-2">Storage</th>
                                 <th className="p-2">Color</th>
+                                <th className="p-2">Price (KSh)</th>
                                 <th className="p-2">Stock</th>
                                 <th className="p-2 text-right">Action</th>
                               </tr>
@@ -2113,6 +2280,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 <tr key={i} className="hover:bg-surface-container-high/30">
                                   <td className="p-2">{v.storage}</td>
                                   <td className="p-2">{v.color}</td>
+                                  <td className="p-2 font-mono">{v.priceKsh ? `KSh ${v.priceKsh.toLocaleString()}` : "—"}</td>
                                   <td className="p-2 font-mono">{v.stock} units</td>
                                   <td className="p-2 text-right">
                                     <button
@@ -2137,7 +2305,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       {/* Add new variant inputs */}
                       <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
                         <span className="text-[10px] font-bold text-on-surface uppercase block">Add Variant Combination</span>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                           <div className="space-y-1">
                             <input
                               type="text"
@@ -2154,6 +2322,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               onChange={(e) => setNewVarColor(e.target.value)}
                               placeholder="e.g. Royal Blue"
                               className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <input
+                              type="number"
+                              value={newVarPriceKsh}
+                              onChange={(e) => setNewVarPriceKsh(Number(e.target.value))}
+                              placeholder="Price KSh"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                              min="0"
                             />
                           </div>
                           <div className="space-y-1">

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Star, ShieldCheck, ArrowLeft, Heart, Plus, Minus, CheckCircle, MessageSquare, ZoomIn, Bell, TrendingDown } from "lucide-react";
-import { Product, Review, Warranty, formatProductPrice, CURRENCY_SYMBOL } from "../types";
+import { Product, Review, Warranty, formatProductPrice, CURRENCY_SYMBOL, VariantImagesMap } from "../types";
 
 interface ProductDetailViewProps {
   product: Product;
@@ -30,35 +30,58 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     setQuantity(1);
   }, [product.id, product.image]);
 
+  // Collect all available images for the selected storage+color combination
+  const getAvailableImages = (): string[] => {
+    const baseImages: string[] = [product.image].filter(Boolean);
+    // Variant-specific images: "256GB|Obsidian" → images[]
+    const variantKey = selectedStorage && selectedColor
+      ? `${selectedStorage}|${selectedColor}`
+      : selectedColor
+        ? `|${selectedColor}`
+        : null;
+    const variantImgs: string[] = variantKey
+      ? (product.variantImages as VariantImagesMap)?.[variantKey]?.map(vi => vi.imageUrl).filter(Boolean) || []
+      : [];
+    // Color-specific image (legacy single-image per color)
+    const colorImg: string[] = selectedColor && product.colorImages?.[selectedColor]
+      ? [product.colorImages[selectedColor]]
+      : [];
+    // Extra gallery images
+    const extraImgs: string[] = product.images?.filter(
+      img => !baseImages.includes(img) && !colorImg.includes(img) && !variantImgs.includes(img)
+    ) || [];
+    return [...new Set([...baseImages, ...colorImg, ...variantImgs, ...extraImgs])];
+  };
+
   // Switch displayed image when a color with a mapped URL is selected
   React.useEffect(() => {
-    if (!selectedColor) return;
-    const colorImage = product.colorImages?.[selectedColor];
-    if (colorImage) {
-      setActiveImage(colorImage);
+    if (!selectedColor) {
+      setActiveImage(product.image);
+      return;
+    }
+    // Priority: variant images > color image > base image
+    const variantKey = selectedStorage ? `${selectedStorage}|${selectedColor}` : `|${selectedColor}`;
+    const variantImgs = (product.variantImages as VariantImagesMap)?.[variantKey];
+    if (variantImgs && variantImgs.length > 0) {
+      setActiveImage(variantImgs[0].imageUrl);
+    } else if (product.colorImages?.[selectedColor]) {
+      setActiveImage(product.colorImages[selectedColor]);
     } else {
-      // Fall back to the base product image if no color-specific image exists
       setActiveImage(product.image);
     }
-  }, [selectedColor, product.colorImages, product.image]);
+  }, [selectedColor, selectedStorage, product.colorImages, product.image]);
 
-  // Check if product has variant-based pricing (new structure)
-  const hasVariants = product.variants && Object.keys(product.variants).length > 0;
+  // Check if product has variant-based pricing (ProductVariant[] structure)
+  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
 
-  // Compute dynamic price from variants: { "512GB": { "Blue,Silver": 210000 } }
+  // Compute dynamic price from ProductVariant[]
   const getVariantPriceKsh = (storage: string | undefined, color: string | undefined): number | null => {
     if (!hasVariants || !storage || !color) return null;
-    const storageVariants = product.variants?.[storage];
-    if (!storageVariants) return null;
-    // Try exact color match first
-    if (storageVariants[color] !== undefined) return storageVariants[color];
-    // Fallback: try color keys that contain the selected color
-    for (const key of Object.keys(storageVariants)) {
-      if (key.split(',').map(c => c.trim()).includes(color)) {
-        return storageVariants[key];
-      }
-    }
-    return null;
+    const match = product.variants?.find(
+      v => v.storage.toLowerCase() === storage.toLowerCase() &&
+           v.color.toLowerCase() === color.toLowerCase()
+    );
+    return match?.priceKsh ?? null;
   };
 
   const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
@@ -258,34 +281,28 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             </div>
           </div>
 
-          {/* Multiple Images Gallery */}
-          {product.images && product.images.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-center pt-2">
-              <button
-                onClick={() => setActiveImage(product.image)}
-                className={`w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low border p-1 transition-all ${
-                  (activeImage === product.image || !activeImage)
-                    ? "ring-2 ring-primary border-transparent animate-in zoom-in-75 duration-200"
-                    : "border-outline/15 hover:border-outline/30"
-                }`}
-              >
-                <img src={product.image} alt={product.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-              </button>
-              {product.images.map((imgUrl, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImage(imgUrl)}
-                  className={`w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low border p-1 transition-all ${
-                    activeImage === imgUrl
-                      ? "ring-2 ring-primary border-transparent animate-in zoom-in-75 duration-200"
-                      : "border-outline/15 hover:border-outline/30"
-                  }`}
-                >
-                  <img src={imgUrl} alt={`${product.name} gallery ${idx + 1}`} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Multiple Images Gallery — shows all images for selected color+storage combo */}
+          {(() => {
+            const availableImages = getAvailableImages();
+            if (availableImages.length <= 1) return null;
+            return (
+              <div className="flex flex-wrap gap-2 justify-center pt-2">
+                {availableImages.map((imgUrl, idx) => (
+                  <button
+                    key={`${imgUrl}-${idx}`}
+                    onClick={() => setActiveImage(imgUrl)}
+                    className={`w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low border p-1 transition-all ${
+                      activeImage === imgUrl
+                        ? "ring-2 ring-primary border-transparent animate-in zoom-in-75 duration-200"
+                        : "border-outline/15 hover:border-outline/30"
+                    }`}
+                  >
+                    <img src={imgUrl} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
           
           <div className="flex items-center gap-3 justify-center text-xs text-on-surface-variant/60 bg-surface-container-low p-3.5 rounded-2xl border border-outline/5">
             <ShieldCheck className="w-4 h-4 text-primary" />
