@@ -631,8 +631,10 @@ function ProductDetailRoute({
       />
       <ProductDetailView
         product={product}
+        products={products}
         onBackToCatalog={onBackToCatalog}
         onAddToCart={onAddToCart}
+        onSelectProduct={handleSelectProduct}
       />
     </>
   );

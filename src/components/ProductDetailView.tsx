@@ -4,14 +4,18 @@ import { Product, Review, Warranty, formatProductPrice, CURRENCY_SYMBOL, Variant
 
 interface ProductDetailViewProps {
   product: Product;
+  products?: Product[];
   onBackToCatalog: () => void;
   onAddToCart: (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty) => void;
+  onSelectProduct: (product: Product) => void;
 }
 
 export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   product,
+  products = [],
   onBackToCatalog,
   onAddToCart,
+  onSelectProduct,
 }) => {
   const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : undefined);
   const [selectedStorage, setSelectedStorage] = useState(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
@@ -781,6 +785,47 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* More to Explore — related products from same category */}
+      {(() => {
+        const related = products
+          .filter(p => p.id !== product.id && p.category === product.category)
+          .slice(0, 4);
+        if (related.length === 0) return null;
+        return (
+          <section className="border-t border-outline/10 pt-10 mt-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-black text-xl text-on-surface">More to Explore</h2>
+              <button
+                onClick={onBackToCatalog}
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                View all →
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {related.map(prod => (
+                <button
+                  key={prod.id}
+                  onClick={() => onSelectProduct(prod)}
+                  className="text-left group"
+                >
+                  <div className="aspect-square rounded-2xl bg-surface-container-low overflow-hidden border border-outline/10 mb-2">
+                    <img
+                      src={prod.image}
+                      alt={prod.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <p className="text-[11px] font-semibold text-on-surface leading-tight line-clamp-2">{prod.name}</p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">{formatProductPrice(prod)}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 };

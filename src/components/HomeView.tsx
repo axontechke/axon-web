@@ -40,10 +40,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
     return [
       { name: "Laptops", desc: "Axon Book Series", icon: Laptop, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=200&q=80" },
       { name: "Tablets", desc: "Axon Slate Series", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=200&q=80" },
-      { name: "Audio", desc: "Acoustic Pods", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=80" },
+      { name: "Audio", desc: "Earphones & Headphones", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=80" },
       { name: "Phones", desc: "Axon Phones", icon: Smartphone, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=200&q=80" },
-      { name: "Accessories", desc: "Ecosystem Ext.", icon: Layers, image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80" },
-      { name: "Power", desc: "Induction", icon: Plug, image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?auto=format&fit=crop&w=200&q=80" },
+      { name: "Accessories", desc: "Keyboard, Cables & More", icon: Layers, image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80" },
+      { name: "Power", desc: "Power Banks & Chargers", icon: Plug, image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?auto=format&fit=crop&w=200&q=80" },
     ];
   }, [config?.categoriesList]);
 
@@ -883,10 +883,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="bg-surface-container py-12 px-5 sm:px-8 rounded-[32px] border border-outline/10 max-w-7xl mx-3 sm:mx-6 lg:mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-left">
         <div className="space-y-3 max-w-lg">
           <h3 className="font-display font-bold text-xl text-on-surface">
-            {config?.protocolTitle || "The Axon Integration Protocol"}
+            {config?.protocolTitle || "Why Shop With Us"}
           </h3>
           <p className="text-xs text-on-surface-variant/80 leading-relaxed">
-            {config?.protocolDescription || "Every device you add into your personal cluster automatically synchronizes credentials, audio feeds, battery telemetry, and mechanical click states via secure near-field frequencies."}
+            {config?.protocolDescription || "We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support."}
           </p>
         </div>
         <div className="flex flex-wrap gap-4 shrink-0">
@@ -910,11 +910,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <>
                 <div className="flex items-center gap-2 p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-xs font-semibold text-on-surface">
                   <Badge1Icon className="w-4 h-4 text-primary" />
-                  <span>{config?.protocolBadge1Text || "0.02ms Sync Latency"}</span>
+                  <span>{config?.protocolBadge1Text || "Fast Delivery"}</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-xs font-semibold text-on-surface">
                   <Badge2Icon className="w-4 h-4 text-primary" />
-                  <span>{config?.protocolBadge2Text || "Ecosystem Encrypted"}</span>
+                  <span>{config?.protocolBadge2Text || "Secure Checkout"}</span>
                 </div>
               </>
             );
