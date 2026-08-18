@@ -404,6 +404,7 @@ function AppContent() {
                 products={products}
                 onAddToCart={handleAddToCart}
                 onBackToCatalog={() => navigate(ROUTES.catalog)}
+                onSelectProduct={handleSelectProduct}
               />
             } 
           />
@@ -567,13 +568,15 @@ function AppContent() {
 }
 
 // Helper route components
-function ProductDetailRoute({ 
-  products, 
-  onAddToCart, 
-  onBackToCatalog 
-}: { 
+function ProductDetailRoute({
+  products,
+  onAddToCart,
+  onBackToCatalog,
+  onSelectProduct
+}: {
   products: Product[];
   onAddToCart: (product: Product, quantity: number, color?: string, storage?: string, warranty?: Warranty) => void;
+  onSelectProduct: (product: Product) => void;
   onBackToCatalog: () => void;
 }) {
   const { productId } = useParams();
@@ -634,7 +637,7 @@ function ProductDetailRoute({
         products={products}
         onBackToCatalog={onBackToCatalog}
         onAddToCart={onAddToCart}
-        onSelectProduct={handleSelectProduct}
+        onSelectProduct={onSelectProduct}
       />
     </>
   );

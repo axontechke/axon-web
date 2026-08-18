@@ -586,9 +586,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           <td className="py-3.5 px-4 text-on-surface font-medium">{value}</td>
                         </tr>
                       ))
-                    ) : (
-                      </>
-                    )}
+                    ) : null}
                   </tbody>
                 </table>
               </div>
