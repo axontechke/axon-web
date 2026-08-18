@@ -1275,6 +1275,56 @@ async function deleteProductVariantImage(_req: Request, env: Env, _ctx: Executio
   return corsResponse({ success: true, id: params.id });
 }
 
+// PUT /api/admin/products/:id/variants — bulk update variants array (price, stock, storage, color)
+async function updateProductVariants(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const { variants } = await req.json();
+  if (!Array.isArray(variants)) return jsonError("variants must be an array");
+  await env.DB.prepare(
+    "UPDATE products SET variants = ?, updatedAt = ? WHERE id = ?"
+  ).bind(JSON.stringify(variants), now(), params.id).run();
+  const updated = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(params.id).first();
+  return corsResponse(updated ? {
+    ...updated,
+    colors: JSON.parse((updated as any).colors || "[]"),
+    storages: JSON.parse((updated as any).storages || "[]"),
+    variants: JSON.parse((updated as any).variants || "[]"),
+  } : null);
+}
+
+// POST /api/admin/product-variant-images/bulk-delete — delete multiple images by ids
+async function bulkDeleteVariantImages(req: Request, env: Env): Promise<Response> {
+  const { ids } = await req.json();
+  if (!Array.isArray(ids) || ids.length === 0) return jsonError("ids array is required");
+  const placeholders = ids.map(() => "?").join(",");
+  const result = await env.DB.prepare(
+    `DELETE FROM product_variant_images WHERE id IN (${placeholders})`
+  ).bind(...ids).run();
+  return corsResponse({ success: true, deleted: result.meta?.changes || 0 });
+}
+
+// PUT /api/admin/products/:id/variant-stock — update stock (and optionally price) for specific storage+color combos
+async function updateProductVariantStock(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const { updates } = await req.json();
+  if (!Array.isArray(updates)) return jsonError("updates must be an array of {storage, color, stock?, priceKsh?}");
+  const product = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(params.id).first() as any;
+  if (!product) return jsonError("Product not found", 404);
+  const variants = JSON.parse(product.variants || "[]");
+  for (const upd of updates) {
+    const idx = variants.findIndex(
+      (v: any) => v.storage.toLowerCase() === (upd.storage || "").toLowerCase() &&
+                  v.color.toLowerCase() === (upd.color || "").toLowerCase()
+    );
+    if (idx > -1) {
+      if (upd.stock !== undefined) variants[idx].stock = upd.stock;
+      if (upd.priceKsh !== undefined) variants[idx].priceKsh = upd.priceKsh;
+    }
+  }
+  await env.DB.prepare(
+    "UPDATE products SET variants = ?, updatedAt = ? WHERE id = ?"
+  ).bind(JSON.stringify(variants), now(), params.id).run();
+  return corsResponse({ success: true, variants });
+}
+
 // ─── SITEMAP & SEO ───────────────────────────────────────────
 async function generateSitemap(env: Env): Promise<Response> {
   await seedDatabase(env.DB);
@@ -1362,6 +1412,9 @@ const routes: Route[] = [
   route("POST", "/api/admin/product-variant-images", createProductVariantImage),
   route("PUT", "/api/admin/product-variant-images/:id", updateProductVariantImage),
   route("DELETE", "/api/admin/product-variant-images/:id", deleteProductVariantImage),
+  route("POST", "/api/admin/product-variant-images/bulk-delete", bulkDeleteVariantImages),
+  route("PUT", "/api/admin/products/:id/variants", updateProductVariants),
+  route("PUT", "/api/admin/products/:id/variant-stock", updateProductVariantStock),
 ];
 
 // ─── ENTRY ───────────────────────────────────────────────────
