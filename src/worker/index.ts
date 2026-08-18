@@ -3,6 +3,104 @@ export interface Env {
   GEMINI_API_KEY?: string;
   ADMIN_EMAIL?: string;
   ADMIN_PASSWORD?: string;
+  ADMIN_API_KEY?: string;          // Secret key for server-to-server auth (VPS internal calls)
+  ALLOWED_ADMIN_IPS?: string;    // Comma-separated list of allowed IPs for admin endpoints
+}
+
+// ─── SECURITY HELPERS ─────────────────────────────────────────
+
+// In-memory rate limiter: tracks failed attempts per IP (resets on worker restart — fine for DDoS deterrent)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_FAILED_ATTEMPTS = 20;
+
+function getClientIp(req: Request): string {
+  return (
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-client-ip") ||
+    "unknown"
+  );
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  if (entry.count >= MAX_FAILED_ATTEMPTS) return true;
+  entry.count++;
+  return false;
+}
+
+function recordFailedAttempt(ip: string): void {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+  } else {
+    entry.count++;
+  }
+}
+
+function clearRateLimit(ip: string): void {
+  rateLimitMap.delete(ip);
+}
+
+function getAllowedIps(env: Env): string[] {
+  if (!env.ALLOWED_ADMIN_IPS) return [];
+  return env.ALLOWED_ADMIN_IPS.split(",").map(ip => ip.trim()).filter(Boolean);
+}
+
+function isIpAllowed(clientIp: string, env: Env): boolean {
+  const allowed = getAllowedIps(env);
+  if (allowed.length === 0) return true; // No allowlist configured — allow all (backward compatible)
+  // Check for exact match or CIDR-like partial (e.g. "192.168.1" matches "192.168.1.100")
+  return allowed.some(allowedIp =>
+    clientIp === allowedIp || clientIp.startsWith(allowedIp + ".")
+  );
+}
+
+// Verify the request is allowed: checks IP allowlist + optional API key
+function verifyRequestSecurity(req: Request, env: Env, isAdminRoute: boolean): Response | null {
+  const clientIp = getClientIp(req);
+
+  // 1. Rate limiting on all API routes (stops brute force)
+  if (isRateLimited(clientIp)) {
+    return corsResponse({ error: "Too many requests. Try again later." }, 429);
+  }
+
+  // 2. Admin routes: require valid auth OR trusted API key OR allowed IP
+  if (isAdminRoute) {
+    // Internal API key for VPS server-to-server calls
+    if (env.ADMIN_API_KEY) {
+      const keyHeader = req.headers.get("x-admin-api-key");
+      if (keyHeader === env.ADMIN_API_KEY) {
+        return null; // Pass — API key is valid
+      }
+    }
+
+    // IP allowlist check
+    if (!isIpAllowed(clientIp, env)) {
+      recordFailedAttempt(clientIp);
+      return corsResponse({ error: "Access denied from this IP address." }, 403);
+    }
+  }
+
+  return null; // Pass — no security block
+}
+
+// Sanitize error messages — never expose internals to clients
+function sanitizeError(err: unknown): string {
+  if (err instanceof Error) {
+    // Log the real error server-side
+    console.error("[SERVER ERROR]", err.message, err.stack);
+    return "An internal error occurred. Please try again.";
+  }
+  return "An internal error occurred. Please try again.";
 }
 
 // ─── AUTH UTILITIES ──────────────────────────────────────────
@@ -37,9 +135,10 @@ function generateToken(): string {
 
 // ─── CORS ────────────────────────────────────────────────────
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://axontech.co.ke https://www.axontech.co.ke", // Restrict to your domain(s)
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-admin-api-key",
+  "Access-Control-Max-Age": "86400",
 };
 
 function corsResponse(body?: any, status = 200): Response {
@@ -433,6 +532,7 @@ async function seedSuperAdmin(db: D1Database, email: string, password: string): 
 
 // ─── AUTH HANDLER ─────────────────────────────────────────────
 async function login(req: Request, env: Env): Promise<Response> {
+  const clientIp = getClientIp(req);
   const { email, password } = await req.json();
   if (!email || !password) return jsonError("Email and password required.");
 
@@ -440,35 +540,94 @@ async function login(req: Request, env: Env): Promise<Response> {
     "SELECT id, email, passwordHash, salt, role FROM users WHERE LOWER(email) = LOWER(?)"
   ).bind(email).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>();
 
-  if (!user) return jsonError("Invalid credentials.", 401);
+  if (!user) {
+    recordFailedAttempt(clientIp);
+    return jsonError("Invalid credentials.", 401);
+  }
 
   const valid = await verifyPassword(password, user.salt, user.passwordHash);
-  if (!valid) return jsonError("Invalid credentials.", 401);
+  if (!valid) {
+    recordFailedAttempt(clientIp);
+    return jsonError("Invalid credentials.", 401);
+  }
 
   const token = generateToken();
   const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
-  // Store session token
+  // Store session token with login IP for audit trail
   await env.DB.prepare(
     "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
-  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt })).run();
+  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt, loginIp: clientIp })).run();
 
+  clearRateLimit(clientIp);
   return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
+}
+
+// POST /api/auth/logout
+async function logout(req: Request, env: Env): Promise<Response> {
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    await env.DB.prepare("DELETE FROM config WHERE key = ?").bind(`session:${token}`).run();
+  }
+  return corsResponse({ success: true });
+}
+
+// GET /api/auth/me — get current session user
+async function getMe(req: Request, env: Env): Promise<Response> {
+  const auth = await verifyAuth(req, env);
+  if (!auth) return jsonError("Not authenticated.", 401);
+  return corsResponse({ userId: auth.userId, email: auth.email, role: auth.role });
+}
+
+// DELETE /api/admin/sessions/:token — revoke a specific session (admin only)
+async function revokeSession(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  await env.DB.prepare("DELETE FROM config WHERE key = ?").bind(`session:${params.token}`).run();
+  return corsResponse({ success: true });
+}
+
+// DELETE /api/admin/sessions — revoke all sessions for current user (except their own)
+async function revokeAllSessions(req: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
+  const auth = await verifyAuth(req, env);
+  if (!auth) return jsonError("Unauthorized.", 401);
+  const authHeader = req.headers.get("Authorization");
+  const currentToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  // Delete all sessions for this user that aren't the current one
+  const { results } = await env.DB.prepare("SELECT key FROM config WHERE key LIKE 'session:%'").all();
+  const batch: D1Exec[] = [];
+  for (const row of results) {
+    const key = (row as any).key;
+    try {
+      const data = JSON.parse((row as any).value);
+      if (data.userId === auth.userId && key !== `session:${currentToken}`) {
+        batch.push(env.DB.prepare("DELETE FROM config WHERE key = ?").bind(key));
+      }
+    } catch (_) {}
+  }
+  if (batch.length > 0) await env.DB.batch(batch);
+  return corsResponse({ success: true, revoked: batch.length });
 }
 
 async function verifyAuth(req: Request, env: Env): Promise<{ userId: string; email: string; role: string } | null> {
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
+  if (!authHeader?.startsWith("Bearer ")) {
+    recordFailedAttempt(getClientIp(req));
+    return null;
+  }
 
   const token = authHeader.slice(7);
   const session = await env.DB.prepare(
     "SELECT value FROM config WHERE key = ?"
   ).bind(`session:${token}`).first<{ value: string }>();
 
-  if (!session) return null;
+  if (!session) {
+    recordFailedAttempt(getClientIp(req));
+    return null;
+  }
 
   const data = JSON.parse(session.value);
   if (data.expiresAt < Date.now()) {
+    recordFailedAttempt(getClientIp(req));
     await env.DB.prepare("DELETE FROM config WHERE key = ?").bind(`session:${token}`).run();
     return null;
   }
@@ -1364,6 +1523,8 @@ ${urls.join("\n")}
 const routes: Route[] = [
   // Auth
   route("POST", "/api/auth/login", login),
+  route("POST", "/api/auth/logout", logout),
+  route("GET", "/api/auth/me", getMe),
 
   // Public
   route("GET", "/api/products", getProducts),
@@ -1415,6 +1576,8 @@ const routes: Route[] = [
   route("POST", "/api/admin/product-variant-images/bulk-delete", bulkDeleteVariantImages),
   route("PUT", "/api/admin/products/:id/variants", updateProductVariants),
   route("PUT", "/api/admin/products/:id/variant-stock", updateProductVariantStock),
+  route("DELETE", "/api/admin/sessions/:token", revokeSession),
+  route("DELETE", "/api/admin/sessions", revokeAllSessions),
 ];
 
 // ─── ENTRY ───────────────────────────────────────────────────
@@ -1444,15 +1607,26 @@ export default {
 
     // API routes
     if (url.pathname.startsWith("/api/")) {
-      // Auth check for admin routes (except login)
-      if (url.pathname.startsWith("/api/admin/")) {
+      const isAdmin = url.pathname.startsWith("/api/admin/");
+
+      // Security check: rate limiting + IP allowlist + API key
+      const securityBlock = verifyRequestSecurity(req, env, isAdmin);
+      if (securityBlock) return securityBlock;
+
+      // Admin routes: require valid session auth
+      if (isAdmin) {
         const auth = await verifyAuth(req, env);
         if (!auth) return jsonError("Unauthorized.", 401);
       }
 
       const matched = matchRoute(routes, req);
       if (matched) {
-        return matched.handler(req, env, ctx, matched.params);
+        try {
+          return await matched.handler(req, env, ctx, matched.params);
+        } catch (err) {
+          console.error("[ROUTE ERROR]", url.pathname, sanitizeError(err));
+          return jsonError("An internal error occurred.", 500);
+        }
       }
       return jsonError("Not found", 404);
     }

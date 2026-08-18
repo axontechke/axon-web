@@ -422,7 +422,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+    } catch (_) {}
     setIsAuthenticated(false);
     setAuthToken("");
     localStorage.removeItem("axon_admin_token");
@@ -434,6 +440,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
     const headers = new Headers(options.headers);
     if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+    const apiKey = localStorage.getItem("axon_admin_api_key");
+    if (apiKey) headers.set("x-admin-api-key", apiKey);
     return fetch(url, { ...options, headers });
   };
 
