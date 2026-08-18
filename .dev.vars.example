@@ -30,6 +30,24 @@ ADMIN_API_KEY=
 ALLOWED_ADMIN_IPS=
 
 
+# ─── OPTIONAL — WHATSAPP BUSINESS API ────────────────────────
+# Required for real WhatsApp messages on new orders
+# Get started: https://business.whatsapp.com/developers/developer-hub
+# 1. Create a Meta Business Account
+# 2. Set up WhatsApp Business app
+# 3. Get your Phone Number ID and Access Token
+
+# WhatsApp Business access token from Meta
+WHATSAPP_ACCESS_TOKEN=
+
+# Your WhatsApp Business phone number ID (found in Meta developer console)
+WHATSAPP_PHONE_NUMBER_ID=
+
+# Admin phone number to receive order notifications (Kenyan format, no + sign)
+# Example: 254745017979
+WHATSAPP_ADMIN_NOTIFY_NUMBER=254745017979
+
+
 # ─── NOTES ──────────────────────────────────────────────────
 #
 # DB binding (env.DB) is configured automatically by Wrangler via wrangler.toml

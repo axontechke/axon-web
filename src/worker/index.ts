@@ -5,6 +5,9 @@ export interface Env {
   ADMIN_PASSWORD?: string;
   ADMIN_API_KEY?: string;          // Secret key for server-to-server auth (VPS internal calls)
   ALLOWED_ADMIN_IPS?: string;    // Comma-separated list of allowed IPs for admin endpoints
+  WHATSAPP_ACCESS_TOKEN?: string;  // Meta WhatsApp Business API access token
+  WHATSAPP_PHONE_NUMBER_ID?: string; // WhatsApp Business phone number ID
+  WHATSAPP_ADMIN_NOTIFY_NUMBER?: string; // Admin number to receive order alerts (e.g. 254745017979)
 }
 
 // ─── SECURITY HELPERS ─────────────────────────────────────────
@@ -91,6 +94,148 @@ function verifyRequestSecurity(req: Request, env: Env, isAdminRoute: boolean): R
   }
 
   return null; // Pass — no security block
+}
+
+// ─── WHATSAPP API ─────────────────────────────────────────────
+
+interface WhatsAppMessageResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
+// Send a WhatsApp message via Meta Graph API
+async function sendWhatsAppMessage(
+  toNumber: string,
+  message: string,
+  env: Env
+): Promise<WhatsAppMessageResult> {
+  const token = env.WHATSAPP_ACCESS_TOKEN;
+  const phoneId = env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!token || !phoneId) {
+    return { success: false, error: "WhatsApp API credentials not configured" };
+  }
+
+  // Normalize phone: remove spaces, + sign, leading 0
+  const normalized = toNumber.replace(/[\s+0]/g, "").replace(/^254/, "254");
+
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v21.0/${phoneId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: normalized,
+          type: "text",
+          text: { body: message },
+        }),
+      }
+    );
+
+    const data = await response.json() as any;
+
+    if (!response.ok) {
+      console.error("[WHATSAPP SEND ERROR]", data);
+      return { success: false, error: data?.error?.message || "WhatsApp API error" };
+    }
+
+    // Log the API call
+    await env.DB.prepare(
+      `INSERT INTO whatsapp_api_logs (id, timestamp, endpoint, method, requestPayload, responsePayload, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      generateId("wa-log"),
+      now(),
+      `https://graph.facebook.com/v21.0/${phoneId}/messages`,
+      "POST",
+      JSON.stringify({ to: normalized, messageLength: message.length }),
+      JSON.stringify(data),
+      response.status
+    ).run();
+
+    return { success: true, messageId: data.messages?.[0]?.id };
+  } catch (err) {
+    console.error("[WHATSAPP FETCH ERROR]", err);
+    return { success: false, error: String(err) };
+  }
+}
+
+// Send WhatsApp order notification to admin and customer
+async function notifyOrderViaWhatsApp(orderData: {
+  customerName: string;
+  customerPhone: string;
+  orderId: string;
+  total: number;
+  totalKsh: number;
+  items: string;
+  shippingMethod: string;
+}, env: Env): Promise<void> {
+  const adminNumber = env.WHATSAPP_ADMIN_NOTIFY_NUMBER;
+
+  // Message to admin
+  const adminMessage = `🛒 NEW ORDER — #${orderData.orderId}
+
+${orderData.customerName}
+📱 ${orderData.customerPhone}
+💰 KSh ${orderData.totalKsh.toLocaleString()}
+🚚 ${orderData.shippingMethod}
+
+Items:
+${orderData.items}
+
+Login to admin to process: https://axontech.co.ke/admin`;
+
+  // Message to customer
+  const customerMessage = `✅ Order Confirmed — #${orderData.orderId}
+
+Hi ${orderData.customerName}!
+
+We've received your order and will start processing it right away.
+
+Total: KSh ${orderData.totalKsh.toLocaleString()}
+Delivery: ${orderData.shippingMethod}
+
+We'll send updates as your order progresses. Questions? WhatsApp us anytime!`;
+
+  // Send to admin if number is configured
+  if (adminNumber) {
+    const adminResult = await sendWhatsAppMessage(adminNumber, adminMessage, env);
+    await env.DB.prepare(
+      `INSERT INTO whatsapp_notifications (id, orderId, customerName, customerPhone, message, status, timestamp)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      generateId("WA"),
+      orderData.orderId,
+      orderData.customerName,
+      orderData.customerPhone,
+      adminMessage,
+      adminResult.success ? "sent" : "failed",
+      now()
+    ).run();
+  }
+
+  // Send to customer if they provided a number
+  if (orderData.customerPhone) {
+    const customerResult = await sendWhatsAppMessage(orderData.customerPhone, customerMessage, env);
+    await env.DB.prepare(
+      `INSERT INTO whatsapp_notifications (id, orderId, customerName, customerPhone, message, status, timestamp)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      generateId("WA"),
+      orderData.orderId,
+      orderData.customerName,
+      orderData.customerPhone,
+      customerMessage,
+      customerResult.success ? "sent" : "failed",
+      now()
+    ).run();
+  }
 }
 
 // Sanitize error messages — never expose internals to clients
@@ -722,13 +867,20 @@ async function createOrder(req: Request, env: Env): Promise<Response> {
     orderData.payment, orderData.items, orderData.history).run();
 
   const customer = data.customer || {};
-  const itemsList = (data.items || []).map((item: any) => `  - ${item.name} (x${item.quantity})${item.color ? ` [${item.color}]` : ""}`).join("\n");
-  const whatsappMessage = `NEW ORDER RECEIVED\n\nOrder ID: ${id}\nDate: ${new Date().toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })}\n\nCustomer: ${customer.fullName || "Customer"}\nEmail: ${customer.email || "N/A"}\nPhone: ${customer.phone || "N/A"}\nAddress: ${customer.address || ""}, ${customer.city || ""}, ${customer.state || ""} ${customer.zipCode || ""}\n\nItems:\n${itemsList}\n\nShipping: ${data.shippingMethod || "Standard"}\nTotal: $${(data.total || 0).toFixed(2)} USD\n\nStatus: Awaiting Payment Confirmation`;
+  const itemsList = (data.items || [])
+    .map((item: any) => `  • ${item.name}${item.quantity > 1 ? ` (x${item.quantity})` : ""}${item.selectedColor ? ` [${item.selectedColor}]` : ""}${item.selectedStorage ? ` (${item.selectedStorage})` : ""}`)
+    .join("\n");
 
-  await env.DB.prepare(
-    `INSERT INTO whatsapp_notifications (id, orderId, customerName, customerPhone, message, status, timestamp)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).bind(generateId("WA"), id, customer.fullName || "Customer", customer.phone || "", whatsappMessage, "sent", now()).run();
+  // Send real WhatsApp messages to admin and customer
+  await notifyOrderViaWhatsApp({
+    customerName: customer.fullName || "Customer",
+    customerPhone: customer.phone || "",
+    orderId: id,
+    total: data.total || 0,
+    totalKsh: data.totalKsh || 0,
+    items: itemsList,
+    shippingMethod: data.shippingMethod || "Standard",
+  }, env);
 
   return corsResponse({ id, date: orderData.date, status: "pending", ...data }, 201);
 }
