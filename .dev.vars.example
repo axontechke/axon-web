@@ -1,0 +1,42 @@
+# ============================================
+# AXON TECH WORKER — Environment Variables
+# Copy this file to .dev.vars for local development
+# For production: set these in Cloudflare Dashboard → Workers → Settings → Environment Variables
+# ============================================
+
+# ─── REQUIRED ────────────────────────────────────────────────
+
+# Admin login email (used to seed the first super-admin on a fresh DB)
+ADMIN_EMAIL=axontech254@gmail.com
+
+# Admin login password (used to seed the first super-admin on a fresh DB)
+ADMIN_PASSWORD=Axontech#2026!
+
+# Google Gemini API key — required for AI features (blog generation, report generation)
+# Get yours at: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=
+
+
+# ─── OPTIONAL — SECURITY ─────────────────────────────────────
+
+# Secret API key for server-to-server calls from your VPS
+# If set, requests with header "x-admin-api-key: <value>" bypass session auth
+# Recommended: generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+ADMIN_API_KEY=
+
+# Comma-separated list of IPs allowed to access admin endpoints
+# Leave empty to allow from any IP (rate limiting still applies)
+# Example: ALLOWED_ADMIN_IPS=197.232.45.10, 197.232.45.20
+ALLOWED_ADMIN_IPS=
+
+
+# ─── NOTES ──────────────────────────────────────────────────
+#
+# DB binding (env.DB) is configured automatically by Wrangler via wrangler.toml
+# — do not set it here
+#
+# GEMINI_API_KEY is optional — if not set, AI blog/report generation
+# endpoints will return a 400 error, but all other features work fine
+#
+# ADMIN_API_KEY is for advanced use only — leave empty if not needed
+# ALLOWED_ADMIN_IPS is for advanced use only — leave empty to allow all IPs
