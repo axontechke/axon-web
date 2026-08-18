@@ -1,60 +1,44 @@
-# ============================================
-# AXON TECH WORKER — Environment Variables
-# Copy this file to .dev.vars for local development
-# For production: set these in Cloudflare Dashboard → Workers → Settings → Environment Variables
-# ============================================
+# ============================================================
+# AXON TECH — Environment Variables for Local Development
+# ============================================================
+# Copy this file to .dev.vars and fill in your values.
+# These are for LOCAL dev only (wrangler dev).
+# For production (wrangler deploy), use:
+#   npx wrangler secret put VARIABLE_NAME
+# ============================================================
 
 # ─── REQUIRED ────────────────────────────────────────────────
 
-# Admin login email (used to seed the first super-admin on a fresh DB)
+# Super admin credentials — used to seed the first admin user in D1
 ADMIN_EMAIL=axontech254@gmail.com
-
-# Admin login password (used to seed the first super-admin on a fresh DB)
 ADMIN_PASSWORD=Axontech#2026!
 
-# Google Gemini API key — required for AI features (blog generation, report generation)
-# Get yours at: https://aistudio.google.com/app/apikey
+# Google Gemini API key — needed for AI blog generation and AI reports
+# Get yours free: https://aistudio.google.com/app/apikey
 GEMINI_API_KEY=
 
 
-# ─── OPTIONAL — SECURITY ─────────────────────────────────────
+# ─── WHATSAPP BUSINESS API ────────────────────────────────
+# Without these, the site works but no WhatsApp messages are sent
+# Setup: https://business.whatsapp.com/developers/developer-hub
 
-# Secret API key for server-to-server calls from your VPS
-# If set, requests with header "x-admin-api-key: <value>" bypass session auth
-# Recommended: generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-ADMIN_API_KEY=
-
-# Comma-separated list of IPs allowed to access admin endpoints
-# Leave empty to allow from any IP (rate limiting still applies)
-# Example: ALLOWED_ADMIN_IPS=197.232.45.10, 197.232.45.20
-ALLOWED_ADMIN_IPS=
-
-
-# ─── OPTIONAL — WHATSAPP BUSINESS API ────────────────────────
-# Required for real WhatsApp messages on new orders
-# Get started: https://business.whatsapp.com/developers/developer-hub
-# 1. Create a Meta Business Account
-# 2. Set up WhatsApp Business app
-# 3. Get your Phone Number ID and Access Token
-
-# WhatsApp Business access token from Meta
+# Meta-provided long-lived access token
 WHATSAPP_ACCESS_TOKEN=
 
-# Your WhatsApp Business phone number ID (found in Meta developer console)
+# Your WhatsApp Business phone number ID (from Meta developer console)
 WHATSAPP_PHONE_NUMBER_ID=
 
-# Admin phone number to receive order notifications (Kenyan format, no + sign)
-# Example: 254745017979
+# Your number to receive order alerts (Kenyan format, no + sign)
 WHATSAPP_ADMIN_NOTIFY_NUMBER=254745017979
 
 
-# ─── NOTES ──────────────────────────────────────────────────
-#
-# DB binding (env.DB) is configured automatically by Wrangler via wrangler.toml
-# — do not set it here
-#
-# GEMINI_API_KEY is optional — if not set, AI blog/report generation
-# endpoints will return a 400 error, but all other features work fine
-#
-# ADMIN_API_KEY is for advanced use only — leave empty if not needed
-# ALLOWED_ADMIN_IPS is for advanced use only — leave empty to allow all IPs
+# ─── SECURITY (OPTIONAL) ─────────────────────────────────
+
+# Server-to-server API key — send header "x-admin-api-key: <value>" with requests
+# Generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+ADMIN_API_KEY=
+
+# Comma-separated IPs allowed to access admin endpoints
+# Leave empty to allow all IPs (rate limiting still applies)
+# Example: ALLOWED_ADMIN_IPS=197.232.45.10,10.0.0.1
+ALLOWED_ADMIN_IPS=
