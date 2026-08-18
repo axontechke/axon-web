@@ -1,0 +1,1 @@
+INSERT OR IGNORE INTO users (id, email, passwordHash, salt, role) VALUES ('extra-admin-1', 'axontech254@gmail.com', '6c690557a10e942307b925d5de07d95b371004a1205bf695de72762590f87f89', 'e13ea92e12efbc60b15f0a03d6e0bcf1', 'admin');
