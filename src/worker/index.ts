@@ -167,16 +167,26 @@ async function sendWhatsAppMessage(
 }
 
 // Send WhatsApp order notification to admin and customer
-async function notifyOrderViaWhatsApp(orderData: {
-  customerName: string;
-  customerPhone: string;
-  orderId: string;
-  total: number;
-  totalKsh: number;
-  items: string;
-  shippingMethod: string;
-}, env: Env): Promise<void> {
+async function notifyOrderViaWhatsApp(
+  orderData: {
+    customerName: string;
+    customerPhone: string;
+    orderId: string;
+    total: number;
+    totalKsh: number;
+    items: string;
+    shippingMethod: string;
+  },
+  env: Env,
+  settings?: { enabled?: boolean; sendToAdmin?: boolean; sendToCustomer?: boolean }
+): Promise<void> {
+  // Check if WhatsApp is enabled from settings (default to true if not set)
+  const enabled = settings?.enabled !== false;
+  if (!enabled) return;
+
   const adminNumber = env.WHATSAPP_ADMIN_NOTIFY_NUMBER;
+  const sendToAdmin = settings?.sendToAdmin !== false;
+  const sendToCustomer = settings?.sendToCustomer !== false;
 
   // Message to admin
   const adminMessage = `🛒 NEW ORDER — #${orderData.orderId}
@@ -203,8 +213,8 @@ Delivery: ${orderData.shippingMethod}
 
 We'll send updates as your order progresses. Questions? WhatsApp us anytime!`;
 
-  // Send to admin if number is configured
-  if (adminNumber) {
+  // Send to admin if enabled and number is configured
+  if (sendToAdmin && adminNumber) {
     const adminResult = await sendWhatsAppMessage(adminNumber, adminMessage, env);
     await env.DB.prepare(
       `INSERT INTO whatsapp_notifications (id, orderId, customerName, customerPhone, message, status, timestamp)
@@ -220,8 +230,8 @@ We'll send updates as your order progresses. Questions? WhatsApp us anytime!`;
     ).run();
   }
 
-  // Send to customer if they provided a number
-  if (orderData.customerPhone) {
+  // Send to customer if enabled and they provided a number
+  if (sendToCustomer && orderData.customerPhone) {
     const customerResult = await sendWhatsAppMessage(orderData.customerPhone, customerMessage, env);
     await env.DB.prepare(
       `INSERT INTO whatsapp_notifications (id, orderId, customerName, customerPhone, message, status, timestamp)
@@ -871,7 +881,33 @@ async function createOrder(req: Request, env: Env): Promise<Response> {
     .map((item: any) => `  • ${item.name}${item.quantity > 1 ? ` (x${item.quantity})` : ""}${item.selectedColor ? ` [${item.selectedColor}]` : ""}${item.selectedStorage ? ` (${item.selectedStorage})` : ""}`)
     .join("\n");
 
-  // Send real WhatsApp messages to admin and customer
+  // Fetch WhatsApp notification settings from config
+  let whatsappSettings: { enabled?: boolean; sendToAdmin?: boolean; sendToCustomer?: boolean } = {};
+  try {
+    const waEnabledRow = await env.DB.prepare(
+      "SELECT value FROM config WHERE key = 'whatsappEnabled'"
+    ).first<{ value: string }>();
+    const waAdminRow = await env.DB.prepare(
+      "SELECT value FROM config WHERE key = 'whatsappSendToAdmin'"
+    ).first<{ value: string }>();
+    const waCustomerRow = await env.DB.prepare(
+      "SELECT value FROM config WHERE key = 'whatsappSendToCustomer'"
+    ).first<{ value: string }>();
+    const waAdminNumRow = await env.DB.prepare(
+      "SELECT value FROM config WHERE key = 'whatsappAdminNumber'"
+    ).first<{ value: string }>();
+    whatsappSettings = {
+      enabled: waEnabledRow ? waEnabledRow.value === "true" : true,
+      sendToAdmin: waAdminRow ? waAdminRow.value === "true" : true,
+      sendToCustomer: waCustomerRow ? waCustomerRow.value === "true" : true,
+    };
+    // If admin number is set in config, override env var
+    if (waAdminNumRow?.value) {
+      (env as any).WHATSAPP_ADMIN_NOTIFY_NUMBER = waAdminNumRow.value;
+    }
+  } catch (_) {}
+
+  // Send real WhatsApp messages to admin and customer (if enabled)
   await notifyOrderViaWhatsApp({
     customerName: customer.fullName || "Customer",
     customerPhone: customer.phone || "",
@@ -880,7 +916,7 @@ async function createOrder(req: Request, env: Env): Promise<Response> {
     totalKsh: data.totalKsh || 0,
     items: itemsList,
     shippingMethod: data.shippingMethod || "Standard",
-  }, env);
+  }, env, whatsappSettings);
 
   return corsResponse({ id, date: orderData.date, status: "pending", ...data }, 201);
 }
@@ -910,6 +946,10 @@ async function getConfig(_req: Request, env: Env): Promise<Response> {
       config[(row as any).key] = (row as any).value;
     }
   }
+  // Inject WhatsApp credential status flags for the admin panel UI
+  config._waTokenSet = !!env.WHATSAPP_ACCESS_TOKEN;
+  config._waPhoneSet = !!env.WHATSAPP_PHONE_NUMBER_ID;
+  config._waAdminSet = !!env.WHATSAPP_ADMIN_NOTIFY_NUMBER;
   return corsResponse(config);
 }
 

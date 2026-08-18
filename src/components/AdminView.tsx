@@ -233,7 +233,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [quotaLimitInput, setQuotaLimitInput] = useState<number>(30);
 
   // Config Sub-Tab State
-  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "protocol" | "footer" | "contact">("general");
+  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "protocol" | "footer" | "contact" | "whatsapp">("general");
 
   // Data States
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -2781,6 +2781,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
             >
               Contact Info
             </button>
+            <button
+              onClick={() => setConfigSubTab("whatsapp")}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                configSubTab === "whatsapp" ? "bg-primary text-white" : "bg-surface-container hover:bg-surface-container-high text-on-surface"
+              }`}
+            >
+              WhatsApp
+            </button>
           </div>
 
           {/* ======================================= */}
@@ -4751,6 +4759,128 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* CONFIG SUB-TAB: WHATSAPP SETTINGS                     */}
+      {/* ======================================================= */}
+      {configSubTab === "whatsapp" && (
+        <div className="space-y-6 animate-in fade-in duration-200 text-xs font-semibold text-left">
+          <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+            <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              WhatsApp Notification Settings
+            </h3>
+            <p className="text-[11px] text-on-surface-variant/70">
+              Control when WhatsApp messages are sent on new orders. Requires WhatsApp Business API credentials to be set in Cloudflare environment variables.
+            </p>
+
+            {/* Enable/Disable WhatsApp notifications */}
+            <div className="flex items-center justify-between p-4 bg-surface border border-outline/10 rounded-xl">
+              <div className="space-y-0.5">
+                <label className="text-[11px] font-bold text-on-surface block">Enable WhatsApp Notifications</label>
+                <p className="text-[10px] text-on-surface-variant/60">Master switch for all WhatsApp messages on new orders</p>
+              </div>
+              <button
+                onClick={() => setWebConfig({ ...webConfig, whatsappEnabled: !webConfig.whatsappEnabled })}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  webConfig.whatsappEnabled ? "bg-green-500" : "bg-surface-container-high"
+                }`}
+              >
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                  webConfig.whatsappEnabled ? "translate-x-7" : "translate-x-1"
+                }`} />
+              </button>
+            </div>
+
+            {/* Send to Admin */}
+            <div className="flex items-center justify-between p-4 bg-surface border border-outline/10 rounded-xl">
+              <div className="space-y-0.5">
+                <label className="text-[11px] font-bold text-on-surface block">Notify Admin on New Orders</label>
+                <p className="text-[10px] text-on-surface-variant/60">Send order details to your admin WhatsApp number</p>
+              </div>
+              <button
+                onClick={() => setWebConfig({ ...webConfig, whatsappSendToAdmin: !webConfig.whatsappSendToAdmin })}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  webConfig.whatsappSendToAdmin ? "bg-green-500" : "bg-surface-container-high"
+                }`}
+              >
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                  webConfig.whatsappSendToAdmin ? "translate-x-7" : "translate-x-1"
+                }`} />
+              </button>
+            </div>
+
+            {/* Send to Customer */}
+            <div className="flex items-center justify-between p-4 bg-surface border border-outline/10 rounded-xl">
+              <div className="space-y-0.5">
+                <label className="text-[11px] font-bold text-on-surface block">Notify Customer on New Orders</label>
+                <p className="text-[10px] text-on-surface-variant/60">Send order confirmation to the customer's WhatsApp</p>
+              </div>
+              <button
+                onClick={() => setWebConfig({ ...webConfig, whatsappSendToCustomer: !webConfig.whatsappSendToCustomer })}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  webConfig.whatsappSendToCustomer ? "bg-green-500" : "bg-surface-container-high"
+                }`}
+              >
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                  webConfig.whatsappSendToCustomer ? "translate-x-7" : "translate-x-1"
+                }`} />
+              </button>
+            </div>
+
+            {/* WhatsApp API status */}
+            <div className="p-4 rounded-xl border border-outline/10 space-y-2">
+              <h4 className="text-[11px] font-bold text-on-surface uppercase">API Configuration Status</h4>
+              <div className="space-y-1 text-[10px]">
+                <div className="flex items-center gap-2">
+                  <span className={webConfig._waTokenSet ? "text-green-500" : "text-red-500"}>•</span>
+                  <span className="text-on-surface-variant">WhatsApp Access Token:</span>
+                  <span className={webConfig._waTokenSet ? "text-green-500 font-bold" : "text-red-500"}>
+                    {webConfig._waTokenSet ? "Configured" : "Not set — add WHATSAPP_ACCESS_TOKEN in Cloudflare secrets"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={webConfig._waPhoneSet ? "text-green-500" : "text-red-500"}>•</span>
+                  <span className="text-on-surface-variant">Phone Number ID:</span>
+                  <span className={webConfig._waPhoneSet ? "text-green-500 font-bold" : "text-red-500"}>
+                    {webConfig._waPhoneSet ? "Configured" : "Not set — add WHATSAPP_PHONE_NUMBER_ID in Cloudflare secrets"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={webConfig._waAdminSet ? "text-green-500" : "text-yellow-500"}>•</span>
+                  <span className="text-on-surface-variant">Admin Notify Number:</span>
+                  <span className={webConfig._waAdminSet ? "text-green-500 font-bold" : "text-yellow-500"}>
+                    {webConfig.whatsappAdminNumber || "Not set — add WHATSAPP_ADMIN_NOTIFY_NUMBER in Cloudflare secrets"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Admin WhatsApp number override (editable in UI) */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-on-surface-variant uppercase block">Admin WhatsApp Number (overrides env var)</label>
+              <input
+                type="text"
+                value={webConfig.whatsappAdminNumber || ""}
+                onChange={(e) => setWebConfig({ ...webConfig, whatsappAdminNumber: e.target.value })}
+                placeholder="254745017979"
+                className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+              />
+              <p className="text-[9px] text-on-surface-variant/60">Kenyan format, no + sign. Leave empty to use env var value.</p>
+            </div>
+
+            {/* Save button */}
+            <div className="pt-2">
+              <button
+                onClick={handleSaveConfig}
+                className="w-full py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md"
+              >
+                Save WhatsApp Settings
+              </button>
+            </div>
           </div>
         </div>
       )}
