@@ -8,6 +8,12 @@ export interface Env {
   WHATSAPP_ACCESS_TOKEN?: string;  // Meta WhatsApp Business API access token
   WHATSAPP_PHONE_NUMBER_ID?: string; // WhatsApp Business phone number ID
   WHATSAPP_ADMIN_NOTIFY_NUMBER?: string; // Admin number to receive order alerts (e.g. 254745017979)
+  FIREBASE_WEB_API_KEY?: string;   // Firebase Web API key for ID token verification
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+async function jsonBody<T = Record<string, any>>(req: Request): Promise<T> {
+  return req.json() as Promise<T>;
 }
 
 // ─── SECURITY HELPERS ─────────────────────────────────────────
@@ -606,7 +612,7 @@ const INITIAL_DELIVERY_METHODS = [
 
 // ─── SEED DATABASE ───────────────────────────────────────────
 async function seedDatabase(db: D1Database): Promise<void> {
-  const batch: D1Exec[] = [];
+  const batch: any[] = [];
 
   // Check and seed products
   const prodCount = await db.prepare("SELECT COUNT(*) as count FROM products").first<{ count: number }>();
@@ -688,7 +694,7 @@ async function seedSuperAdmin(db: D1Database, email: string, password: string): 
 // ─── AUTH HANDLER ─────────────────────────────────────────────
 async function login(req: Request, env: Env): Promise<Response> {
   const clientIp = getClientIp(req);
-  const { email, password } = await req.json();
+  const { email, password } = await jsonBody<{ email?: string; password?: string }>(req);
   if (!email || !password) return jsonError("Email and password required.");
 
   const user = await env.DB.prepare(
@@ -710,6 +716,50 @@ async function login(req: Request, env: Env): Promise<Response> {
   const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
   // Store session token with login IP for audit trail
+  await env.DB.prepare(
+    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
+  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt, loginIp: clientIp })).run();
+
+  clearRateLimit(clientIp);
+  return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
+}
+
+// POST /api/auth/firebase-login — Google Sign-In via Firebase ID token
+async function firebaseLogin(req: Request, env: Env): Promise<Response> {
+  const clientIp = getClientIp(req);
+  const { idToken } = await jsonBody<{ idToken?: string }>(req);
+  if (!idToken) return jsonError("ID token required.", 400);
+
+  // Verify the Firebase ID token via Google's tokeninfo endpoint
+  const tokenInfoRes = await fetch(
+    `https://oauth2.googleapis.googleapis.com/tokeninfo?id_token=${idToken}`
+  );
+  const tokenInfo = await tokenInfoRes.json() as { email?: string; aud?: string; sub?: string };
+
+  if (!tokenInfo.email) {
+    recordFailedAttempt(clientIp);
+    return jsonError("Invalid ID token.", 401);
+  }
+
+  // Verify the audience matches our Firebase Web API key
+  if (tokenInfo.aud !== env.FIREBASE_WEB_API_KEY) {
+    recordFailedAttempt(clientIp);
+    return jsonError("Token audience mismatch.", 401);
+  }
+
+  // Look up the user by email — must be an admin or super-admin
+  const user = await env.DB.prepare(
+    "SELECT id, email, role FROM users WHERE LOWER(email) = LOWER(?) AND role IN ('admin', 'super-admin')"
+  ).bind(tokenInfo.email).first<{ id: string; email: string; role: string }>();
+
+  if (!user) {
+    recordFailedAttempt(clientIp);
+    return jsonError("Not authorized as admin.", 403);
+  }
+
+  const token = generateToken();
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
   await env.DB.prepare(
     "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
   ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt, loginIp: clientIp })).run();
@@ -749,7 +799,7 @@ async function revokeAllSessions(req: Request, env: Env, _ctx: ExecutionContext)
   const currentToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : "";
   // Delete all sessions for this user that aren't the current one
   const { results } = await env.DB.prepare("SELECT key FROM config WHERE key LIKE 'session:%'").all();
-  const batch: D1Exec[] = [];
+  const batch: any[] = [];
   for (const row of results) {
     const key = (row as any).key;
     try {
@@ -848,7 +898,7 @@ async function getOrders(_req: Request, env: Env): Promise<Response> {
 
 // POST /api/orders
 async function createOrder(req: Request, env: Env): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody<Record<string, any>>(req);
   const id = generateTrackingNumber();
   const orderData = {
     id, date: now(), status: "pending",
@@ -955,8 +1005,8 @@ async function getConfig(_req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/config
 async function updateConfig(req: Request, env: Env): Promise<Response> {
-  const data = await req.json();
-  const batch: D1Exec[] = [];
+  const data = await jsonBody(req);
+  const batch: any[] = [];
   for (const [key, value] of Object.entries(data)) {
     batch.push(env.DB.prepare(`INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)`).bind(key, JSON.stringify(value)));
   }
@@ -977,8 +1027,8 @@ async function getContact(_req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/contact
 async function updateContact(req: Request, env: Env): Promise<Response> {
-  const data = await req.json();
-  const batch: D1Exec[] = [];
+  const data = await jsonBody(req);
+  const batch: any[] = [];
   for (const [key, value] of Object.entries(data)) {
     batch.push(env.DB.prepare(`INSERT OR REPLACE INTO contact (key, value) VALUES (?, ?)`).bind(key, JSON.stringify(value)));
   }
@@ -995,7 +1045,7 @@ async function getDeliveryMethods(_req: Request, env: Env): Promise<Response> {
 
 // POST /api/admin/delivery-methods
 async function createDeliveryMethod(req: Request, env: Env): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const id = data.id || generateId("del");
   await env.DB.prepare(
     `INSERT INTO delivery_methods (id, name, price, transitDays, carrier, enabled, description, locations) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
@@ -1005,7 +1055,7 @@ async function createDeliveryMethod(req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/delivery-methods/:id
 async function updateDeliveryMethod(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const fields: string[] = [];
   const values: any[] = [];
   if (data.name !== undefined) { fields.push("name = ?"); values.push(data.name); }
@@ -1031,7 +1081,7 @@ async function deleteDeliveryMethod(_req: Request, env: Env, _ctx: ExecutionCont
 
 // POST /api/support-requests
 async function createSupportRequest(req: Request, env: Env): Promise<Response> {
-  const { name, email, subject, message } = await req.json();
+  const { name, email, subject, message } = await jsonBody<{ name?: string; email?: string; subject?: string; message?: string }>(req);
   if (!name || !email || !subject || !message) return jsonError("Missing required fields");
   const id = generateId("AXN-INQ");
   await env.DB.prepare(
@@ -1048,14 +1098,14 @@ async function getSupportRequests(_req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/support-requests/:id
 async function updateSupportRequest(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const { status } = await req.json();
+  const { status } = await jsonBody<{ status?: string }>(req);
   await env.DB.prepare("UPDATE support_requests SET status = ? WHERE id = ?").bind(status, params.id).run();
   return corsResponse({ id: params.id, status });
 }
 
 // POST /api/price-trackers
 async function createPriceTracker(req: Request, env: Env): Promise<Response> {
-  const { productId, email, initialPrice, initialPriceKsh } = await req.json();
+  const { productId, email, initialPrice, initialPriceKsh } = await jsonBody<{ productId?: string; email?: string; initialPrice?: number; initialPriceKsh?: number }>(req);
   if (!productId || !email) return jsonError("Missing required fields");
 
   const product = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(productId).first();
@@ -1108,7 +1158,7 @@ async function getAnalytics(_req: Request, env: Env): Promise<Response> {
     items.forEach((item: any) => {
       const prod = products.find((p: any) => p.id === item.id);
       const category = prod ? prod.category : "General";
-      categorySales[category] = (categorySales[category] || 0) + (item.price * item.quantity);
+      categorySales[category as string] = (categorySales[category as string] || 0) + (item.price * item.quantity);
     });
   });
 
@@ -1123,7 +1173,7 @@ async function getAnalytics(_req: Request, env: Env): Promise<Response> {
 
 // POST /api/admin/products
 async function createProduct(req: Request, env: Env): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const id = data.id || generateId("product");
   await env.DB.prepare(
     `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, variants)
@@ -1137,7 +1187,7 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/products/:id
 async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const fields: string[] = [];
   const values: any[] = [];
 
@@ -1205,7 +1255,7 @@ async function deleteProduct(_req: Request, env: Env, _ctx: ExecutionContext, pa
 
 // PUT /api/admin/orders/:id/status
 async function updateOrderStatus(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const { status, notes } = await req.json();
+  const { status, notes } = await jsonBody<{ status?: string; notes?: string }>(req);
   const order = await env.DB.prepare("SELECT * FROM orders WHERE id = ?").bind(params.id).first() as any;
   if (!order) return jsonError("Order not found", 404);
 
@@ -1220,7 +1270,7 @@ async function updateOrderStatus(req: Request, env: Env, _ctx: ExecutionContext,
 
 // POST /api/admin/orders/:id/dispatch
 async function dispatchOrder(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const { deliveryMethodId, trackingNumber, notes } = await req.json();
+  const { deliveryMethodId, trackingNumber, notes } = await jsonBody<{ deliveryMethodId?: string; trackingNumber?: string; notes?: string }>(req);
   const order = await env.DB.prepare("SELECT * FROM orders WHERE id = ?").bind(params.id).first() as any;
   if (!order) return jsonError("Order not found", 404);
 
@@ -1253,7 +1303,7 @@ async function getBlogPost(_req: Request, env: Env, _ctx: ExecutionContext, para
 
 // POST /api/admin/blog
 async function createBlogPost(req: Request, env: Env): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const id = data.id || generateId("blog");
   const date = data.date || now();
   const tags = JSON.stringify(data.tags || []);
@@ -1281,7 +1331,7 @@ async function createBlogPost(req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/blog/:id
 async function updateBlogPost(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const fields: string[] = [];
   const values: any[] = [];
 
@@ -1312,7 +1362,7 @@ async function getReviews(_req: Request, env: Env): Promise<Response> {
 
 // POST /api/reviews
 async function createReview(req: Request, env: Env): Promise<Response> {
-  const { author, rating, title, content, source } = await req.json();
+  const { author, rating, title, content, source } = await jsonBody<{ author?: string; rating?: number; title?: string; content?: string; source?: string }>(req);
   if (!author || !rating || !content) return jsonError("Author, rating, and content are required.");
 
   const id = generateId("rev");
@@ -1336,7 +1386,7 @@ async function getAdminReviews(_req: Request, env: Env): Promise<Response> {
 
 // PUT /api/admin/reviews/:id
 async function updateReview(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const data = await req.json();
+  const data = await jsonBody(req);
   const fields: string[] = [];
   const values: any[] = [];
   if (data.approved !== undefined) { fields.push("approved = ?"); values.push(data.approved ? 1 : 0); }
@@ -1370,7 +1420,7 @@ async function getWhatsAppApiLogs(_req: Request, env: Env): Promise<Response> {
 async function generateBlogPost(req: Request, env: Env): Promise<Response> {
   if (!env.GEMINI_API_KEY) return jsonError("GEMINI_API_KEY not configured", 400);
 
-  const { topic, category, location, keywords } = await req.json();
+  const { topic, category, location, keywords } = await jsonBody<{ topic?: string; category?: string; location?: string; keywords?: string }>(req);
 
   // Check AI credits
   const configRows = await env.DB.prepare("SELECT value FROM config WHERE key = 'aiCreditsUsed'").first();
@@ -1433,7 +1483,7 @@ Return ONLY a JSON object with these fields: title, slug, excerpt, content, cate
 async function generateReport(req: Request, env: Env): Promise<Response> {
   if (!env.GEMINI_API_KEY) return jsonError("GEMINI_API_KEY not configured", 400);
 
-  const { reportType } = await req.json();
+  const { reportType } = await jsonBody<{ reportType?: string }>(req);
 
   const configRows = await env.DB.prepare("SELECT value FROM config WHERE key = 'aiCreditsUsed'").first();
   const limitRows = await env.DB.prepare("SELECT value FROM config WHERE key = 'aiCreditsLimit'").first();
@@ -1497,7 +1547,7 @@ Use Markdown. Be formal and analytical.`;
 
 // POST /api/admin/scrape-url (simplified for Worker)
 async function scrapeUrl(req: Request, _env: Env): Promise<Response> {
-  const { url } = await req.json();
+  const { url } = await jsonBody<{ url?: string }>(req);
   if (!url) return jsonError("Product URL is required");
 
   const normalizedUrl = url.toLowerCase();
@@ -1596,7 +1646,7 @@ async function getProductVariantImages(_req: Request, env: Env): Promise<Respons
 
 // POST /api/admin/product-variant-images
 async function createProductVariantImage(req: Request, env: Env): Promise<Response> {
-  const { productId, storage, color, imageUrl, sortOrder } = await req.json();
+  const { productId, storage, color, imageUrl, sortOrder } = await jsonBody<{ productId?: string; storage?: string; color?: string; imageUrl?: string; sortOrder?: number }>(req);
   if (!productId || !imageUrl) return jsonError("productId and imageUrl are required");
   const id = generateId("pvi");
   await env.DB.prepare(
@@ -1607,7 +1657,7 @@ async function createProductVariantImage(req: Request, env: Env): Promise<Respon
 
 // PUT /api/admin/product-variant-images/:id
 async function updateProductVariantImage(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const { imageUrl, sortOrder } = await req.json();
+  const { imageUrl, sortOrder } = await jsonBody<{ imageUrl?: string; sortOrder?: number }>(req);
   const fields: string[] = [];
   const values: any[] = [];
   if (imageUrl !== undefined) { fields.push("imageUrl = ?"); values.push(imageUrl); }
@@ -1628,7 +1678,7 @@ async function deleteProductVariantImage(_req: Request, env: Env, _ctx: Executio
 
 // PUT /api/admin/products/:id/variants — bulk update variants array (price, stock, storage, color)
 async function updateProductVariants(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const { variants } = await req.json();
+  const { variants } = await jsonBody<{ variants?: any }>(req);
   if (!Array.isArray(variants)) return jsonError("variants must be an array");
   await env.DB.prepare(
     "UPDATE products SET variants = ?, updatedAt = ? WHERE id = ?"
@@ -1644,7 +1694,7 @@ async function updateProductVariants(req: Request, env: Env, _ctx: ExecutionCont
 
 // POST /api/admin/product-variant-images/bulk-delete — delete multiple images by ids
 async function bulkDeleteVariantImages(req: Request, env: Env): Promise<Response> {
-  const { ids } = await req.json();
+  const { ids } = await jsonBody<{ ids?: string[] }>(req);
   if (!Array.isArray(ids) || ids.length === 0) return jsonError("ids array is required");
   const placeholders = ids.map(() => "?").join(",");
   const result = await env.DB.prepare(
@@ -1655,7 +1705,7 @@ async function bulkDeleteVariantImages(req: Request, env: Env): Promise<Response
 
 // PUT /api/admin/products/:id/variant-stock — update stock (and optionally price) for specific storage+color combos
 async function updateProductVariantStock(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
-  const { updates } = await req.json();
+  const { updates } = await jsonBody<{ updates?: Record<string, any> }>(req);
   if (!Array.isArray(updates)) return jsonError("updates must be an array of {storage, color, stock?, priceKsh?}");
   const product = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(params.id).first() as any;
   if (!product) return jsonError("Product not found", 404);
@@ -1715,6 +1765,7 @@ ${urls.join("\n")}
 const routes: Route[] = [
   // Auth
   route("POST", "/api/auth/login", login),
+  route("POST", "/api/auth/firebase-login", firebaseLogin),
   route("POST", "/api/auth/logout", logout),
   route("GET", "/api/auth/me", getMe),
 

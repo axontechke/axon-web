@@ -7,8 +7,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "axon-tech-db",
-      "database_id": "f29b9801-d7ef-4b2d-9867-77149278205c"
+      "database_name": "axon-tech-db-fresh",
+      "database_id": "b16719bd-bc6e-4f48-9728-9b20061978a6"
     }
   ],
   "observability": {

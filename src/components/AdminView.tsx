@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useFirebaseAuth } from "../context/FirebaseAuthContext";
 import { 
   BarChart3, 
   Package, 
@@ -32,7 +33,8 @@ import {
   TrendingDown,
   Sparkles,
   FileText,
-  Star
+  Star,
+  Chrome
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
@@ -223,12 +225,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
   setIsAdminAuthenticated,
   onViewWeb
 }) => {
+  // Firebase Auth
+  const { signInWithGoogle } = useFirebaseAuth();
+
   // Authentication State
-  const [loginEmail, setLoginEmail] = useState("");
-  const [passkey, setPasskey] = useState("");
+  const [authError, setAuthError] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("axon_admin_token"));
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("axon_admin_token") || "");
-  const [authError, setAuthError] = useState("");
 
   // Tab State
   const [activeTab, setActiveTab] = useState<"analytics" | "products" | "orders" | "config" | "support" | "delivery" | "whatsapp" | "blog" | "priceTrackers" | "aiReports" | "reviews">("analytics");
@@ -405,28 +408,29 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }, 4500);
   };
 
-  const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleSignIn = async () => {
     setAuthError("");
     try {
-      const res = await fetch("/api/auth/login", {
+      const user = await signInWithGoogle();
+      const idToken = await user.getIdToken();
+
+      const res = await fetch("/api/auth/firebase-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail, password: passkey }),
+        body: JSON.stringify({ idToken }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setAuthError(data.error || "Invalid credentials.");
+        setAuthError(data.error || "Not authorized as admin.");
         return;
       }
       localStorage.setItem("axon_admin_token", data.token);
       localStorage.setItem("axon_admin_authed", "true");
       setAuthToken(data.token);
       setIsAuthenticated(true);
-      setPasskey("");
-      setLoginEmail("");
-    } catch {
-      setAuthError("Network error. Please try again.");
+    } catch (err: any) {
+      if (err.code === "auth/popup-closed-by-user") return;
+      setAuthError("Sign-in failed. Try again.");
     }
   };
 
@@ -441,8 +445,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setAuthToken("");
     localStorage.removeItem("axon_admin_token");
     localStorage.removeItem("axon_admin_authed");
-    setPasskey("");
-    setLoginEmail("");
   };
 
   const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
@@ -1105,45 +1107,20 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </p>
           </div>
 
-          <form onSubmit={handleAuthSubmit} className="space-y-4 text-left">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-                Administrator Email
-              </label>
-              <input
-                type="email"
-                placeholder="admin@email.com"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full px-4 py-2.5 bg-surface border border-outline/15 rounded-xl text-xs focus:outline-none focus:border-primary text-on-surface"
-              />
+          {authError && (
+            <div className="flex items-center gap-1.5 text-[10px] text-red-500 font-medium bg-red-500/10 p-2.5 rounded-xl">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{authError}</span>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-                Enter Administration Key
-              </label>
-              <input
-                type="password"
-                placeholder="Password"
-                value={passkey}
-                onChange={(e) => setPasskey(e.target.value)}
-                className="w-full px-4 py-2.5 bg-surface border border-outline/15 rounded-xl text-xs focus:outline-none focus:border-primary text-on-surface"
-              />
-              {authError && (
-                <div className="flex items-center gap-1.5 text-[10px] text-red-500 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  <span>{authError}</span>
-                </div>
-              )}
-            </div>
+          )}
 
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-colors shadow-md active:scale-98"
-            >
-              Authorize Node Session
-            </button>
-          </form>
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl transition-colors shadow-md border border-gray-200 flex items-center justify-center gap-2.5"
+          >
+            <Chrome className="w-4 h-4" />
+            Sign in with Google
+          </button>
 
           <div className="text-[9px] text-on-surface-variant/50">
             Node Cloud Run Port 3000 Security Module.
@@ -2820,7 +2797,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="checkbox"
                           checked={webConfig.showAnnouncement}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,showAnnouncement: e.target.checked })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,showAnnouncement: e.target.checked }))}
                           className="w-4 h-4 rounded text-primary border-outline/20 focus:ring-0"
                         />
                         <span className="text-xs">Display Banner</span>
@@ -2830,7 +2807,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <input
                       type="text"
                       value={webConfig.announcement}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,announcement: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,announcement: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                       placeholder="Ecosystem debut banner marquee text..."
                     />
@@ -2843,7 +2820,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="text"
                         value={webConfig.heroTitle}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,heroTitle: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,heroTitle: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                       />
                     </div>
@@ -2852,7 +2829,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[11px] text-on-surface-variant uppercase block">Main Hero Banner description (Legacy fallback)</label>
                       <textarea
                         value={webConfig.heroDescription}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,heroDescription: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,heroDescription: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none h-24"
                       />
                     </div>
@@ -2871,7 +2848,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[10px] text-on-surface-variant uppercase block">Privacy Policy Charter</label>
                       <textarea
                         value={webConfig.privacyPolicy || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,privacyPolicy: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,privacyPolicy: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none h-24"
                         placeholder="Describe how user data and telemetry parameters are securely cataloged..."
                       />
@@ -2881,7 +2858,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[10px] text-on-surface-variant uppercase block">Terms of Use / Ecosystem Charter</label>
                       <textarea
                         value={webConfig.termsOfUse || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,termsOfUse: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,termsOfUse: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none h-24"
                         placeholder="State intellectual boundaries, warranty registries, and compiler sandboxing limits..."
                       />
@@ -2891,7 +2868,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[10px] text-on-surface-variant uppercase block">Cookie and Cache Policy</label>
                       <textarea
                         value={webConfig.cookiePolicy || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,cookiePolicy: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,cookiePolicy: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none h-24"
                         placeholder="Configure local storage parameters and analytics key behaviors..."
                       />
@@ -2901,7 +2878,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[10px] text-on-surface-variant uppercase block">Refund and Harmony Return Protocol</label>
                       <textarea
                         value={webConfig.refundPolicy || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,refundPolicy: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,refundPolicy: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none h-24"
                         placeholder="Specify the 30-day RMA diagnostic window rules..."
                       />
@@ -2911,7 +2888,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[10px] text-on-surface-variant uppercase block">Delivery and Dispatch Policy</label>
                       <textarea
                         value={webConfig.deliveryPolicy || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,deliveryPolicy: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,deliveryPolicy: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none h-24"
                         placeholder="Details about double-box static shields, priority dispatch, and custom fees..."
                       />
@@ -3004,7 +2981,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="url"
                         value={webConfig.socialTwitter || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialTwitter: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialTwitter: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                         placeholder="https://twitter.com/..."
                       />
@@ -3015,7 +2992,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="url"
                         value={webConfig.socialGithub || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialGithub: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialGithub: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                         placeholder="https://github.com/..."
                       />
@@ -3026,7 +3003,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="url"
                         value={webConfig.socialLinkedIn || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialLinkedIn: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialLinkedIn: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                         placeholder="https://linkedin.com/company/..."
                       />
@@ -3037,7 +3014,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="email"
                         value={webConfig.contactEmail || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,contactEmail: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,contactEmail: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                         placeholder="synergy@axon.net"
                       />
@@ -3048,7 +3025,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="email"
                         value={webConfig.supportEmail || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,supportEmail: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,supportEmail: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
                         placeholder="support@axon.net"
                       />
@@ -3101,7 +3078,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] font-bold text-on-surface-variant uppercase block">Presentation Mode</label>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setWebConfig(prev => ({ ...prev,heroMode: "current" })}
+                        onClick={() => setWebConfig(prev => ({ ...prev,heroMode: "current" }))}
                         className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
                           (webConfig?.heroMode || "current") === "current"
                             ? "bg-primary text-white border-primary"
@@ -3111,7 +3088,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         Standard Slideshow
                       </button>
                       <button
-                        onClick={() => setWebConfig(prev => ({ ...prev,heroMode: "media-only" })}
+                        onClick={() => setWebConfig(prev => ({ ...prev,heroMode: "media-only" }))}
                         className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
                           webConfig?.heroMode === "media-only"
                             ? "bg-primary text-white border-primary"
@@ -3128,7 +3105,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] font-bold text-on-surface-variant uppercase block">Target Product Device</label>
                     <select
                       value={webConfig?.heroTargetProduct || "axon-phone-1-pro"}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,heroTargetProduct: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,heroTargetProduct: e.target.value }))}
                       className="w-full px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface font-semibold focus:outline-none focus:border-primary"
                     >
                       {validProductsList.map(p => (
@@ -3144,7 +3121,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] font-bold text-on-surface-variant uppercase block">Action Button Label</label>
                     <select
                       value={webConfig?.heroButtonText || "Shop Now"}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,heroButtonText: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,heroButtonText: e.target.value }))}
                       className="w-full px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface font-semibold focus:outline-none focus:border-primary"
                     >
                       <option value="Shop Now">Shop Now</option>
@@ -3187,7 +3164,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         overlayTitle: "Neural Core",
                         overlayDesc: "Vapor Chamber cooling built-in"
                       };
-                      setWebConfig(prev => ({ ...prev,heroSlides: [...currentSlides, newSlide] });
+                      setWebConfig(prev => ({ ...prev,heroSlides: [...currentSlides, newSlide] }));
                       showFeedback("Added a new hero slide! Fill out parameters below.");
                     }}
                     className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center gap-1 font-bold text-[11px]"
@@ -3219,7 +3196,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 return;
                               }
                               const updated = currentSlides.filter((_, idx) => idx !== sIdx);
-                              setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                              setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               showFeedback("Hero slide removed.");
                             }}
                             disabled={currentSlides.length <= 3}
@@ -3244,7 +3221,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.tag || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, tag: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                               placeholder="THE AXON ECOSYSTEM DEBUT"
@@ -3257,7 +3234,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.tagIcon || "Cpu"}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, tagIcon: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
@@ -3280,7 +3257,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.overlayTitle || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, overlayTitle: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                               placeholder="Infinity Screen"
@@ -3297,7 +3274,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.title || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, title: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-bold text-sm"
                               placeholder="Slide Heading text"
@@ -3311,7 +3288,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.overlayDesc || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, overlayDesc: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                               placeholder="e.g. 12.9 inch ProMotion Touchscreen"
@@ -3325,7 +3302,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             value={slide.description || ""}
                             onChange={(e) => {
                               const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, description: e.target.value } : s);
-                              setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                              setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                             }}
                             className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface h-16"
                             placeholder="Slide short summary of specs and utility..."
@@ -3341,7 +3318,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.primaryBtnText || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, primaryBtnText: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                               placeholder="Explore Device"
@@ -3354,7 +3331,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.primaryActionTarget || "product"}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, primaryActionTarget: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
@@ -3370,7 +3347,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 value={slide.primaryActionValue || ""}
                                 onChange={(e) => {
                                   const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, primaryActionValue: e.target.value } : s);
-                                  setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                  setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                 }}
                                 className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                               >
@@ -3385,7 +3362,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 value={slide.primaryActionValue || ""}
                                 onChange={(e) => {
                                   const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, primaryActionValue: e.target.value } : s);
-                                  setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                  setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                 }}
                                 className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                                 placeholder="e.g. Laptops, Audio, All"
@@ -3403,7 +3380,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.secondaryBtnText || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, secondaryBtnText: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                               placeholder="Shop all hardware"
@@ -3416,7 +3393,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.secondaryActionTarget || "category"}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, secondaryActionTarget: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
@@ -3432,7 +3409,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 value={slide.secondaryActionValue || ""}
                                 onChange={(e) => {
                                   const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, secondaryActionValue: e.target.value } : s);
-                                  setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                  setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                 }}
                                 className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                               >
@@ -3447,7 +3424,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 value={slide.secondaryActionValue || ""}
                                 onChange={(e) => {
                                   const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, secondaryActionValue: e.target.value } : s);
-                                  setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                  setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                 }}
                                 className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                                 placeholder="e.g. Laptops, Audio, All"
@@ -3464,7 +3441,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.targetProductId || ""}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, targetProductId: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
@@ -3482,7 +3459,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={slide.mediaType || "image"}
                               onChange={(e) => {
                                 const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, mediaType: e.target.value } : s);
-                                setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
@@ -3507,7 +3484,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   value={slide.mediaEmbed || ""}
                                   onChange={(e) => {
                                     const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, mediaEmbed: e.target.value } : s);
-                                    setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                    setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono h-20"
                                   placeholder='<iframe width="560" height="315" src="https://www.youtube.com/embed/..." frameborder="0" allowfullscreen></iframe>'
@@ -3524,7 +3501,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   value={slide.mobileMediaEmbed || ""}
                                   onChange={(e) => {
                                     const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, mobileMediaEmbed: e.target.value } : s);
-                                    setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                    setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono h-20"
                                   placeholder='<iframe src="https://player.vimeo.com/video/...&portrait=1" frameborder="0"></iframe>'
@@ -3544,7 +3521,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   value={slide.mediaUrl || ""}
                                   onChange={(e) => {
                                     const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, mediaUrl: e.target.value } : s);
-                                    setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                    setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                                   placeholder="https://images.unsplash.com/photo-..."
@@ -3562,7 +3539,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   value={slide.mobileMediaUrl || ""}
                                   onChange={(e) => {
                                     const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, mobileMediaUrl: e.target.value } : s);
-                                    setWebConfig(prev => ({ ...prev,heroSlides: updated });
+                                    setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                                   placeholder="https://images.unsplash.com/photo-mobile-..."
@@ -3614,7 +3591,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         icon: "Layers",
                         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80"
                       };
-                      setWebConfig(prev => ({ ...prev,categoriesList: [...currentCats, newCat] });
+                      setWebConfig(prev => ({ ...prev,categoriesList: [...currentCats, newCat] }));
                       showFeedback("New category slot added!");
                     }}
                     className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center gap-1 font-bold text-[11px]"
@@ -3634,7 +3611,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <button
                             onClick={() => {
                               const updated = currentCats.filter((_, idx) => idx !== cIdx);
-                              setWebConfig(prev => ({ ...prev,categoriesList: updated });
+                              setWebConfig(prev => ({ ...prev,categoriesList: updated }));
                               showFeedback("Category deleted.");
                             }}
                             className="p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/15 border border-red-500/10 rounded-lg transition-colors"
@@ -3652,7 +3629,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={cat.name || ""}
                               onChange={(e) => {
                                 const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, name: e.target.value } : c);
-                                setWebConfig(prev => ({ ...prev,categoriesList: updated });
+                                setWebConfig(prev => ({ ...prev,categoriesList: updated }));
                               }}
                               className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                               placeholder="e.g. Laptops"
@@ -3665,7 +3642,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={cat.icon || "Layers"}
                               onChange={(e) => {
                                 const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, icon: e.target.value } : c);
-                                setWebConfig(prev => ({ ...prev,categoriesList: updated });
+                                setWebConfig(prev => ({ ...prev,categoriesList: updated }));
                               }}
                               className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                             >
@@ -3686,7 +3663,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             value={cat.desc || ""}
                             onChange={(e) => {
                               const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, desc: e.target.value } : c);
-                              setWebConfig(prev => ({ ...prev,categoriesList: updated });
+                              setWebConfig(prev => ({ ...prev,categoriesList: updated }));
                             }}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                             placeholder="e.g. Axon Book Series"
@@ -3700,7 +3677,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             value={cat.image || ""}
                             onChange={(e) => {
                               const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, image: e.target.value } : c);
-                              setWebConfig(prev => ({ ...prev,categoriesList: updated });
+                              setWebConfig(prev => ({ ...prev,categoriesList: updated }));
                             }}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-[10px] text-on-surface font-mono"
                             placeholder="https://images.unsplash.com/photo-..."
@@ -3747,7 +3724,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Linked Product Item</label>
                         <select
                           value={webConfig.trendingSlot1Product || "axon-buds-pro"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot1Product: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot1Product: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
                           {validProductsList.map(p => (
@@ -3761,7 +3738,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.trendingSlot1Tag || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot1Tag: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot1Tag: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Best Seller"
                         />
@@ -3771,7 +3748,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Overriding Description</label>
                         <textarea
                           value={webConfig.trendingSlot1Desc || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot1Desc: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot1Desc: e.target.value }))}
                           className="w-full h-20 px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Describe slide specs..."
                         />
@@ -3788,7 +3765,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Linked Product Item</label>
                         <select
                           value={webConfig.trendingSlot2Product || "power-capsule-v2"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot2Product: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot2Product: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
                           {validProductsList.map(p => (
@@ -3802,7 +3779,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.trendingSlot2Tag || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot2Tag: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot2Tag: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Power Stage"
                         />
@@ -3812,7 +3789,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Overriding Description</label>
                         <textarea
                           value={webConfig.trendingSlot2Desc || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot2Desc: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot2Desc: e.target.value }))}
                           className="w-full h-20 px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Describe slide specs..."
                         />
@@ -3829,7 +3806,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Linked Product Item</label>
                         <select
                           value={webConfig.trendingSlot3Product || "axon-book-16"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot3Product: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot3Product: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
                           {validProductsList.map(p => (
@@ -3843,7 +3820,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.trendingSlot3Tag || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot3Tag: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot3Tag: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="NEW RELEASE"
                         />
@@ -3853,7 +3830,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Overriding Description</label>
                         <textarea
                           value={webConfig.trendingSlot3Desc || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot3Desc: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot3Desc: e.target.value }))}
                           className="w-full h-20 px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Describe slide specs..."
                         />
@@ -3870,7 +3847,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Linked Product Item</label>
                         <select
                           value={webConfig.trendingSlot4Product || "axon-audio-engine"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot4Product: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot4Product: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
                         >
                           {validProductsList.map(p => (
@@ -3884,7 +3861,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.trendingSlot4Tag || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot4Tag: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot4Tag: e.target.value }))}
                           className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Professional Studio Stage"
                         />
@@ -3894,7 +3871,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Overriding Description</label>
                         <textarea
                           value={webConfig.trendingSlot4Desc || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot4Desc: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,trendingSlot4Desc: e.target.value }))}
                           className="w-full h-20 px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Describe slide specs..."
                         />
@@ -3935,7 +3912,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <input
                       type="text"
                       value={webConfig.spotlightTitle || "The Ecosystem Spotlight"}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,spotlightTitle: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,spotlightTitle: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                       placeholder="The Ecosystem Spotlight"
                     />
@@ -3945,7 +3922,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] text-on-surface-variant uppercase block">Spotlight Description Text</label>
                     <textarea
                       value={webConfig.spotlightDescription || "Each product designed with absolute form-factor alignment and state-of-the-art durability."}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,spotlightDescription: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,spotlightDescription: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface h-16"
                       placeholder="Description details..."
                     />
@@ -3967,7 +3944,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               onChange={(e) => {
                                 const copy = [...currentList];
                                 copy[index] = e.target.value;
-                                setWebConfig(prev => ({ ...prev,spotlightProducts: copy.filter(Boolean) });
+                                setWebConfig(prev => ({ ...prev,spotlightProducts: copy.filter(Boolean) }));
                               }}
                               className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-[11px] text-on-surface font-mono"
                             >
@@ -4015,7 +3992,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <input
                       type="text"
                       value={webConfig.protocolTitle || "Why Shop With Us"}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,protocolTitle: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,protocolTitle: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                       placeholder="Why Shop With Us"
                     />
@@ -4025,7 +4002,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] text-on-surface-variant uppercase block">Detailed Protocol Description</label>
                     <textarea
                       value={webConfig.protocolDescription || "We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support."}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,protocolDescription: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,protocolDescription: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface h-20"
                       placeholder="Protocol value statement details..."
                     />
@@ -4040,7 +4017,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <label className="text-[9px] text-on-surface-variant block uppercase">Badge Icon</label>
                           <select
                             value={webConfig.protocolBadge1Icon || "Zap"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge1Icon: e.target.value })}
+                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge1Icon: e.target.value }))}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                           >
                             <option value="Zap">Zap (Lightning)</option>
@@ -4061,7 +4038,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <input
                             type="text"
                             value={webConfig.protocolBadge1Text || "Fast Delivery"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge1Text: e.target.value })}
+                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge1Text: e.target.value }))}
                             className="w-full px-3 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                             placeholder="0.02ms Sync Latency"
                           />
@@ -4077,7 +4054,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <label className="text-[9px] text-on-surface-variant block uppercase">Badge Icon</label>
                           <select
                             value={webConfig.protocolBadge2Icon || "ShieldCheck"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge2Icon: e.target.value })}
+                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge2Icon: e.target.value }))}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
                           >
                             <option value="Zap">Zap (Lightning)</option>
@@ -4098,7 +4075,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <input
                             type="text"
                             value={webConfig.protocolBadge2Text || "Secure Checkout"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge2Text: e.target.value })}
+                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge2Text: e.target.value }))}
                             className="w-full px-3 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
                             placeholder="Secure Checkout"
                           />
@@ -4144,7 +4121,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerBrandName || "AXON"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandName: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandName: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="AXON"
                         />
@@ -4154,7 +4131,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerBrandSuffix || "TECH"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandSuffix: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandSuffix: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="TECH"
                         />
@@ -4164,7 +4141,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="url"
                           value={webConfig.footerBrandLogoUrl || ""}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandLogoUrl: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandLogoUrl: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="https://..."
                         />
@@ -4184,7 +4161,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <label className="text-[10px] text-on-surface-variant uppercase block">Footer Brand Description</label>
                       <textarea
                         value={webConfig.footerDescription || "Crafting precise premium hardware and accessories harmonized into a seamless high-performance lifestyle ecosystem."}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,footerDescription: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,footerDescription: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface h-20"
                         placeholder="Footer branding text..."
                       />
@@ -4195,7 +4172,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <input
                         type="text"
                         value={webConfig.footerWarrantyText || "Authorized Retailer warranty included"}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,footerWarrantyText: e.target.value })}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,footerWarrantyText: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                         placeholder="Authorized Retailer warranty included"
                       />
@@ -4211,7 +4188,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerNewsletterTitle || "Ecosystem Brief"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerNewsletterTitle: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerNewsletterTitle: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="Ecosystem Brief"
                         />
@@ -4220,7 +4197,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[10px] text-on-surface-variant uppercase block">Newsletter Description</label>
                         <textarea
                           value={webConfig.footerNewsletterDescription || "Subscribe to receive priority notifications of limited hardware drops, system updates, and custom product bundles."}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerNewsletterDescription: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerNewsletterDescription: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface h-16"
                           placeholder="Subscribe to receive..."
                         />
@@ -4236,7 +4213,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerCol1Title || "Ecosystem"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol1Title: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol1Title: e.target.value }))}
                           className="px-2.5 py-1 bg-surface-container border border-outline/15 rounded-xl text-xs font-semibold text-on-surface"
                           placeholder="Ecosystem"
                         />
@@ -4245,7 +4222,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         onClick={() => {
                           const currentLinks = webConfig.footerCol1Links || defaultCol1Links;
                           const newLink = { text: "Custom link text", target: "terms" };
-                          setWebConfig(prev => ({ ...prev,footerCol1Links: [...currentLinks, newLink] });
+                          setWebConfig(prev => ({ ...prev,footerCol1Links: [...currentLinks, newLink] }));
                         }}
                         className="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[9px] font-bold transition-colors"
                       >
@@ -4265,7 +4242,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               onChange={(e) => {
                                 const copy = [...links];
                                 copy[idx] = { ...copy[idx], text: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy });
+                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy }));
                               }}
                               className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface w-full"
                               placeholder="Link Title text"
@@ -4275,7 +4252,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               onChange={(e) => {
                                 const copy = [...links];
                                 copy[idx] = { ...copy[idx], target: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy });
+                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy }));
                               }}
                               className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
                             >
@@ -4288,7 +4265,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <button
                               onClick={() => {
                                 const copy = links.filter((_: any, lIdx: number) => lIdx !== idx);
-                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy });
+                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy }));
                               }}
                               className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                             >
@@ -4308,7 +4285,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerCol2Title || "Support & Care"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol2Title: e.target.value })}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol2Title: e.target.value }))}
                           className="px-2.5 py-1 bg-surface-container border border-outline/15 rounded-xl text-xs font-semibold text-on-surface"
                           placeholder="Support & Care"
                         />
@@ -4317,7 +4294,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         onClick={() => {
                           const currentLinks = webConfig.footerCol2Links || defaultCol2Links;
                           const newLink = { text: "Custom support link", target: "terms" };
-                          setWebConfig(prev => ({ ...prev,footerCol2Links: [...currentLinks, newLink] });
+                          setWebConfig(prev => ({ ...prev,footerCol2Links: [...currentLinks, newLink] }));
                         }}
                         className="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[9px] font-bold transition-colors"
                       >
@@ -4337,7 +4314,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               onChange={(e) => {
                                 const copy = [...links];
                                 copy[idx] = { ...copy[idx], text: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy });
+                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy }));
                               }}
                               className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface w-full"
                               placeholder="Link Title text"
@@ -4347,7 +4324,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               onChange={(e) => {
                                 const copy = [...links];
                                 copy[idx] = { ...copy[idx], target: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy });
+                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy }));
                               }}
                               className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
                             >
@@ -4360,7 +4337,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <button
                               onClick={() => {
                                 const copy = links.filter((_: any, lIdx: number) => lIdx !== idx);
-                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy });
+                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy }));
                               }}
                               className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                             >
@@ -4380,7 +4357,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         onClick={() => {
                           const currentLinks = webConfig.footerBottomLinks || [];
                           const newLink = { text: "New Link", target: "terms" };
-                          setWebConfig(prev => ({ ...prev,footerBottomLinks: [...currentLinks, newLink] });
+                          setWebConfig(prev => ({ ...prev,footerBottomLinks: [...currentLinks, newLink] }));
                         }}
                         className="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[9px] font-bold transition-colors"
                       >
@@ -4397,7 +4374,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             onChange={(e) => {
                               const copy = [...webConfig.footerBottomLinks];
                               copy[idx] = { ...copy[idx], text: e.target.value };
-                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy });
+                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy }));
                             }}
                             className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface w-full"
                             placeholder="Link text"
@@ -4407,7 +4384,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             onChange={(e) => {
                               const copy = [...webConfig.footerBottomLinks];
                               copy[idx] = { ...copy[idx], target: e.target.value };
-                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy });
+                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy }));
                             }}
                             className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
                           >
@@ -4421,7 +4398,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <button
                             onClick={() => {
                               const copy = webConfig.footerBottomLinks.filter((_: any, lIdx: number) => lIdx !== idx);
-                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy });
+                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy }));
                             }}
                             className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                           >
@@ -4438,7 +4415,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <input
                       type="text"
                       value={webConfig.footerCopyrightText || ""}
-                      onChange={(e) => setWebConfig(prev => ({ ...prev,footerCopyrightText: e.target.value })}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev,footerCopyrightText: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                       placeholder="© 2026 AXON TECH INC. ALL RIGHTS RESERVED."
                     />
@@ -4873,7 +4850,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               <input
                 type="text"
                 value={webConfig.whatsappAdminNumber || ""}
-                onChange={(e) => setWebConfig(prev => ({ ...prev,whatsappAdminNumber: e.target.value })}
+                onChange={(e) => setWebConfig(prev => ({ ...prev,whatsappAdminNumber: e.target.value }))}
                 placeholder="254745017979"
                 className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
               />
