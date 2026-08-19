@@ -420,7 +420,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
       });
       const data = await res.json();
       if (!res.ok) {
-        setAuthError(data.error || "Not authorized as admin.");
+        const msg = typeof data.error === "string" ? data.error : JSON.stringify(data.error) || "Not authorized as admin.";
+        setAuthError(msg);
         return;
       }
       localStorage.setItem("axon_admin_token", data.token);
