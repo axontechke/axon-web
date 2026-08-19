@@ -808,6 +808,21 @@ function saveDB(data: any) {
 // USER & ADMIN ROUTING ENDPOINTS
 // ==========================================
 
+// Auth — proxy to Worker
+app.post("/api/auth/firebase-login", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const body = req.body;
+    const result = await remoteDB("POST", "/api/auth/firebase-login", body);
+    if (result.ok) {
+      res.json(result.data);
+    } else {
+      res.status(result.status).json({ error: result.data });
+    }
+  } else {
+    res.status(503).json({ error: "Auth not available in local mode." });
+  }
+});
+
 // 1. PRODUCTS ENDPOINTS
 app.get("/api/products", async (req, res) => {
   if (USE_REMOTE_DB) {
