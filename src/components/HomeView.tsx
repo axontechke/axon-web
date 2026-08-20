@@ -387,15 +387,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* Tag */}
               <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-primary/90 text-white text-[9px] font-semibold tracking-wide w-fit mb-2">
                 <TagIcon className="w-2.5 h-2.5 text-white" />
-                <span>{activeSlide?.tag}</span>
+                <span>{activeSlide?.tag || config?.announcement?.slice(0, 30) || "AXON TECH"}</span>
               </div>
 
               {/* Title & Description */}
               <h1 className="font-display font-black text-xl text-white leading-tight mb-1.5 animate-in fade-in slide-in-from-bottom-1 duration-400">
-                {activeSlide?.title}
+                {activeSlide?.title || config?.heroTitle || "Tech Gadgets & Accessories"}
               </h1>
               <p className="text-white/80 text-[10px] leading-relaxed line-clamp-2 mb-3">
-                {activeSlide?.description}
+                {activeSlide?.description || config?.heroDescription || "Phones, tablets, laptops, earphones and more. Genuine products, fast delivery across Kenya."}
               </p>
 
               {/* CTAs */}
@@ -490,15 +490,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="lg:col-span-7 xl:col-span-7 space-y-2.5 sm:space-y-4 text-left flex flex-col justify-center h-full">
                 <div className="inline-flex items-center gap-2 px-3 py-0.5 sm:py-1 rounded-full bg-primary-fixed/60 text-on-primary-fixed text-[8px] sm:text-[10px] font-semibold tracking-wide w-fit animate-in fade-in slide-in-from-top-1 duration-300" key={`tag-${activeSlide?.id}`}>
                   <TagIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
-                  <span>{activeSlide?.tag}</span>
+                  <span>{activeSlide?.tag || config?.announcement?.slice(0, 30) || "AXON TECH"}</span>
                 </div>
 
                 <h1 className="font-display font-black text-lg sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-on-surface leading-tight tracking-tight flex items-center animate-in fade-in slide-in-from-left-2 duration-400" key={`title-${activeSlide?.id}`}>
-                  {activeSlide?.title}
+                  {activeSlide?.title || config?.heroTitle || "Tech Gadgets & Accessories"}
                 </h1>
 
                 <p className="text-on-surface-variant/85 text-[10px] sm:text-sm leading-relaxed max-w-xl line-clamp-2 sm:line-clamp-none flex items-center animate-in fade-in slide-in-from-left-2 duration-500" key={`desc-${activeSlide?.id}`}>
-                  {activeSlide?.description}
+                  {activeSlide?.description || config?.heroDescription || "Phones, tablets, laptops, earphones and more. Genuine products, fast delivery across Kenya, and warranty included."}
                 </p>
 
                 <div className="flex flex-wrap gap-1.5 sm:gap-3 pt-0.5 sm:pt-1">
