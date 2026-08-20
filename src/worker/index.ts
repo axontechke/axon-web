@@ -9,6 +9,7 @@ export interface Env {
   WHATSAPP_PHONE_NUMBER_ID?: string; // WhatsApp Business phone number ID
   WHATSAPP_ADMIN_NOTIFY_NUMBER?: string; // Admin number to receive order alerts (e.g. 254745017979)
   FIREBASE_WEB_API_KEY?: string;   // Firebase Web API key for ID token verification
+  FIREBASE_PROJECT_ID?: string;    // Firebase Project ID for ID token verification (aud check)
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────
@@ -37,11 +38,9 @@ function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
   if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     return false;
   }
   if (entry.count >= MAX_FAILED_ATTEMPTS) return true;
-  entry.count++;
   return false;
 }
 
@@ -360,115 +359,7 @@ function escapeXml(str: string): string {
 }
 
 // ─── INITIAL DATA (for seeding) ─────────────────────────────
-const INITIAL_PRODUCTS = [
-  {
-    id: "axon-slate-pro", name: "Axon Slate Pro", price: 899,
-    description: "The ultimate canvas for your creativity. Engineered with the new Axon-X1 chip, a stunning Liquid Infinity Display, and all-day battery life to power your most demanding professional workflows.",
-    category: "Tablets", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4",
-    colors: ["Silver", "Slate", "Teal"], storages: ["128GB", "256GB"],
-    rating: 4.8, reviewsCount: 124, inStock: true, isNew: true,
-    specifications: { "Display": "12.9-inch Liquid Infinity Retina, 120Hz ProMotion technology", "Processor": "Axon-X1 Chip with 12-core CPU and 16-core GPU", "Camera": "12MP Ultra Wide Front Camera with Center Focus", "Battery": "Up to 12 hours of surf time on Wi-Fi", "Connectivity": "Wi-Fi 6E, Bluetooth 5.3, USB-C (Thunderbolt 4)" },
-    reviews: [
-      { id: "r1", rating: 5, date: "2 days ago", title: "Perfect for Illustrators", content: "The display quality is unmatched. I've used every major tablet on the market, but the Axon Slate Pro's color accuracy is a game changer.", author: "Julian D.", verified: true },
-      { id: "r2", rating: 5, date: "1 week ago", title: "Blazing Fast", content: "Video editing on the go has never been easier. The X1 chip handles 4K footage without breaking a sweat.", author: "Sarah M.", verified: true }
-    ]
-  },
-  {
-    id: "axon-buds-pro", name: "Axon Buds Pro", price: 249,
-    description: "Great sounding earbuds with active noise cancellation. Comfortable fit, clear calls, and all-day battery.",
-    category: "Audio", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida/AP1WRLveukNAEEoaiw0J0ZyTdRXCDLDQeVriO8RPSO07VqG6LHuiZKbAt4Dg2sTdEfKEVFdO33e963etV-9ywn6q-U126LftC3Q0kB_aQMU-EKLMckpd2aCFL_Pyyl2-AkanE_okTJuZzBGlzw5tb32ajPvIu5lS3mfVY_RnFsbf6v3XkJV5QJbbqsVdId9xnP2Q0qRYv7txovrj2FlvoymhwrD79wh7gY8qUKTseKN2eKJVclJ_JtsDptLGO2E",
-    colors: ["Teal", "White", "Copper"], storages: [],
-    rating: 4.7, reviewsCount: 88, inStock: true, isBestSeller: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-audio-engine", name: "Axon Audio Engine", price: 1299,
-    description: "High-fidelity professional sound processor and amplification stage. Built-in digital audio converters deliver impeccable studio-grade clarity.",
-    category: "Audio", brand: "Quantum",
-    image: "https://lh3.googleusercontent.com/aida/AP1WRLtF6fRV5vlFFWB1ECsMepx4t792VSBdFhAKnum1o61Q3YXOWx6HH_gwHIEmYE_QuN36V6foHZGml2yWCGcw7j-AvkYhXTuf7KX8VJUdhFxLdvakWUedjkYmI5t26ep68EBgsZlnkf-groo1LQeIwsqFFpzH_s4wbrpW79l0Cj5T3yYhV938-LgIC1dTh7re0qDuNamtslKnRNz6PBW-jIln1kGdc2SGYcqNrnCaQV34-uI_7AzE1_0E5w",
-    colors: [], storages: [], rating: 4.9, reviewsCount: 42, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "power-capsule-v2", name: "Power Capsule V2", price: 79,
-    description: "Modern modular power bank and high-speed multi-charging capsule. Perfect for maintaining all your portable gear powered on the move.",
-    category: "Power", brand: "Volt",
-    image: "https://lh3.googleusercontent.com/aida/AP1WRLveukNAEEoaiw0J0ZyTdRXCDLDQeVriO8RPSO07VqG6LHuiZKbAt4Dg2sTdEfKEVFdO33e963etV-9ywn6q-U126LftC3Q0kB_aQMU-EKLMckpd2aCFL_Pyyl2-AkanE_okTJuZzBGlzw5tb32ajPvIu5lS3mfVY_RnFsbf6v3XkJV5QJbbqsVdId9xnP2Q0qRYv7txovrj2FlvoymhwrD79wh7gY8qUKTseKN2eKJVclJ_JtsDptLGO2E",
-    colors: [], storages: [], rating: 4.5, reviewsCount: 56, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-buds-light", name: "Axon Buds Light", price: 129,
-    description: "Lightweight true wireless earphones. Balanced sound delivery, rapid charge, and comfort-focused ergonomics for extended daily wear.",
-    category: "Audio", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida/AP1WRLveukNAEEoaiw0J0ZyTdRXCDLDQeVriO8RPSO07VqG6LHuiZKbAt4Dg2sTdEfKEVFdO33e963etV-9ywn6q-U126LftC3Q0kB_aQMU-EKLMckpd2aCFL_Pyyl2-AkanE_okTJuZzBGlzw5tb32ajPvIu5lS3mfVY_RnFsbf6v3XkJV5QJbbqsVdId9xnP2Q0qRYv7txovrj2FlvoymhwrD79wh7gY8qUKTseKN2eKJVclJ_JtsDptLGO2E",
-    colors: ["Charcoal", "White", "Coral"], storages: [],
-    rating: 4.3, reviewsCount: 212, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-slate-air", name: "Axon Slate Air", price: 899,
-    description: "Ultra-thin and lightweight tablet for work and entertainment. Sharp display and long battery life.",
-    category: "Tablets", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4",
-    colors: [], storages: [], rating: 4.6, reviewsCount: 37, inStock: true, isNew: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-book-16", name: "Axon Book 16", price: 1499,
-    description: "The peak of performance. A majestic 16-inch high-definition screen laptop powered by multi-core processors. Designed to conquer compile tasks, graphic assets, and audio rendering.",
-    category: "Laptops", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCVr1FxtLe8TbNj6bNHryEEvqN5vuC9zVmvyjSBMCLsrwPo3JdTj4vId_x443V3krw6-5rOnxLZ_2zD3PAeVt2oKGos2hpJiJd6WRfkOyJUXcvUaSX8CKhmP_mFhYGOYmXkV0z9OwijAUuSuSFbRGC11lVDvKUm-M9oecWJYjWa6bUvglSKaH_0dCC5B-_Mk3tSNdIUMpjYg6VSKYpL49Bikl4Fly_bss8eFgZcC35adc7jlPlqYWsRXMeOeaIWzR7ALJ_oZt5teTc",
-    colors: ["Silver", "Space Gray"], storages: [],
-    rating: 4.8, reviewsCount: 95, inStock: true, isNew: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-studio-pro", name: "Axon Studio Pro", price: 349,
-    description: "Premium over-ear headphones with clear sound, comfortable ear cushions, and long battery life.",
-    category: "Audio", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBRvwmNNr252qjRvYpv41anXkgHswtvsh4_oBZIetnYKzgmb8H1iuxt6POQV6hHTL8DIVJ_tQlo9Tn05GU6-Cwqz28ZWhQKTNuI2ODbutDc1ajs-hlXalwSxA8kyTkAYfYsV91t-mXIzVZLGrybfx1_3mUmuuB3UuhPp9W7m741ILGht_3BbzvQ8tgoET9AtRBzRvqvGHgNBKYTdsWfJBjjgvQaW3Ihb4qQ1siyjGUfkIELAIsnSsQFLzBlWPHKEq29bqg_cL8yYzQ",
-    colors: ["Teal", "Charcoal"], storages: [],
-    rating: 4.9, reviewsCount: 104, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "power-hub-pro", name: "Power Hub Pro", price: 79,
-    description: "Desktop charging hub with multiple ports. Charges your laptop, phone, and earbuds at the same time.",
-    category: "Power", brand: "Volt",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAguwcGqjb9LoFvkQuoLm9PyB-YiY9rpSLZGrIQTjKs9iyoPeAp_QJAlMjS9rgLQox3XCd2W5TvnFvjtjK4lao6dD3MoInlv8qzTiLo_BRBQbDDBuHPr7x_vnhcKvxe3yHk_eLN-7fjBpm4TH7snY3pybXL5p7oHbfR9-VWOEW_W3RngotoNwCOIWuVbozQSldd3RKirANbfJX2PnYrq3BEeqZc91-xaeIFKSPF1W_GXKdzPU5sA1AufKx7T9wkjcDBrERR57PXi4I",
-    colors: [], storages: [], rating: 4.7, reviewsCount: 39, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-click-2", name: "Axon Click 2", price: 129,
-    description: "Slim mechanical keyboard with satisfying clicky keys and solid build quality. Great for typing and gaming.",
-    category: "Accessories", brand: "Aero",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD4iPQ0lE17HRf94txHDCGvmGV2gQGxREcuM873it2hytM15adF2iJYLPOjT2Dc85gi6pmDnL1RqzDfCHE5Y4I9KbKh5TX8nWue3VyClX7zPRnTFLpy3e7KWSTFUvXNU3GLmW2Aj39YRcL3CeBYzKT6BlsKo9ULLrUlbmgZm7xxeFJFLFtBg5KyhboMWIzV8T41ymBIDKt-6bLpAKRDH9SumOIxcon3t9UpYCZLLfBd2-LZtrOV8SdSys42DkWgVQgjJV-V-dmjoNw",
-    colors: [], storages: [], rating: 4.6, reviewsCount: 71, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-book-14", name: "Axon Book 14", price: 1299,
-    description: "A compact professional laptop engineered in aerospace grade alloy. Exceptional battery longevity paired with blazing power performance.",
-    category: "Laptops", brand: "Axon",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCWWH3i4J3iXG_I4FZHMSvgTxWn9_0eb4hhMuCK2dUH6XqZi7_XgzM8nxFVjvzRFgp33VGU7Ys-zL7k3SmC7pwqCGNYTX9ywr2qNofTHCQMau5baahE4ZL0terIv7iNG4ePsw_9FWKW8G0aCxz82nRZpZT3P7Y1NJPCgbLuTDVxiaI3-kdQV2WbnUAiAHmdFndSkp-c7t7Iif3akwrgt9caStnANWrJunocGZWqgjA_WPoOpdPMX_rJpVkM_nip1JgnVjDBNOAXUSM",
-    colors: [], storages: [], rating: 4.7, reviewsCount: 81, inStock: true,
-    specifications: {}, reviews: []
-  },
-  {
-    id: "axon-phone-1-pro", name: "Axon Phone 1 Pro", price: 799,
-    description: "State-of-the-art smartphone boasting an Ultra-Retina OLED display, the Axon-M1 neural processor, and a high-fidelity triple camera system with 10x optical zoom.",
-    category: "Phones", brand: "Axon",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
-    colors: ["Obsidian", "Pearl", "Emerald"], storages: ["128GB", "256GB", "512GB"],
-    rating: 4.8, reviewsCount: 142, inStock: true, isNew: true,
-    specifications: { "Display": "6.7-inch OLED Super Retina, 120Hz refresh rate", "Processor": "Axon-M1 Neural Engine with AI co-processing", "Camera": "Triple system: 50MP Wide, 48MP Ultra-Wide, 48MP Telephoto", "Battery": "Up to 24 hours typical usage", "Durability": "IP68 water and dust resistance" },
-    reviews: []
-  }
-];
+const INITIAL_PRODUCTS: any[] = [];
 
 
 const INITIAL_CONFIG: Record<string, any> = {
@@ -476,18 +367,24 @@ const INITIAL_CONFIG: Record<string, any> = {
   showAnnouncement: true,
   heroTitle: "Tech Gadgets & Accessories.",
   heroDescription: "Phones, tablets, laptops, earphones and more. Genuine products, fast delivery across Kenya, and warranty included.",
-  heroSlides: [
-    { id: "ecosystem", tag: "NEW ARRIVALS", tagIcon: "Cpu", title: "Tablets for Work & Play.", description: "Meet the Axon Slate Pro. Beautiful display, fast processor, and all-day battery life. Perfect for students, professionals, and creatives.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-slate-pro", secondaryBtnText: "Shop all products", secondaryActionTarget: "category", secondaryActionValue: "All", mediaType: "image", mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png", mobileMediaUrl: "", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "12.9\" Display", overlayDesc: "120Hz Touchscreen", targetProductId: "axon-slate-pro" },
-    { id: "phone-video", tag: "MOBILE LAUNCH", tagIcon: "Zap", title: "Axon Phone 1 Pro", description: "Beautiful OLED display, amazing cameras, and long battery life. The phone that just works — no fuss.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-phone-1-pro", secondaryBtnText: "View Phones", secondaryActionTarget: "category", secondaryActionValue: "Phones", mediaType: "video", mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4", mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "OLED Display", overlayDesc: "120Hz Refresh Rate", targetProductId: "axon-phone-1-pro" },
-    { id: "book-laptop", tag: "LAPTOP LAUNCH", tagIcon: "Laptop", title: "Axon Book 16 Laptop.", description: "Fast, light, and reliable. Great for work, school, and everything in between.", primaryBtnText: "Shop Now", primaryActionTarget: "product", primaryActionValue: "axon-book-16", secondaryBtnText: "Shop Laptops", secondaryActionTarget: "category", secondaryActionValue: "Laptops", mediaType: "video", mediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mobileMediaUrl: "https://player.vimeo.com/external/435674703.sd.mp4?s=7fdf18621350a413d3e2751d722b07e92397e5ad&profile_id=139&oauth2_token_id=57447761", mediaEmbed: "", mobileMediaEmbed: "", overlayTitle: "16\" Display", overlayDesc: "All-Day Battery", targetProductId: "axon-book-16" }
-  ],
+  heroSlides: [],
+  navbarLogoUrl: "",
+  ogImage: "",
+  categoryThumbnails: {
+    "Laptops": "",
+    "Tablets": "",
+    "Audio": "",
+    "Phones": "",
+    "Accessories": "",
+    "Power": ""
+  },
   activePromos: [
     { code: "AXON15", discount: 15, description: "15% discount on products" },
     { code: "SAVE20", discount: 20, description: "20% off all accessories" }
   ],
-  socialTwitter: "https://twitter.com/axontech",
-  socialGithub: "https://github.com/axontech",
-  socialLinkedIn: "https://linkedin.com/company/axontech",
+  socialTwitter: "",
+  socialGithub: "",
+  socialLinkedIn: "",
   contactEmail: "synergy@axon.net",
   supportEmail: "support@axon.net",
   privacyPolicy: "AXON TECH collects information directly relevant to fulfilling your physical hardware logistics and ensuring high-fidelity system diagnostics.",
@@ -499,7 +396,7 @@ const INITIAL_CONFIG: Record<string, any> = {
   aiCreditsUsed: 0,
   footerBrandName: "AXON",
   footerBrandSuffix: "TECH",
-  footerBrandLogoUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png",
+  footerBrandLogoUrl: "",
   footerDescription: "Your trusted online store for premium tech and accessories across Kenya.",
   footerWarrantyText: "Authorized Retailer warranty included",
   footerCol1Title: "Shop",
@@ -539,13 +436,13 @@ const INITIAL_CONTACT: Record<string, any> = {
   tagline: "Your Trusted Technology Partner in Kenya",
   emails: { sales: "sales@axontechke.com", info: "info@axontechke.com", general: "axontechkenya@gmail.com" },
   phones: { primary: "+254745017979", formattedPrimary: "+254 745 017979", whatsapp: "https://wa.me/254745017979" },
-  location: { city: "Nairobi", country: "Kenya", addressString: "Simara Mall, Ground Floor, Shop G50, Nairobi, Kenya", icon: "https://img.icons8.com/color/48/marker.png", embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.22384758913!2d36.815349!3d-1.286389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f10d3e527d73d%3A0xc6cb1c7df44a9!2sSimara%20Mall!5e0!3m2!1sen!2ske!4v1721012345678!5m2!1sen!2ske", externalUrl: "https://maps.google.com/?q=Simara+Mall+Ground+Floor+Shop+G50+Nairobi" },
+  location: { city: "Nairobi", country: "Kenya", addressString: "Simara Mall, Ground Floor, Shop G50, Nairobi, Kenya", icon: "", embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.22384758913!2d36.815349!3d-1.286389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f10d3e527d73d%3A0xc6cb1c7df44a9!2sSimara%20Mall!5e0!3m2!1sen!2ske!4v1721012345678!5m2!1sen!2ske", externalUrl: "https://maps.google.com/?q=Simara+Mall+Ground+Floor+Shop+G50+Nairobi" },
   businessHours: { weekdays: "Monday - Saturday: 8:00 AM - 6:00 PM EAT", supportCall: "8:00 AM - 8:00 PM EAT" },
   socials: [
-    { name: "WhatsApp", url: "https://wa.me/254745017979", icon: "https://img.icons8.com/color/48/whatsapp.png" },
-    { name: "Instagram", url: "https://instagram.com/axontechke", icon: "https://img.icons8.com/color/48/instagram-new--v1.png" },
-    { name: "Facebook", url: "https://facebook.com/axontechke", icon: "https://img.icons8.com/color/48/facebook-new.png" },
-    { name: "TikTok", url: "https://tiktok.com/@axontechke", icon: "https://img.icons8.com/color/48/tiktok.png" }
+    { name: "WhatsApp", url: "https://wa.me/254745017979", icon: "" },
+    { name: "Instagram", url: "https://instagram.com/axontechke", icon: "" },
+    { name: "Facebook", url: "https://facebook.com/axontechke", icon: "" },
+    { name: "TikTok", url: "https://tiktok.com/@axontechke", icon: "" }
   ]
 };
 
@@ -565,7 +462,7 @@ const INITIAL_ORDERS = [
     totalUsd: 988.9,
     hasKsh: 1,
     payment: JSON.stringify({ lastFour: "4242" }),
-    items: JSON.stringify([{ id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Space Gray", storage: "256GB", image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4" }]),
+    items: JSON.stringify([{ id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Space Gray", storage: "256GB", image: "" }]),
     history: JSON.stringify([
       { status: "pending", time: "2024-01-15T10:30:00Z", notes: "Order placed. Awaiting payment confirmation." },
       { status: "packaged", time: "2024-01-15T14:00:00Z", notes: "Order sealed and quality checked." },
@@ -589,7 +486,7 @@ const INITIAL_ORDERS = [
     hasKsh: 1,
     payment: JSON.stringify({ lastFour: "1234" }),
     items: JSON.stringify([
-      { id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Space Gray", storage: "256GB", image: "https://lh3.googleusercontent.com/aida/AP1WRLsEaA-6jW08RfQxSwo9FHWNJjhM-Suo4qO0q0TAZHUyl0fTawdKbiNaKINqnvUByZVhMmJ5f5tFNwwKpmZf-SWBa3G92PMNYFrErwe-94XGSCE7KEedOSkYQ6-eT-o7WIQhURb_7afTAT-7pCwcd1SFHZnc0fvSdUR8J02RUertATSpdkffarq5qs40j8MjaOLFr_4DKuAA3u6Wg5xwWeIzSnBrCGN2RezoiK2HYiauNE90S3qIbZM48e4" },
+      { id: "axon-slate-pro", name: "Axon Slate Pro", price: 899, quantity: 1, color: "Space Gray", storage: "256GB", image: "" },
       { id: "axon-pen-pro", name: "Axon Pen Pro", price: 899, quantity: 1, color: "White", storage: "128GB", image: "" }
     ]),
     history: JSON.stringify([
@@ -678,17 +575,20 @@ async function seedDatabase(db: D1Database): Promise<void> {
 }
 
 // ─── SEED SUPER ADMIN ────────────────────────────────────────
-async function seedSuperAdmin(db: D1Database, email: string, password: string): Promise<void> {
-  const existing = await db.prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?)").bind(email).first<{ id: string }>();
-  if (existing) return;
+async function seedSuperAdmin(db: D1Database, emails: string, password: string): Promise<void> {
+  const emailList = emails.split(",").map(e => e.trim()).filter(Boolean);
+  for (const email of emailList) {
+    const existing = await db.prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?)").bind(email).first<{ id: string }>();
+    if (existing) continue;
 
-  const salt = generateSalt();
-  const passwordHash = await hashPassword(password, salt);
-  const id = crypto.randomUUID();
+    const salt = generateSalt();
+    const passwordHash = await hashPassword(password, salt);
+    const id = crypto.randomUUID();
 
-  await db.prepare(
-    "INSERT INTO users (id, email, passwordHash, salt, role) VALUES (?, ?, ?, ?, 'super-admin')"
-  ).bind(id, email, passwordHash, salt).run();
+    await db.prepare(
+      "INSERT INTO users (id, email, passwordHash, salt, role) VALUES (?, ?, ?, ?, 'super-admin')"
+    ).bind(id, email, passwordHash, salt).run();
+  }
 }
 
 // ─── AUTH HANDLER ─────────────────────────────────────────────
@@ -730,27 +630,30 @@ async function firebaseLogin(req: Request, env: Env): Promise<Response> {
   const { idToken } = await jsonBody<{ idToken?: string }>(req);
   if (!idToken) return jsonError("ID token required.", 400);
 
-  // Verify the Firebase ID token via Google's tokeninfo endpoint
-  const tokenInfoRes = await fetch(
-    `https://oauth2.googleapis.googleapis.com/tokeninfo?id_token=${idToken}`
+  // Verify Firebase ID Token using Google Identity Toolkit
+  const apiKey = env.FIREBASE_WEB_API_KEY || "AIzaSyBpnE2w32levmkDgKicxjYzg7W5nBeu_Po";
+  const verifyRes = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken })
+    }
   );
-  const tokenInfo = await tokenInfoRes.json() as { email?: string; aud?: string; sub?: string };
+  
+  const verifyData = await verifyRes.json() as any;
 
-  if (!tokenInfo.email) {
+  if (!verifyData.users || verifyData.users.length === 0) {
     recordFailedAttempt(clientIp);
     return jsonError("Invalid ID token.", 401);
   }
 
-  // Verify the audience matches our Firebase Web API key
-  if (tokenInfo.aud !== env.FIREBASE_WEB_API_KEY) {
-    recordFailedAttempt(clientIp);
-    return jsonError("Token audience mismatch.", 401);
-  }
+  const email = verifyData.users[0].email;
 
-  // Look up the user by email — must be an admin or super-admin
+  // Look up user — must exist with admin or super-admin role
   const user = await env.DB.prepare(
     "SELECT id, email, role FROM users WHERE LOWER(email) = LOWER(?) AND role IN ('admin', 'super-admin')"
-  ).bind(tokenInfo.email).first<{ id: string; email: string; role: string }>();
+  ).bind(email).first<{ id: string; email: string; role: string }>();
 
   if (!user) {
     recordFailedAttempt(clientIp);
@@ -1556,19 +1459,19 @@ async function scrapeUrl(req: Request, _env: Env): Promise<Response> {
 
   if (normalizedUrl.includes("iphone-15")) {
     name = "Apple iPhone 15 Pro Max (Titanium)"; priceKsh = 167700; brand = "Apple";
-    image = "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80";
+    image = "";
     description = "Elite aerospace titanium design with custom Action button, M17 Pro cinematic processing core.";
     specifications = { "Chipset": "Apple A17 Pro (3nm)", "Screen": "6.7 inch Super Retina XDR OLED" };
   } else if (normalizedUrl.includes("s24-ultra") || normalizedUrl.includes("samsung")) {
     name = "Samsung Galaxy S24 Ultra"; priceKsh = 154700; brand = "Samsung";
-    image = "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80";
+    image = "";
     description = "Powered by Galaxy AI with 200MP Quad Telephoto camera system.";
     specifications = { "Chipset": "Snapdragon 8 Gen 3", "Screen": "6.8 inch Dynamic AMOLED 2X" };
   } else {
     let parsedName = url.replace(/https?:\/\/(www\.)?/, "").replace(/\.(com|co\.ke|org|net|ke)/, "").split("/").filter(Boolean).pop() || "Gadget";
     name = parsedName.replace(/[-_]+/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
     priceKsh = 85000;
-    image = "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80";
+    image = "";
     description = "Imported real-time gadget from Kenyan e-commerce marketplaces.";
   }
 
@@ -1606,9 +1509,9 @@ async function syncRealtimeProducts(_req: Request, env: Env): Promise<Response> 
   let syncedCount = 0;
 
   const fallbackProducts = [
-    { id: "pp-iphone-15-pro-max", name: "iPhone 15 Pro Max (Titanium)", price: 1290, priceKsh: 167700, category: "Phones", brand: "Apple", image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80", rating: 4.9, reviewsCount: 342, description: "Official listing from PhonePlace Kenya." },
-    { id: "pp-samsung-s24-ultra", name: "Samsung Galaxy S24 Ultra", price: 1190, priceKsh: 154700, category: "Phones", brand: "Samsung", image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80", rating: 4.8, reviewsCount: 219, description: "Official listing from PhonePlace Kenya." },
-    { id: "is-macbook-pro-16", name: "MacBook Pro 16 M3 Max", price: 3290, priceKsh: 427700, category: "Laptops", brand: "Apple", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80", rating: 4.9, reviewsCount: 184, description: "Official listing from iStreet Kenya." }
+    { id: "pp-iphone-15-pro-max", name: "iPhone 15 Pro Max (Titanium)", price: 1290, priceKsh: 167700, category: "Phones", brand: "Apple", image: "", rating: 4.9, reviewsCount: 342, description: "Official listing from PhonePlace Kenya." },
+    { id: "pp-samsung-s24-ultra", name: "Samsung Galaxy S24 Ultra", price: 1190, priceKsh: 154700, category: "Phones", brand: "Samsung", image: "", rating: 4.8, reviewsCount: 219, description: "Official listing from PhonePlace Kenya." },
+    { id: "is-macbook-pro-16", name: "MacBook Pro 16 M3 Max", price: 3290, priceKsh: 427700, category: "Laptops", brand: "Apple", image: "", rating: 4.9, reviewsCount: 184, description: "Official listing from iStreet Kenya." }
   ];
 
   for (const p of fallbackProducts) {

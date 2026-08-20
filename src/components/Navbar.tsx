@@ -18,6 +18,7 @@ interface NavbarProps {
   isAdminAuthenticated?: boolean;
   onAdminLogout?: () => void;
   products?: Product[];
+  config?: any;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -36,6 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   isAdminAuthenticated = false,
   onAdminLogout,
   products = [],
+  config,
 }) => {
   // Helper to convert pathname to screen name for active state comparison
   const getScreenFromPath = (path: string): AppScreen => {
@@ -187,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           id="nav-logo-container"
         >
           <img
-            src="https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png"
+            src={config?.navbarLogoUrl || undefined}
             alt="Axon Logo"
             className="w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
             referrerPolicy="no-referrer"
@@ -414,9 +416,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => { handleNavClick("Home"); }} 
                 className="flex flex-row items-center cursor-pointer group shrink-0"
               >
-                <img 
-                  src="https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png" 
-                  alt="Axon Logo" 
+                <img
+                  src={config?.navbarLogoUrl || ""}
+                  alt="Axon Logo"
                   className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
                   referrerPolicy="no-referrer"
                 />

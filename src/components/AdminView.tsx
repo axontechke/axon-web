@@ -136,68 +136,68 @@ interface WebConfig {
 }
 
 const defaultCategories = [
-  { name: "Laptops", desc: "Axon Book Series", icon: "Laptop", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=200&q=80" },
-  { name: "Tablets", desc: "Axon Slate Series", icon: "Tablet", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=200&q=80" },
-  { name: "Audio", desc: "Acoustic Pods", icon: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=80" },
-  { name: "Phones", desc: "Axon Phones", icon: "Smartphone", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=200&q=80" },
-  { name: "Accessories", desc: "Ecosystem Ext.", icon: "Layers", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80" },
-  { name: "Power", desc: "Induction", icon: "Plug", image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?auto=format&fit=crop&w=200&q=80" }
+  { name: "Laptops", desc: "", icon: "Laptop", image: "" },
+  { name: "Tablets", desc: "", icon: "Tablet", image: "" },
+  { name: "Audio", desc: "", icon: "Headphones", image: "" },
+  { name: "Phones", desc: "", icon: "Smartphone", image: "" },
+  { name: "Accessories", desc: "", icon: "Layers", image: "" },
+  { name: "Power", desc: "", icon: "Plug", image: "" }
 ];
 
 const defaultSlides = [
   {
     id: "ecosystem",
-    tag: "THE AXON ECOSYSTEM DEBUT",
+    tag: "",
     tagIcon: "Cpu",
-    title: "Integrated Form & Function.",
-    description: "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 silicon chip, a liquid Infinity Display, and multi-device cross-talk. Powering your ultimate creative studio anywhere.",
-    primaryBtnText: "Explore Slate Pro",
-    primaryActionTarget: "product",
-    primaryActionValue: "axon-slate-pro",
-    secondaryBtnText: "Shop all hardware",
-    secondaryActionTarget: "category",
-    secondaryActionValue: "All",
+    title: "",
+    description: "",
+    primaryBtnText: "",
+    primaryActionTarget: "",
+    primaryActionValue: "",
+    secondaryBtnText: "",
+    secondaryActionTarget: "",
+    secondaryActionValue: "",
     mediaType: "image",
-    mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png",
-    mediaAlt: "Axon Tech Ecosystem Showcase",
-    overlayTitle: "Infinity Screen",
-    overlayDesc: "12.9 inch ProMotion Touchscreen"
+    mediaUrl: "",
+    mediaAlt: "",
+    overlayTitle: "",
+    overlayDesc: ""
   },
   {
     id: "phone-video",
-    tag: "CINEMATIC HARDWARE PREVIEW",
+    tag: "",
     tagIcon: "Zap",
-    title: "Axon Phone 1 Pro.",
-    description: "The ultimate mobile powerhouse. Crafted with a space-grade solid titanium unibody, an active liquid dynamic screen, and a pioneering cinematic triple-camera system.",
-    primaryBtnText: "Explore Phone Pro",
-    primaryActionTarget: "product",
-    primaryActionValue: "axon-phone-1-pro",
-    secondaryBtnText: "View Smart Devices",
-    secondaryActionTarget: "category",
-    secondaryActionValue: "Phones",
+    title: "",
+    description: "",
+    primaryBtnText: "",
+    primaryActionTarget: "",
+    primaryActionValue: "",
+    secondaryBtnText: "",
+    secondaryActionTarget: "",
+    secondaryActionValue: "",
     mediaType: "video",
-    mediaUrl: "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0543f24b4f3d02e071a7f0d23979155&profile_id=139&oauth2_token_id=57447761",
-    mediaAlt: "Axon Phone 1 Pro Video Showcase",
-    overlayTitle: "Optic Zoom",
-    overlayDesc: "10x Hardware Periscope"
+    mediaUrl: "",
+    mediaAlt: "",
+    overlayTitle: "",
+    overlayDesc: ""
   },
   {
     id: "book-laptop",
-    tag: "THE M3 SILICON BEAST",
+    tag: "",
     tagIcon: "ShieldCheck",
-    title: "Axon Book 16 Ultra.",
-    description: "Uncompromised power. Powered by the modular Axon silicon architecture with high-fidelity liquid-vapor cooling array, and outstanding operational compiler performance.",
-    primaryBtnText: "Explore Book 16",
-    primaryActionTarget: "product",
-    primaryActionValue: "axon-book-16",
-    secondaryBtnText: "Configure Laptops",
-    secondaryActionTarget: "category",
-    secondaryActionValue: "Laptops",
+    title: "",
+    description: "",
+    primaryBtnText: "",
+    primaryActionTarget: "",
+    primaryActionValue: "",
+    secondaryBtnText: "",
+    secondaryActionTarget: "",
+    secondaryActionValue: "",
     mediaType: "image",
-    mediaUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1920&q=80",
-    mediaAlt: "Axon Book 16 Ultra Internal Architecture",
-    overlayTitle: "Silicon Core",
-    overlayDesc: "Unified Memory Capable"
+    mediaUrl: "",
+    mediaAlt: "",
+    overlayTitle: "",
+    overlayDesc: ""
   }
 ];
 
@@ -465,7 +465,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       price: 199,
       category: "Audio",
       brand: "Axon",
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+      image: "",
       description: "Superior premium design built for continuous performance.",
       rating: 4.8,
       reviewsCount: 1,
@@ -1332,7 +1332,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Gross Revenue</span>
                 <div className="p-1.5 rounded-lg bg-green-500/10 text-green-600"><DollarSign className="w-4 h-4" /></div>
               </div>
-              <h3 className="font-display font-black text-2xl text-on-surface">${analytics.totalRevenue.toFixed(2)}</h3>
+              <h3 className="font-display font-black text-2xl text-on-surface">KSh {analytics.totalRevenue.toLocaleString()}</h3>
               <p className="text-[9px] text-on-surface-variant/60 flex items-center gap-1">
                 <TrendingUp className="w-3.5 h-3.5 text-green-500" />
                 <span>+12.4% from last checkout block</span>
@@ -1353,7 +1353,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Average Cart Size</span>
                 <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600"><TrendingUp className="w-4 h-4" /></div>
               </div>
-              <h3 className="font-display font-black text-2xl text-on-surface">${analytics.avgOrderValue.toFixed(2)}</h3>
+              <h3 className="font-display font-black text-2xl text-on-surface">KSh {analytics.avgOrderValue.toLocaleString()}</h3>
               <p className="text-[9px] text-on-surface-variant/60">High ecosystem cross-talk buying ratio</p>
             </div>
 
@@ -1402,12 +1402,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} />
                     <XAxis dataKey="name" stroke="#8f7065" fontSize={10} tickLine={false} />
-                    <YAxis stroke="#8f7065" fontSize={10} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                    <YAxis stroke="#8f7065" fontSize={10} tickLine={false} tickFormatter={(v) => `KSh ${v.toLocaleString()}`} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: "#1e1d1c", borderColor: "#8f7065", borderRadius: "12px" }} 
                       labelStyle={{ color: "#ffdbce", fontWeight: "bold" }}
                       itemStyle={{ color: "#ffffff" }}
-                      formatter={(v: any) => [`$${v} USD`, "Revenue"]}
+                      formatter={(v: any) => [`KSh ${v.toLocaleString()}`, "Revenue"]}
                     />
                     <Area type="monotone" dataKey="revenue" stroke="#a73a00" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" />
                   </AreaChart>
@@ -1460,7 +1460,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <Cell key={`cell-${index}`} fill={color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(v: any) => [`$${v}`, "Revenue"]} />
+                        <Tooltip formatter={(v: any) => [`KSh ${v.toLocaleString()}`, "Revenue"]} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -1702,7 +1702,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <div className="bg-surface border border-outline/10 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
                       <div className="relative aspect-video bg-black/5 flex items-center justify-center overflow-hidden">
                         <img
-                          src={stagedProduct.image || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80"}
+                          src={stagedProduct.image || ""}
                           alt={stagedProduct.name}
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
@@ -1980,7 +1980,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           const lines = e.target.value.split("\n").map(l => l.trim()).filter(Boolean);
                           setEditingProduct({ ...editingProduct, images: lines });
                         }}
-                        placeholder="https://images.unsplash.com/example-1.jpg&#10;https://images.unsplash.com/example-2.jpg"
+                        placeholder="https://example.com/image1.jpg"
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none h-20"
                       />
                     </div>
@@ -3040,6 +3040,28 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         placeholder="support@axon.net"
                       />
                     </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-on-surface-variant uppercase block">Navbar Logo URL</label>
+                      <input
+                        type="url"
+                        value={webConfig.navbarLogoUrl || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,navbarLogoUrl: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
+                        placeholder="https://example.com/logo.png"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-on-surface-variant uppercase block">OG Image URL (social sharing)</label>
+                      <input
+                        type="url"
+                        value={webConfig.ogImage || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev,ogImage: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
+                        placeholder="https://example.com/og-image.png"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -3169,7 +3191,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         secondaryActionTarget: "category",
                         secondaryActionValue: "Accessories",
                         mediaType: "image",
-                        mediaUrl: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=800&q=80",
+                        mediaUrl: "",
                         mediaAlt: "Neural Core Preview Image",
                         overlayTitle: "Neural Core",
                         overlayDesc: "Vapor Chamber cooling built-in"
@@ -3514,7 +3536,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono h-20"
-                                  placeholder='<iframe src="https://player.vimeo.com/video/...&portrait=1" frameborder="0"></iframe>'
+                                  placeholder='<iframe src="https://player.example.com/video/123" frameborder="0"></iframe>'
                                 />
                                 <p className="text-[8px] text-on-surface-variant/60">Vertical 9:16 optimized embed code. Dynamically rendered on screens smaller than 768px wide.</p>
                               </div>
@@ -3534,7 +3556,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
-                                  placeholder="https://images.unsplash.com/photo-..."
+                                  placeholder="https://example.com/image.jpg"
                                 />
                                 <p className="text-[8px] text-on-surface-variant/60">Fully qualified secure URL pointing to high-resolution landscape assets.</p>
                               </div>
@@ -3552,7 +3574,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                                   }}
                                   className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
-                                  placeholder="https://images.unsplash.com/photo-mobile-..."
+                                  placeholder="https://example.com/mobile-image.jpg"
                                 />
                                 <p className="text-[8px] text-on-surface-variant/60">Optimized portrait size asset. Enhances mobile rendering speed and visual framing.</p>
                               </div>
@@ -3596,10 +3618,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     onClick={() => {
                       const currentCats = webConfig.categoriesList || defaultCategories;
                       const newCat = {
-                        name: "Smart Gear",
-                        desc: "Next-gen biometric trackers",
+                        name: "",
+                        desc: "",
                         icon: "Layers",
-                        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80"
+                        image: ""
                       };
                       setWebConfig(prev => ({ ...prev,categoriesList: [...currentCats, newCat] }));
                       showFeedback("New category slot added!");
@@ -3690,7 +3712,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               setWebConfig(prev => ({ ...prev,categoriesList: updated }));
                             }}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-[10px] text-on-surface font-mono"
-                            placeholder="https://images.unsplash.com/photo-..."
+                            placeholder="https://example.com/image.jpg"
                           />
                         </div>
                       </div>
@@ -4585,6 +4607,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         />
                       </div>
                     </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-on-surface-variant uppercase block">Location Icon URL</label>
+                      <input
+                        type="text"
+                        value={contactData.location?.icon || ""}
+                        onChange={(e) => setContactData({ ...contactData, location: { ...contactData.location, icon: e.target.value } })}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                        placeholder="https://example.com/marker.png"
+                      />
+                    </div>
                   </div>
 
                   {/* Business Hours */}
@@ -4619,28 +4651,41 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Social Media Links</h4>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                       {(contactData.socials || []).map((social: any, idx: number) => (
-                        <div key={idx} className="flex gap-3 items-center bg-surface-container p-2 rounded-lg">
-                          <span className="font-mono text-[9px] text-on-surface-variant w-16 truncate">{social.name}</span>
+                        <div key={idx} className="flex flex-col gap-2 bg-surface-container p-2 rounded-lg">
+                          <div className="flex gap-3 items-center">
+                            <span className="font-mono text-[9px] text-on-surface-variant w-16 truncate">{social.name}</span>
+                            <input
+                              type="text"
+                              value={social.url || ""}
+                              onChange={(e) => {
+                                const copy = [...(contactData.socials || [])];
+                                copy[idx] = { ...copy[idx], url: e.target.value };
+                                setContactData({ ...contactData, socials: copy });
+                              }}
+                              className="flex-1 px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
+                              placeholder="https://..."
+                            />
+                            <button
+                              onClick={() => {
+                                const copy = contactData.socials.filter((_: any, i: number) => i !== idx);
+                                setContactData({ ...contactData, socials: copy });
+                              }}
+                              className="p-1.5 text-red-500/70 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                           <input
                             type="text"
-                            value={social.url || ""}
+                            value={social.icon || ""}
                             onChange={(e) => {
                               const copy = [...(contactData.socials || [])];
-                              copy[idx] = { ...copy[idx], url: e.target.value };
+                              copy[idx] = { ...copy[idx], icon: e.target.value };
                               setContactData({ ...contactData, socials: copy });
                             }}
-                            className="flex-1 px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
-                            placeholder="https://..."
+                            className="w-full px-2.5 py-1 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
+                            placeholder="Icon URL (e.g. https://img.icons8.com/color/48/whatsapp.png)"
                           />
-                          <button
-                            onClick={() => {
-                              const copy = contactData.socials.filter((_: any, i: number) => i !== idx);
-                              setContactData({ ...contactData, socials: copy });
-                            }}
-                            className="p-1.5 text-red-500/70 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
                         </div>
                       ))}
                     </div>

@@ -164,6 +164,15 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     setMaxPrice(500000);
   };
 
+  const hasActiveFilters = 
+    searchQuery !== "" || 
+    selectedCategory !== "All" || 
+    selectedBrand !== "All" || 
+    sortBy !== "featured" || 
+    inStockOnly !== false || 
+    maxPrice !== 500000;
+
+
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-8 animate-in fade-in duration-200" id="catalog-view-container">
       {/* Header and Summary */}
@@ -184,14 +193,16 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
               <Filter className="w-4 h-4 text-primary" />
               <span>Filters</span>
             </h3>
-            <button
-              onClick={handleResetFilters}
-              className="text-[10px] text-primary hover:underline font-semibold flex items-center gap-1"
-              id="desktop-reset-btn"
-            >
-              <RefreshCw className="w-3 h-3" />
-              Reset
-            </button>
+            {hasActiveFilters && (
+              <button
+                onClick={handleResetFilters}
+                className="text-[10px] text-primary hover:underline font-semibold flex items-center gap-1"
+                id="desktop-reset-btn"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Reset
+              </button>
+            )}
           </div>
 
           {/* Search Sub-field */}
@@ -416,7 +427,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
             </div>
           ) : (
             /* Products Grid */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
@@ -499,12 +510,12 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-between pt-4 mt-4 border-t border-outline/10">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0 pt-4 mt-4 border-t border-outline/10">
                     <span className="font-bold text-xs text-on-surface">{formatProductPrice(product)}</span>
                     {product.inStock ? (
                       <button
                         onClick={() => onAddToCart(product, 1)}
-                        className="px-3 py-1.5 rounded-full text-[10px] font-bold cursor-pointer glass-btn-ios"
+                        className="w-full md:w-auto px-3 py-1.5 rounded-full text-[10px] font-bold cursor-pointer glass-btn-ios-primary"
                         id={`catalog-add-${product.id}`}
                       >
                         Quick Add +
@@ -525,7 +536,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
         <div className="fixed inset-0 z-50 overflow-hidden lg:hidden" id="mobile-filter-modal">
           <div className="absolute inset-0 bg-on-surface/40 backdrop-blur-xs" onClick={() => setShowMobileFilters(false)} />
           <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-sm bg-surface border-l border-outline/10 flex flex-col p-6 space-y-6 text-left shadow-2xl animate-in slide-in-from-right duration-200">
+            <div className="w-screen max-w-sm bg-surface border-l border-outline/10 flex flex-col p-6 space-y-6 text-left shadow-2xl animate-in slide-in-from-right duration-200 overflow-y-auto">
               <div className="flex items-center justify-between border-b border-outline/10 pb-4">
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                   <Filter className="w-4 h-4 text-primary" />
@@ -537,16 +548,18 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
               </div>
 
               {/* Reset inside mobile */}
-              <button
-                onClick={() => {
-                  handleResetFilters();
-                  setShowMobileFilters(false);
-                }}
-                className="w-full py-2.5 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-semibold text-on-surface flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Reset all filters
-              </button>
+              {hasActiveFilters && (
+                <button
+                  onClick={() => {
+                    handleResetFilters();
+                    setShowMobileFilters(false);
+                  }}
+                  className="w-full py-2.5 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-semibold text-on-surface flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Reset all filters
+                </button>
+              )}
 
                {/* Categories list */}
               <div className="space-y-2">

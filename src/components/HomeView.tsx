@@ -37,14 +37,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         icon: iconMap[c.icon] || Layers
       }));
     }
-    return [
-      { name: "Laptops", desc: "Axon Book Series", icon: Laptop, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=200&q=80" },
-      { name: "Tablets", desc: "Axon Slate Series", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=200&q=80" },
-      { name: "Audio", desc: "Earphones & Headphones", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=80" },
-      { name: "Phones", desc: "Axon Phones", icon: Smartphone, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=200&q=80" },
-      { name: "Accessories", desc: "Keyboard, Cables & More", icon: Layers, image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=200&q=80" },
-      { name: "Power", desc: "Power Banks & Chargers", icon: Plug, image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?auto=format&fit=crop&w=200&q=80" },
-    ];
+    return [];
   }, [config?.categoriesList]);
 
   // Detect Mobile Width
@@ -75,93 +68,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
       Plug: Plug,
     };
 
-    const defaultRaw = [
-      {
-        id: "ecosystem",
-        tag: "NEW ARRIVALS",
-        tagIcon: "Cpu",
-        title: config?.heroTitle || "Integrated Form & Function.",
-        description: config?.heroDescription || "Meet the Axon Slate Pro. Engineered with the breakthrough Axon-X1 chip, a stunning Liquid Infinity Display, and all-day battery life.",
-        primaryBtnText: "Shop Now",
-        primaryActionTarget: "product",
-        primaryActionValue: "axon-slate-pro",
-        secondaryBtnText: "Shop all hardware",
-        secondaryActionTarget: "category",
-        secondaryActionValue: "All",
-        mediaType: "image",
-        mediaUrl: "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png",
-        mobileMediaUrl: "",
-        mediaEmbed: "",
-        mobileMediaEmbed: "",
-        overlayTitle: "Infinity Screen",
-        overlayDesc: "12.9\" ProMotion Touchscreen",
-        targetProductId: "axon-slate-pro"
-      },
-      {
-        id: "phone-video",
-        tag: "CINEMATIC HARDWARE PREVIEW",
-        tagIcon: "Zap",
-        title: "Axon Phone 1 Pro",
-        description: "The ultimate titanium-clad mobile experience with the powerful Axon-M1 neural processor, customizable Action controls, and ultra-high dynamic triple lenses.",
-        primaryBtnText: "Explore",
-        primaryActionTarget: "product",
-        primaryActionValue: "axon-phone-1-pro",
-        secondaryBtnText: "",
-        secondaryActionTarget: "",
-        secondaryActionValue: "",
-        mediaType: "video",
-        mediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/xlarge.mp4",
-        mobileMediaUrl: "https://www.apple.com/105/media/us/iphone-17/2025/b2c72de3-1cbc-4e24-b4d3-23c7abcec4ec/anim/hero/large.mp4",
-        mediaEmbed: "",
-        mobileMediaEmbed: "",
-        overlayTitle: "M1 Neural",
-        overlayDesc: "Titanium Chassis",
-        targetProductId: "axon-phone-1-pro"
-      },
-      {
-        id: "book-laptop",
-        tag: "LAPTOP LAUNCH",
-        tagIcon: "Laptop",
-        title: "Axon Book 16 Ultra.",
-        description: "Uncompromised performance. With high-speed processing, stunning display, and all-day battery life.",
-        primaryBtnText: "Shop Now",
-        primaryActionTarget: "product",
-        primaryActionValue: "axon-book-16",
-        secondaryBtnText: "Shop Laptops",
-        secondaryActionTarget: "category",
-        secondaryActionValue: "Laptops",
-        mediaType: "image",
-        mediaUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1920&q=80",
-        mobileMediaUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
-        mediaEmbed: "",
-        mobileMediaEmbed: "",
-        overlayTitle: "Silicon Core",
-        overlayDesc: "Unified Memory Capable",
-        targetProductId: "axon-book-16"
-      }
-    ];
+    let source = Array.isArray(list) ? [...list] : [];
 
-    let source = [];
-    if (Array.isArray(list) && list.length > 0) {
-      source = [...list];
-    } else {
-      source = [...defaultRaw];
-    }
-
-    // Ensure min 3 slides by padding with defaults
-    if (source.length < 3) {
-      for (const d of defaultRaw) {
-        if (source.length >= 3) break;
-        if (!source.some(s => s.id === d.id)) {
-          source.push(d);
-        }
-      }
-      while (source.length < 3) {
-        source.push({
-          ...source[0],
-          id: source[0].id + "_dup_" + source.length
-        });
-      }
+    // Ensure min 3 slides by padding with empty duplicates
+    while (source.length < 3) {
+      source.push({
+        ...source[0],
+        id: (source[0]?.id || "slide") + "_blank_" + source.length
+      });
     }
 
     return source.map((slide: any) => {

@@ -20,7 +20,7 @@ export interface SEOConfig {
 
 const SITE_NAME = 'AXON TECH Kenya';
 export const SITE_URL = 'https://axontech.co.ke';
-const DEFAULT_OG_IMAGE = 'https://res.cloudinary.com/dwwvh34yi/image/upload/v1783718244/axon_tech_hero_pvcg7b.png';
+const DEFAULT_OG_IMAGE = '';
 
 export const SEO_DEFAULTS: SEOConfig = {
   title: `${SITE_NAME} | Premium Technology Hardware in Kenya`,
@@ -57,7 +57,7 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
         '@type': 'Organization',
         name: SITE_NAME,
         url: SITE_URL,
-        logo: 'https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png',
+        logo: '',
         description: 'Premium technology hardware store in Nairobi, Kenya.',
         address: {
           '@type': 'PostalAddress',
@@ -81,7 +81,7 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
         '@context': 'https://schema.org',
         '@type': 'LocalBusiness',
         name: SITE_NAME,
-        image: 'https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png',
+        image: '',
         address: {
           '@type': 'PostalAddress',
           streetAddress: 'Simara Mall, Ground Floor, Shop G50',

@@ -337,6 +337,7 @@ function AppContent() {
           }
         }}
         products={products}
+        config={webConfig}
       />
 
       {/* Slideout Cart Drawer */}
@@ -525,8 +526,8 @@ function AppContent() {
           {/* Redirect /home to / */}
           <Route path="/home" element={<Navigate to="/" replace />} />
 
-          {/* Redirect /track-order variant to /track-order */}
-          <Route path="/track-order" element={<Navigate to={ROUTES.trackOrder} replace />} />
+          {/* Redirect /trackorder variant to /track-order */}
+          <Route path="/trackorder" element={<Navigate to={ROUTES.trackOrder} replace />} />
 
           {/* 404 Not Found */}
           <Route
@@ -560,6 +561,20 @@ function AppContent() {
 
       {/* Consistent Footer */}
       <Footer onNavigate={(screen) => navigate(`/${screen.toLowerCase()}`)} config={webConfig} />
+
+      {/* Back to Admin Floating Button (Visible on Web when Auth'd) */}
+      {isAdminAuthenticated && location.pathname !== ROUTES.admin && (
+        <button
+          onClick={() => navigate(ROUTES.admin)}
+          className="fixed bottom-24 right-6 z-50 flex items-center gap-2 bg-on-surface text-background px-4 py-3 rounded-full shadow-xl hover:scale-105 active:scale-95 transition-all"
+          title="Back to Admin"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="font-bold text-sm tracking-wide">Admin</span>
+        </button>
+      )}
 
       {/* WhatsApp Floating Button */}
       <WhatsAppFloatingButton />

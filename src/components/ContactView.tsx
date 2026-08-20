@@ -73,7 +73,7 @@ export const ContactView: React.FC = () => {
   const tagline = contact?.tagline || "Your Trusted Technology Partner in Kenya";
   const businessHours = contact?.businessHours || { weekdays: "Monday – Saturday: 8:00 AM – 6:00 PM EAT", supportCall: "8:00 AM – 8:00 PM EAT" };
   const socials = contact?.socials || [];
-  const locationIcon = contact?.location?.icon || "https://img.icons8.com/color/48/marker.png";
+  const locationIcon = contact?.location?.icon || "";
   const embedUrl = contact?.location?.embedUrl || "";
   const externalUrl = contact?.location?.externalUrl || "https://maps.google.com/?q=Simara+Mall+Ground+Floor+Shop+G50+Nairobi";
 

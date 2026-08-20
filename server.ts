@@ -11,7 +11,7 @@ const DB_FILE = path.join(process.cwd(), "db.json");
 // ─── REMOTE DB FLAG ───────────────────────────────────────────
 // Set USE_REMOTE_DB=true to proxy all API calls to the Cloudflare Worker (D1)
 const USE_REMOTE_DB = process.env.USE_REMOTE_DB !== "false"; // Default true, proxy to worker
-const WORKER_URL = process.env.WORKER_URL || "https://axon-tech.axontech254.workers.dev";
+const WORKER_URL = process.env.WORKER_URL || "https://website.axontech254.workers.dev";
 
 app.use(express.json());
 

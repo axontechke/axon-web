@@ -92,7 +92,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   // Derived values from database
   const businessName = config?.footerBrandName || contact?.businessName || "AXON";
   const brandSuffix = config?.footerBrandSuffix || "TECH";
-  const brandLogo = config?.footerBrandLogoUrl || "https://res.cloudinary.com/dwwvh34yi/image/upload/v1783980758/Axon_2_ao8wqm.png";
+  const brandLogo = config?.footerBrandLogoUrl || "";
   const footerDesc = config?.footerDescription || `${businessName} | Your Trusted Technology Partner`;
   const address = contact?.location?.addressString || "";
   const formattedPhone = contact?.phones?.formattedPrimary || "";
@@ -131,7 +131,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
         <div className="space-y-4 text-left">
           <div className="flex flex-row items-center gap-2 shrink-0 whitespace-nowrap">
             <img 
-              src={brandLogo}
+              src={brandLogo || undefined}
               alt={`${businessName} Logo`}
               className="w-8 h-8 object-contain shrink-0 brightness-0 invert"
               referrerPolicy="no-referrer"
@@ -248,9 +248,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
         </div>
       </div>
 
-      <div className="border-t border-white/5 py-6 px-6 text-center text-[10px] text-[#e2d5cf]/40 max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div className="border-t border-white/5 py-6 px-6 text-left text-[10px] text-[#e2d5cf]/40 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-3">
         <span>{copyrightText}</span>
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-wrap gap-4 justify-start">
           {bottomLinks.map((link: any, idx: number) => (
             <button 
               key={idx}
