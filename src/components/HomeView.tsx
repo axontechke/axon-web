@@ -102,17 +102,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
         secondaryAction = () => onNavigateToCatalog(slide.secondaryActionValue || "All");
       }
 
-      // Resolve effective media — override URL takes precedence over product default media
-      const useOverride = slide.heroMediaOverrideEnabled && slide.heroMediaOverrideUrl;
-      const effectiveMediaType = useOverride ? (slide.heroMediaOverrideType || "image") : slide.mediaType;
-      const effectiveMediaUrl = useOverride ? slide.heroMediaOverrideUrl : slide.mediaUrl;
-      const effectiveMediaEmbed = useOverride ? slide.heroMediaOverrideUrl : slide.mediaEmbed;
-      const effectiveMobileMediaUrl = useOverride ? slide.heroMediaOverrideUrl : slide.mobileMediaUrl;
-      const effectiveMobileMediaEmbed = useOverride ? slide.heroMediaOverrideUrl : slide.mobileMediaEmbed;
+      // Resolve effective media — global config-level override URL takes precedence over product default media
+      const useOverride = config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl;
+      const effectiveMediaType = useOverride ? (config?.heroMediaOverrideType || "image") : slide.mediaType;
+      const effectiveMediaUrl = useOverride ? config?.heroMediaOverrideUrl : slide.mediaUrl;
+      const effectiveMediaEmbed = useOverride ? config?.heroMediaOverrideUrl : slide.mediaEmbed;
+      const effectiveMobileMediaUrl = useOverride ? config?.heroMediaOverrideUrl : slide.mobileMediaUrl;
+      const effectiveMobileMediaEmbed = useOverride ? config?.heroMediaOverrideUrl : slide.mobileMediaEmbed;
 
       // The connected product drives the click-through link in override mode
-      const linkedProduct = slide.targetProductId
-        ? products.find(p => p.id === slide.targetProductId)
+      // Use global heroTargetProduct as the link target for the override
+      const linkedProductId = config?.heroTargetProduct || slide.targetProductId;
+      const linkedProduct = linkedProductId
+        ? products.find(p => p.id === linkedProductId)
         : null;
       const linkedProductAction = linkedProduct
         ? () => onSelectProduct(linkedProduct)
