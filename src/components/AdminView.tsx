@@ -3503,6 +3503,75 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           </div>
                         </div>
 
+                        {/* Hero Media Override — replaces product default media with a custom slideshow/video URL */}
+                        <div className="border-t border-outline/5 pt-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="text-[10px] text-on-surface-variant uppercase block font-bold">Hero Media Override URL</label>
+                              <p className="text-[8px] text-on-surface-variant/65 mt-0.5">Custom media URL that overrides the connected product's default images. The product selection acts as the click link.</p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, heroMediaOverrideEnabled: !s.heroMediaOverrideEnabled } : s);
+                                setWebConfig(prev => ({ ...prev, heroSlides: updated }));
+                              }}
+                              className={`relative w-10 h-5 rounded-full transition-colors ${
+                                slide.heroMediaOverrideEnabled ? "bg-primary" : "bg-outline/20"
+                              }`}
+                            >
+                              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                                slide.heroMediaOverrideEnabled ? "translate-x-5" : "translate-x-0.5"
+                              }`} />
+                            </button>
+                          </div>
+
+                          {slide.heroMediaOverrideEnabled && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] text-on-surface-variant uppercase block">Override Type</label>
+                                <select
+                                  value={slide.heroMediaOverrideType || "image"}
+                                  onChange={(e) => {
+                                    const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, heroMediaOverrideType: e.target.value } : s);
+                                    setWebConfig(prev => ({ ...prev, heroSlides: updated }));
+                                  }}
+                                  className="w-full px-2 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
+                                >
+                                  <option value="image">Image (JPG/PNG/WEBP)</option>
+                                  <option value="video">Video (MP4 URL)</option>
+                                  <option value="embed">Embed (iFrame/YouTube/Vimeo)</option>
+                                </select>
+                              </div>
+
+                              <div className="space-y-1.5 md:col-span-2">
+                                <label className="text-[10px] text-on-surface-variant uppercase block">Override URL / Embed Code</label>
+                                {slide.heroMediaOverrideType === "embed" ? (
+                                  <textarea
+                                    value={slide.heroMediaOverrideUrl || ""}
+                                    onChange={(e) => {
+                                      const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, heroMediaOverrideUrl: e.target.value } : s);
+                                      setWebConfig(prev => ({ ...prev, heroSlides: updated }));
+                                    }}
+                                    className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono h-16"
+                                    placeholder='<iframe src="https://www.youtube.com/embed/..." ...></iframe>'
+                                  />
+                                ) : (
+                                  <input
+                                    type="url"
+                                    value={slide.heroMediaOverrideUrl || ""}
+                                    onChange={(e) => {
+                                      const updated = currentSlides.map((s, idx) => idx === sIdx ? { ...s, heroMediaOverrideUrl: e.target.value } : s);
+                                      setWebConfig(prev => ({ ...prev, heroSlides: updated }));
+                                    }}
+                                    className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
+                                    placeholder="https://example.com/slideshow.jpg"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
                         {/* Conditional Media Inputs */}
                         <div className="border-t border-outline/5 pt-3">
                           {slide.mediaType === "embed" ? (

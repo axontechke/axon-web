@@ -102,11 +102,33 @@ export const HomeView: React.FC<HomeViewProps> = ({
         secondaryAction = () => onNavigateToCatalog(slide.secondaryActionValue || "All");
       }
 
+      // Resolve effective media — override URL takes precedence over product default media
+      const useOverride = slide.heroMediaOverrideEnabled && slide.heroMediaOverrideUrl;
+      const effectiveMediaType = useOverride ? (slide.heroMediaOverrideType || "image") : slide.mediaType;
+      const effectiveMediaUrl = useOverride ? slide.heroMediaOverrideUrl : slide.mediaUrl;
+      const effectiveMediaEmbed = useOverride ? slide.heroMediaOverrideUrl : slide.mediaEmbed;
+      const effectiveMobileMediaUrl = useOverride ? slide.heroMediaOverrideUrl : slide.mobileMediaUrl;
+      const effectiveMobileMediaEmbed = useOverride ? slide.heroMediaOverrideUrl : slide.mobileMediaEmbed;
+
+      // The connected product drives the click-through link in override mode
+      const linkedProduct = slide.targetProductId
+        ? products.find(p => p.id === slide.targetProductId)
+        : null;
+      const linkedProductAction = linkedProduct
+        ? () => onSelectProduct(linkedProduct)
+        : () => onNavigateToCatalog("All");
+
       return {
         ...slide,
         tagIcon: iconMap[slide.tagIcon] || Cpu,
         primaryAction,
-        secondaryAction
+        secondaryAction,
+        effectiveMediaType,
+        effectiveMediaUrl,
+        effectiveMediaEmbed,
+        effectiveMobileMediaUrl,
+        effectiveMobileMediaEmbed,
+        linkedProductAction
       };
     });
   }, [config, products, featuredHeroProduct]);
@@ -149,12 +171,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const isMediaOnly = config?.heroMode === "media-only";
 
   const handleMediaOnlyCTA = () => {
-    const slideTargetProductId = activeSlide?.targetProductId || config?.heroTargetProduct || "axon-phone-1-pro";
-    const found = products.find(p => p.id === slideTargetProductId);
-    if (found) {
-      onSelectProduct(found);
+    // Use the override-linked product when heroMediaOverride is active, else fall back to targetProductId
+    if (activeSlide?.linkedProductAction) {
+      activeSlide.linkedProductAction();
     } else {
-      onNavigateToCatalog("All");
+      const slideTargetProductId = activeSlide?.targetProductId || config?.heroTargetProduct || "axon-phone-1-pro";
+      const found = products.find(p => p.id === slideTargetProductId);
+      if (found) {
+        onSelectProduct(found);
+      } else {
+        onNavigateToCatalog("All");
+      }
     }
   };
 
@@ -174,18 +201,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
               >
                 {/* Cinematic Background Media Container */}
                 <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`media-only-bg-${activeSlide?.id}`}>
-                  {activeSlide?.mediaType === "embed" ? (
-                    <div 
+                  {activeSlide?.effectiveMediaType === "embed" ? (
+                    <div
                       className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
                       dangerouslySetInnerHTML={{
-                        __html: (isMobile && activeSlide?.mobileMediaEmbed) 
-                          ? activeSlide?.mobileMediaEmbed 
-                          : (activeSlide?.mediaEmbed || activeSlide?.mediaUrl)
+                        __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl
                       }}
                     />
-                  ) : activeSlide?.mediaType === "video" ? (
+                  ) : activeSlide?.effectiveMediaType === "video" ? (
                     <video
-                      src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                      src={activeSlide?.effectiveMediaUrl}
                       className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
                       autoPlay
                       loop
@@ -200,7 +225,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     />
                   ) : (
                     <img
-                      src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                      src={activeSlide?.effectiveMediaUrl}
                       alt={activeSlide?.mediaAlt || activeSlide?.title}
                       className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
                       referrerPolicy="no-referrer"
@@ -276,7 +301,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             );
           })()
-        ) : isMobile && activeSlide?.mediaType === "video" ? (
+        ) : isMobile && (activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
           // Mobile Video Overlay Layout - video takes full width, details overlay on top
           <div
             className="relative min-h-[480px] sm:min-h-[520px]"
@@ -286,7 +311,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {/* Full-bleed video background */}
             <div className="absolute inset-0 z-0" key={`mobile-video-${activeSlide?.id}`}>
               <video
-                src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                src={activeSlide?.effectiveMediaType === "video" ? activeSlide?.effectiveMediaUrl : undefined}
                 className="w-full h-full object-cover"
                 autoPlay
                 loop
@@ -385,18 +410,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
           >
             {/* Full-bleed background media */}
             <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`bg-media-${activeSlide?.id}`}>
-              {activeSlide?.mediaType === "embed" ? (
+              {activeSlide?.effectiveMediaType === "embed" ? (
                 <div
                   className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35"
                   dangerouslySetInnerHTML={{
-                    __html: (isMobile && activeSlide?.mobileMediaEmbed)
-                      ? activeSlide?.mobileMediaEmbed
-                      : (activeSlide?.mediaEmbed || activeSlide?.mediaUrl)
+                    __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl
                   }}
                 />
-              ) : activeSlide?.mediaType === "video" ? (
+              ) : activeSlide?.effectiveMediaType === "video" ? (
                 <video
-                  src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                  src={activeSlide?.effectiveMediaUrl}
                   className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000"
                   autoPlay
                   loop
@@ -411,7 +434,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 />
               ) : (
                 <img
-                  src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                  src={activeSlide?.effectiveMediaUrl}
                   alt={activeSlide?.mediaAlt || activeSlide?.title}
                   className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000"
                   referrerPolicy="no-referrer"
@@ -508,14 +531,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   className="relative w-full max-w-sm lg:max-w-md aspect-[16/10] sm:aspect-[4/3] lg:aspect-[1.4] rounded-2xl overflow-hidden bg-surface-container-high/60 border border-outline/15 shadow-lg group/media animate-in fade-in zoom-in-95 duration-500"
                   key={`media-${activeSlide?.id}`}
                 >
-                  {activeSlide?.mediaType === "embed" ? (
+                  {activeSlide?.effectiveMediaType === "embed" ? (
                     <div
                       className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
-                      dangerouslySetInnerHTML={{ __html: (isMobile && activeSlide?.mobileMediaEmbed) ? activeSlide?.mobileMediaEmbed : (activeSlide?.mediaEmbed || activeSlide?.mediaUrl) }}
+                      dangerouslySetInnerHTML={{ __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl }}
                     />
-                  ) : activeSlide?.mediaType === "video" ? (
+                  ) : activeSlide?.effectiveMediaType === "video" ? (
                     <video
-                      src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                      src={activeSlide?.effectiveMediaUrl}
                       className="w-full h-full object-cover select-none"
                       autoPlay
                       loop
@@ -525,7 +548,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     />
                   ) : (
                     <img
-                      src={(isMobile && activeSlide?.mobileMediaUrl) ? activeSlide?.mobileMediaUrl : activeSlide?.mediaUrl}
+                      src={activeSlide?.effectiveMediaUrl}
                       alt={activeSlide?.mediaAlt || activeSlide?.title}
                       className="w-full h-full object-cover select-none"
                       key={`hero-img-${activeSlide?.id}`}
