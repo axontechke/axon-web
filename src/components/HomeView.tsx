@@ -203,7 +203,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
               >
                 {/* Cinematic Background Media Container */}
                 <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`media-only-bg-${activeSlide?.id}`}>
-                  {activeSlide?.effectiveMediaType === "embed" ? (
+                  {(config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) ? (
+                    config?.heroMediaOverrideType === "embed" ? (
+                      <div
+                        className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
+                        dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }}
+                      />
+                    ) : config?.heroMediaOverrideType === "video" ? (
+                      <video
+                        src={config?.heroMediaOverrideUrl}
+                        className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        onLoadedMetadata={(e) => {
+                          const video = e.currentTarget;
+                          if (video.duration && isFinite(video.duration)) {
+                            setSlideInterval(Math.ceil(video.duration * 1000) + 500);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={config?.heroMediaOverrideUrl}
+                        alt="Hero media"
+                        className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
+                        referrerPolicy="no-referrer"
+                      />
+                    )
+                  ) : activeSlide?.effectiveMediaType === "embed" ? (
                     <div
                       className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
                       dangerouslySetInnerHTML={{
@@ -303,7 +332,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             );
           })()
-        ) : isMobile && (activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
+        ) : isMobile && ((config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) || activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
           // Mobile Video Overlay Layout - video takes full width, details overlay on top
           <div
             className="relative min-h-[480px] sm:min-h-[520px]"
@@ -312,20 +341,43 @@ export const HomeView: React.FC<HomeViewProps> = ({
           >
             {/* Full-bleed video background */}
             <div className="absolute inset-0 z-0" key={`mobile-video-${activeSlide?.id}`}>
-              <video
-                src={activeSlide?.effectiveMediaType === "video" ? activeSlide?.effectiveMediaUrl : undefined}
-                className="w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                onLoadedMetadata={(e) => {
-                  const video = e.currentTarget;
-                  if (video.duration && isFinite(video.duration)) {
-                    setSlideInterval(Math.ceil(video.duration * 1000) + 500);
-                  }
-                }}
-              />
+              {(config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) ? (
+                config?.heroMediaOverrideType === "video" ? (
+                  <video
+                    src={config?.heroMediaOverrideUrl}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    onLoadedMetadata={(e) => {
+                      const video = e.currentTarget;
+                      if (video.duration && isFinite(video.duration)) {
+                        setSlideInterval(Math.ceil(video.duration * 1000) + 500);
+                      }
+                    }}
+                  />
+                ) : config?.heroMediaOverrideType === "embed" ? (
+                  <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
+                ) : (
+                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                )
+              ) : (
+                <video
+                  src={activeSlide?.effectiveMediaType === "video" ? activeSlide?.effectiveMediaUrl : undefined}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  onLoadedMetadata={(e) => {
+                    const video = e.currentTarget;
+                    if (video.duration && isFinite(video.duration)) {
+                      setSlideInterval(Math.ceil(video.duration * 1000) + 500);
+                    }
+                  }}
+                />
+              )}
               {/* Gradient overlay for text legibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             </div>
@@ -412,35 +464,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
           >
             {/* Full-bleed background media */}
             <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`bg-media-${activeSlide?.id}`}>
-              {activeSlide?.effectiveMediaType === "embed" ? (
-                <div
-                  className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35"
-                  dangerouslySetInnerHTML={{
-                    __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl
-                  }}
-                />
+              {(config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) ? (
+                config?.heroMediaOverrideType === "embed" ? (
+                  <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
+                ) : config?.heroMediaOverrideType === "video" ? (
+                  <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
+                ) : (
+                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
+                )
+              ) : activeSlide?.effectiveMediaType === "embed" ? (
+                <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35" dangerouslySetInnerHTML={{ __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl }} />
               ) : activeSlide?.effectiveMediaType === "video" ? (
-                <video
-                  src={activeSlide?.effectiveMediaUrl}
-                  className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  onLoadedMetadata={(e) => {
-                    const video = e.currentTarget;
-                    if (video.duration && isFinite(video.duration)) {
-                      setSlideInterval(Math.ceil(video.duration * 1000) + 500);
-                    }
-                  }}
-                />
+                <video src={activeSlide?.effectiveMediaUrl} className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
               ) : (
-                <img
-                  src={activeSlide?.effectiveMediaUrl}
-                  alt={activeSlide?.mediaAlt || activeSlide?.title}
-                  className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000"
-                  referrerPolicy="no-referrer"
-                />
+                <img src={activeSlide?.effectiveMediaUrl} alt={activeSlide?.mediaAlt || activeSlide?.title} className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
               )}
               {/* Glass & Gradient overlays for dynamic high-end typography legibility */}
               <div className="absolute inset-0 bg-gradient-to-r from-surface-container-low via-surface-container-low/95 to-surface-container-low/40 md:from-surface-container-low via-surface-container-low/90 lg:to-surface-container-low/30" />
@@ -533,7 +570,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   className="relative w-full max-w-sm lg:max-w-md aspect-[16/10] sm:aspect-[4/3] lg:aspect-[1.4] rounded-2xl overflow-hidden bg-surface-container-high/60 border border-outline/15 shadow-lg group/media animate-in fade-in zoom-in-95 duration-500"
                   key={`media-${activeSlide?.id}`}
                 >
-                  {activeSlide?.effectiveMediaType === "embed" ? (
+                  {(config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) ? (
+                    config?.heroMediaOverrideType === "embed" ? (
+                      <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
+                    ) : config?.heroMediaOverrideType === "video" ? (
+                      <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-cover select-none" autoPlay loop muted playsInline key={`hero-video-override`} />
+                    ) : (
+                      <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-cover select-none" key={`hero-img-override`} referrerPolicy="no-referrer" />
+                    )
+                  ) : activeSlide?.effectiveMediaType === "embed" ? (
                     <div
                       className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
                       dangerouslySetInnerHTML={{ __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl }}
