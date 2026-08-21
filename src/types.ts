@@ -55,6 +55,7 @@ export interface Product {
   image: string;
   images?: string[];
   colors?: string[];
+  colorCodes?: Record<string, string>; // { "Midnight Black": "#1a1a1a", "Silver": "#c0c0c0" }
   storages?: string[];
   colorImages?: Record<string, string>; // { "Royal Blue": "https://...", "Silver": "https://..." }
   variants?: ProductVariant[];       // legacy + new: per-combo variants with stock & price

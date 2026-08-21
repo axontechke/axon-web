@@ -757,8 +757,9 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     colors: JSON.parse(p.colors || "[]"),
     storages: JSON.parse(p.storages || "[]"),
     colorImages: JSON.parse(p.colorImages || "{}"),
+    colorCodes: JSON.parse(p.colorCodes || "{}"),
     specifications: JSON.parse(p.specifications || "{}"),
-    variants: JSON.parse(p.variants || "{}"),
+    variants: JSON.parse(p.variants || "[]"),
   }));
 
   // Fetch all variant images
@@ -1079,12 +1080,12 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
   const data = await jsonBody(req);
   const id = data.id || generateId("product");
   await env.DB.prepare(
-    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, variants)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, colorCodes, variants)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(id, data.name || "", data.price || 0, data.priceKsh || 0, data.description || "", data.category || "",
     data.brand || "", data.image || "", JSON.stringify(data.colors || []), JSON.stringify(data.storages || []),
     data.rating || 0, data.reviewsCount || 0, data.inStock ? 1 : 0, data.isNew ? 1 : 0, data.isBestSeller ? 1 : 0,
-    JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {}), JSON.stringify(data.variants || {})).run();
+    JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {}), JSON.stringify(data.colorCodes || {}), JSON.stringify(data.variants || [])).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -1106,6 +1107,7 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   if (data.colors !== undefined) { fields.push("colors = ?"); values.push(JSON.stringify(data.colors)); }
   if (data.storages !== undefined) { fields.push("storages = ?"); values.push(JSON.stringify(data.storages)); }
   if (data.colorImages !== undefined) { fields.push("colorImages = ?"); values.push(JSON.stringify(data.colorImages)); }
+  if (data.colorCodes !== undefined) { fields.push("colorCodes = ?"); values.push(JSON.stringify(data.colorCodes)); }
   if (data.specifications !== undefined) { fields.push("specifications = ?"); values.push(JSON.stringify(data.specifications)); }
   if (data.variants !== undefined) { fields.push("variants = ?"); values.push(JSON.stringify(data.variants)); }
   if (data.inStock !== undefined) { fields.push("inStock = ?"); values.push(data.inStock ? 1 : 0); }
@@ -1145,6 +1147,7 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
     ...updated, inStock: !!updated.inStock, isNew: !!updated.isNew, isBestSeller: !!updated.isBestSeller,
     colors: JSON.parse((updated as any).colors || "[]"), storages: JSON.parse((updated as any).storages || "[]"),
     colorImages: JSON.parse((updated as any).colorImages || "{}"),
+    colorCodes: JSON.parse((updated as any).colorCodes || "{}"),
     specifications: JSON.parse((updated as any).specifications || "{}"),
   } : { id: params.id, ...data });
 }

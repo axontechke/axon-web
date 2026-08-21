@@ -301,6 +301,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarStock, setNewVarStock] = useState<number>(10);
   const [newVarPriceKsh, setNewVarPriceKsh] = useState<number>(0);
   const [newColorName, setNewColorName] = useState("");
+  const [newColorCode, setNewColorCode] = useState("");
   const [newColorImageUrl, setNewColorImageUrl] = useState("");
   // Variant image management: keyed by "storage|color"
   const [variantImgMap, setVariantImgMap] = useState<Record<string, any[]>>({});
@@ -2039,8 +2040,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                       {/* Add new color swatch */}
                       <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
-                        <span className="text-[10px] font-bold text-on-surface uppercase block">Assign Swatch Image</span>
-                        <div className="grid grid-cols-5 gap-2">
+                        <span className="text-[10px] font-bold text-on-surface uppercase block">Assign Swatch Image & Color Code</span>
+                        <div className="grid grid-cols-6 gap-2">
                           <div className="col-span-2 space-y-1">
                             <input
                               type="text"
@@ -2050,36 +2051,63 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
                             />
                           </div>
-                          <div className="col-span-3 space-y-1">
+                          <div className="col-span-2 space-y-1">
                             <input
                               type="text"
                               value={newColorImageUrl}
                               onChange={(e) => setNewColorImageUrl(e.target.value)}
-                              placeholder="Image URL (auto-detects color from URL)"
+                              placeholder="Image URL"
                               className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
                             />
                           </div>
+                          <div className="col-span-1 space-y-1">
+                            <input
+                              type="text"
+                              value={newColorCode}
+                              onChange={(e) => setNewColorCode(e.target.value)}
+                              placeholder="#1a1a1a"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px] font-mono"
+                            />
+                          </div>
+                          <div className="col-span-1 flex items-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!newColorName.trim()) return;
+                                // Save color code if provided
+                                if (newColorCode.trim()) {
+                                  const updatedCodes = { ...editingProduct.colorCodes, [newColorName.trim()]: newColorCode.trim() };
+                                  setEditingProduct({ ...editingProduct, colorCodes: updatedCodes });
+                                }
+                                // Save color image if provided
+                                if (newColorImageUrl.trim()) {
+                                  const updated = { ...editingProduct.colorImages, [newColorName.trim()]: newColorImageUrl.trim() };
+                                  setEditingProduct({ ...editingProduct, colorImages: updated });
+                                }
+                                setNewColorName("");
+                                setNewColorImageUrl("");
+                                setNewColorCode("");
+                              }}
+                              disabled={!newColorName.trim()}
+                              className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Add
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!newColorName.trim() || !newColorImageUrl.trim()) return;
-                            // Auto-detect: extract last path segment and use as color if field is still the auto-generated placeholder
-                            const detected = extractColorFromUrl(newColorImageUrl);
-                            const finalColor = newColorName.trim() || detected;
-                            const updated = {
-                              ...editingProduct.colorImages,
-                              [finalColor]: newColorImageUrl.trim()
-                            };
-                            setEditingProduct({ ...editingProduct, colorImages: updated });
-                            setNewColorName("");
-                            setNewColorImageUrl("");
-                          }}
-                          disabled={!newColorName.trim() || !newColorImageUrl.trim()}
-                          className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Add Color Swatch
-                        </button>
+                        <div className="flex gap-4 flex-wrap">
+                          {Object.entries(editingProduct.colorCodes || {}).length > 0 && (
+                            <div className="flex gap-2 items-center">
+                              <span className="text-[9px] text-on-surface-variant/70">Colors:</span>
+                              {Object.entries(editingProduct.colorCodes || {}).map(([color, hex]) => (
+                                <div key={color} className="flex items-center gap-1">
+                                  <div className="w-4 h-4 rounded-full border border-outline/20" style={{ backgroundColor: hex }} />
+                                  <span className="text-[9px] text-on-surface-variant">{color}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
