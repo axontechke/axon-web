@@ -759,7 +759,7 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     colorImages: JSON.parse(p.colorImages || "{}"),
     colorCodes: JSON.parse(p.colorCodes || "{}"),
     specifications: JSON.parse(p.specifications || "{}"),
-    variants: JSON.parse(p.variants || "[]"),
+    variants: (() => { try { const v = JSON.parse(p.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
   }));
 
   // Fetch all variant images
@@ -1594,7 +1594,7 @@ async function updateProductVariants(req: Request, env: Env, _ctx: ExecutionCont
     ...updated,
     colors: JSON.parse((updated as any).colors || "[]"),
     storages: JSON.parse((updated as any).storages || "[]"),
-    variants: JSON.parse((updated as any).variants || "[]"),
+    variants: (() => { try { const v = JSON.parse((updated as any).variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
   } : null);
 }
 
@@ -1615,7 +1615,7 @@ async function updateProductVariantStock(req: Request, env: Env, _ctx: Execution
   if (!Array.isArray(updates)) return jsonError("updates must be an array of {storage, color, stock?, priceKsh?}");
   const product = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(params.id).first() as any;
   if (!product) return jsonError("Product not found", 404);
-  const variants = JSON.parse(product.variants || "[]");
+  const variants = (() => { try { const v = JSON.parse(product.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })();
   for (const upd of updates) {
     const idx = variants.findIndex(
       (v: any) => v.storage.toLowerCase() === (upd.storage || "").toLowerCase() &&
