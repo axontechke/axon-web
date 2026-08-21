@@ -1089,6 +1089,40 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
   return corsResponse({ id, ...data }, 201);
 }
 
+// GET /api/admin/products/:id
+async function getAdminProduct(_req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const row = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(params.id).first() as any;
+  if (!row) return jsonError("Product not found", 404);
+
+  const product = {
+    ...row,
+    inStock: !!row.inStock,
+    isNew: !!row.isNew,
+    isBestSeller: !!row.isBestSeller,
+    colors: JSON.parse(row.colors || "[]"),
+    storages: JSON.parse(row.storages || "[]"),
+    colorImages: JSON.parse(row.colorImages || "{}"),
+    colorCodes: JSON.parse(row.colorCodes || "{}"),
+    specifications: JSON.parse(row.specifications || "{}"),
+    variants: (() => { try { const v = JSON.parse(row.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
+  };
+
+  // Attach variant images
+  const { results: variantImages } = await env.DB.prepare(
+    "SELECT * FROM product_variant_images WHERE productId = ? ORDER BY storage, color, sortOrder"
+  ).bind(params.id).all();
+  const byVariantKey: Record<string, any[]> = {};
+  for (const vi of variantImages) {
+    const v = vi as any;
+    const key = v.storage && v.color ? `${v.storage}|${v.color}` : "base";
+    if (!byVariantKey[key]) byVariantKey[key] = [];
+    byVariantKey[key].push({ id: v.id, imageUrl: v.imageUrl, sortOrder: v.sortOrder });
+  }
+  (product as any).variantImages = byVariantKey;
+
+  return corsResponse(product);
+}
+
 // PUT /api/admin/products/:id
 async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
   const data = await jsonBody(req);
@@ -1693,6 +1727,7 @@ const routes: Route[] = [
 
   // Admin
   route("POST", "/api/admin/products", createProduct),
+  route("GET", "/api/admin/products/:id", getAdminProduct),
   route("PUT", "/api/admin/products/:id", updateProduct),
   route("DELETE", "/api/admin/products/:id", deleteProduct),
   route("PUT", "/api/admin/orders/:id/status", updateOrderStatus),
