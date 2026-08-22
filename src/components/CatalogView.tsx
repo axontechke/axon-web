@@ -439,7 +439,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                     className="cursor-pointer space-y-4 text-left"
                   >
                     {/* Image */}
-                    <div className="relative h-48 rounded-2xl bg-[#f5f5f5] flex items-center justify-center p-4 border border-outline/5 overflow-hidden">
+                    <div className="relative h-48 rounded-2xl bg-surface-container-low flex items-center justify-center p-4 overflow-hidden">
                       {product.isNew && (
                         <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-primary text-white text-[8px] font-bold uppercase tracking-wider">
                           New Release
@@ -759,7 +759,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                               </button>
 
                               {/* Image wrapper */}
-                              <div className="h-32 bg-[#f5f5f5] rounded-2xl p-2 border border-outline/5 flex items-center justify-center relative group-hover:scale-102 transition-transform">
+                              <div className="h-32 rounded-2xl p-2 flex items-center justify-center relative group-hover:scale-102 transition-transform">
                                 <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain" />
                               </div>
 

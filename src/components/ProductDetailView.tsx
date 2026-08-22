@@ -267,7 +267,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         {/* Left Column: Premium Framing Image */}
         <div className="lg:col-span-6 space-y-4">
           <div
-            className="relative aspect-square rounded-[32px] bg-[#f5f5f5] border border-outline/10 flex items-center justify-center p-8 overflow-hidden cursor-zoom-in"
+            className="relative aspect-square rounded-[32px] bg-surface-container-low flex items-center justify-center p-8 overflow-hidden cursor-zoom-in"
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
