@@ -16,6 +16,7 @@ import { ContactView } from "./components/ContactView";
 import { BlogView } from "./components/BlogView";
 import { SEOHead } from "./components/SEOHead";
 import { WhatsAppFloatingButton } from "./components/WhatsAppFloatingButton";
+import { useConfig } from "./context/ConfigContext";
 import API_ROUTES from "./config/api-routes";
 
 // Shared app state context
@@ -41,41 +42,13 @@ function AppContent() {
     }
   });
   
+  // App data from ConfigContext (stale-while-revalidate cache)
+  const { products, config: webConfig, refetch: fetchProductsAndConfig } = useConfig();
+
   // Filtering states
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedBrand, setSelectedBrand] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  // Dynamic server data states
-  const [products, setProducts] = useState<Product[]>([]);
-  const [webConfig, setWebConfig] = useState<any>(null);
-
-  const fetchProductsAndConfig = async () => {
-    try {
-      const t = Date.now();
-      const [prodRes, configRes] = await Promise.all([
-        fetch(`${API_ROUTES.products.list}?t=${t}`),
-        fetch(`${API_ROUTES.config.get}?t=${t}`)
-      ]);
-      if (prodRes.ok) {
-        const prodData = await prodRes.json();
-        if (Array.isArray(prodData) && prodData.length > 0) {
-          // Only keep products with a valid name — shields all downstream .map() calls
-          setProducts(prodData.filter((p: any) => p && typeof p?.name === "string"));
-        }
-      }
-      if (configRes.ok) {
-        const configData = await configRes.json();
-        setWebConfig(configData);
-      }
-    } catch (err) {
-      console.error("Error loading dynamic server metrics:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchProductsAndConfig();
-  }, []);
 
   // Reset brand filter whenever category changes
   useEffect(() => {
