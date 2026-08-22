@@ -135,12 +135,12 @@ export const GoogleReviewsWidget: React.FC<GoogleReviewsWidgetProps> = ({
   return (
     <div className="bg-surface-container-low border border-outline/10 rounded-3xl overflow-hidden" id="google-reviews-widget">
       {/* Header */}
-      <div className="p-6 border-b border-outline/10">
-        <div className="flex items-center justify-between">
+      <div className="p-4 sm:p-6 border-b border-outline/10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="space-y-1">
-            <h3 className="font-display font-bold text-base text-on-surface flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Star className="w-5 h-5 text-primary fill-primary" />
+            <h3 className="font-display font-bold text-sm sm:text-base text-on-surface flex items-center gap-2 whitespace-nowrap">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-primary fill-primary" />
               </div>
               Customer Reviews
             </h3>
@@ -151,9 +151,9 @@ export const GoogleReviewsWidget: React.FC<GoogleReviewsWidgetProps> = ({
           {showForm && !showSubmitForm && (
             <button
               onClick={() => setShowSubmitForm(true)}
-              className="px-3 sm:px-4 py-2 bg-primary/10 text-primary hover:bg-primary/15 text-[10px] sm:text-[11px] font-bold rounded-xl transition-colors flex items-center gap-1 sm:gap-1.5 whitespace-nowrap flex-shrink-0"
+              className="px-3 py-2 bg-primary/10 text-primary hover:bg-primary/15 text-[10px] sm:text-[11px] font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap flex-shrink-0 w-fit"
             >
-              <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <MessageSquare className="w-3 h-3" />
               Write a Review
             </button>
           )}

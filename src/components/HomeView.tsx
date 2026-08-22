@@ -822,7 +822,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {config?.protocolDescription || "We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support."}
           </p>
         </div>
-        <div className="flex flex-nowrap gap-3 shrink-0 overflow-x-auto pb-1">
+        <div className="flex flex-row gap-3 shrink-0 overflow-x-auto pb-1">
           {(() => {
             const iconMap: Record<string, any> = {
               Zap,
@@ -841,12 +841,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             return (
               <>
-                <div className="flex items-center gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap">
-                  <Badge1Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                <div className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap shrink-0">
+                  <Badge1Icon className="w-3 h-3 sm:w-4 sm:h-4 text-primary shrink-0" />
                   <span>{config?.protocolBadge1Text || "Fast Delivery"}</span>
                 </div>
-                <div className="flex items-center gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap">
-                  <Badge2Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                <div className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap shrink-0">
+                  <Badge2Icon className="w-3 h-3 sm:w-4 sm:h-4 text-primary shrink-0" />
                   <span>{config?.protocolBadge2Text || "Secure Checkout"}</span>
                 </div>
               </>
