@@ -117,6 +117,7 @@ interface WebConfig {
   footerBrandName?: string;
   footerBrandSuffix?: string;
   footerBrandLogoUrl?: string;
+  socials?: { name: string; url: string; icon: string }[];
   navbarLogoUrl?: string;
   ogImage?: string;
   heroMediaOverrideEnabled?: boolean;
@@ -3185,37 +3186,68 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   </h3>
 
                   <div className="space-y-4 pt-2">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-on-surface-variant uppercase block">Twitter Stream URL</label>
-                      <input
-                        type="url"
-                        value={webConfig.socialTwitter || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialTwitter: e.target.value }))}
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                        placeholder="https://twitter.com/..."
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-on-surface-variant uppercase block">GitHub Repository URL</label>
-                      <input
-                        type="url"
-                        value={webConfig.socialGithub || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialGithub: e.target.value }))}
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                        placeholder="https://github.com/..."
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-on-surface-variant uppercase block">LinkedIn Corporate URL</label>
-                      <input
-                        type="url"
-                        value={webConfig.socialLinkedIn || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,socialLinkedIn: e.target.value }))}
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                        placeholder="https://linkedin.com/company/..."
-                      />
+                    {/* Social links CRUD */}
+                    <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+                      <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline/5 pb-2">Social Media Links</h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {(webConfig.socials || []).map((social: any, idx: number) => (
+                          <div key={idx} className="flex flex-col gap-2 bg-surface-container p-2 rounded-lg">
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="text"
+                                value={social.name || ""}
+                                onChange={(e) => {
+                                  const copy = [...(webConfig.socials || [])];
+                                  copy[idx] = { ...copy[idx], name: e.target.value };
+                                  setWebConfig(prev => ({ ...prev, socials: copy }));
+                                }}
+                                className="flex-1 px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
+                                placeholder="Platform name (e.g. Twitter, Instagram)"
+                              />
+                              <input
+                                type="url"
+                                value={social.url || ""}
+                                onChange={(e) => {
+                                  const copy = [...(webConfig.socials || [])];
+                                  copy[idx] = { ...copy[idx], url: e.target.value };
+                                  setWebConfig(prev => ({ ...prev, socials: copy }));
+                                }}
+                                className="flex-1 px-2.5 py-1.5 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
+                                placeholder="https://..."
+                              />
+                              <button
+                                onClick={() => {
+                                  const copy = (webConfig.socials || []).filter((_: any, i: number) => i !== idx);
+                                  setWebConfig(prev => ({ ...prev, socials: copy }));
+                                }}
+                                className="p-1.5 text-red-500/70 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <input
+                              type="url"
+                              value={social.icon || ""}
+                              onChange={(e) => {
+                                const copy = [...(webConfig.socials || [])];
+                                copy[idx] = { ...copy[idx], icon: e.target.value };
+                                setWebConfig(prev => ({ ...prev, socials: copy }));
+                              }}
+                              className="w-full px-2.5 py-1 bg-surface border border-outline/15 rounded-xl text-[10px] text-on-surface"
+                              placeholder="Icon URL (e.g. https://img.icons8.com/color/48/twitter.png)"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const currentSocials = webConfig.socials || [];
+                          setWebConfig(prev => ({ ...prev, socials: [...currentSocials, { name: "", url: "", icon: "" }] }));
+                        }}
+                        className="mt-1 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[10px] font-bold transition-colors"
+                      >
+                        + Add social link
+                      </button>
                     </div>
 
                     <div className="space-y-1.5">
