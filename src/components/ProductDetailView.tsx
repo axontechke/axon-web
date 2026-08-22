@@ -17,7 +17,16 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   onAddToCart,
   onSelectProduct,
 }) => {
-  const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : undefined);
+  // selectedColor stores the color NAME string, not the whole ProductColor object
+  const getInitialColor = () => {
+    const colors = product.colors;
+    if (colors && colors.length > 0) {
+      const first = colors[0];
+      return typeof first === 'string' ? first : (first as any).name;
+    }
+    return undefined;
+  };
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
   const [selectedStorage, setSelectedStorage] = useState(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(
     product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined
@@ -26,9 +35,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
   const [activeImage, setActiveImage] = useState(product.image);
 
+  // Helper to get color entry by name (handles both legacy string[] and new ProductColor[])
+  const getColorEntry = (name: string | undefined) => {
+    if (!name || !product.colors?.length) return undefined;
+    const first = product.colors[0];
+    if (typeof first === 'string') return undefined; // legacy, no data
+    return (product.colors as any[]).find((c: any) => c.name === name) as any;
+  };
+
   React.useEffect(() => {
     setActiveImage(product.image);
-    setSelectedColor(product.colors && product.colors.length > 0 ? product.colors[0] : undefined);
+    setSelectedColor(getInitialColor());
     setSelectedStorage(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
     setSelectedWarranty(product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
     setQuantity(1);
@@ -37,7 +54,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   // Collect all available images for the selected storage+color combination
   const getAvailableImages = (): string[] => {
     const baseImages: string[] = [product.image].filter(Boolean);
-    // Variant-specific images: "256GB|Obsidian" → images[]
     const variantKey = selectedStorage && selectedColor
       ? `${selectedStorage}|${selectedColor}`
       : selectedColor
@@ -46,10 +62,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     const variantImgs: string[] = variantKey
       ? (product.variantImages as VariantImagesMap)?.[variantKey]?.map(vi => vi.imageUrl).filter(Boolean) || []
       : [];
-    // Color-specific image (legacy single-image per color)
-    const colorImg: string[] = selectedColor && product.colorImages?.[selectedColor]
-      ? [product.colorImages[selectedColor]]
-      : [];
+    // Color-specific image from unified colors[] entry
+    const colorEntry = getColorEntry(selectedColor);
+    const colorImg: string[] = colorEntry?.image ? [colorEntry.image] : [];
     // Extra gallery images
     const extraImgs: string[] = product.images?.filter(
       img => !baseImages.includes(img) && !colorImg.includes(img) && !variantImgs.includes(img)
@@ -63,17 +78,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       setActiveImage(product.image);
       return;
     }
-    // Priority: variant images > color image > base image
     const variantKey = selectedStorage ? `${selectedStorage}|${selectedColor}` : `|${selectedColor}`;
     const variantImgs = (product.variantImages as VariantImagesMap)?.[variantKey];
     if (variantImgs && variantImgs.length > 0) {
       setActiveImage(variantImgs[0].imageUrl);
-    } else if (product.colorImages?.[selectedColor]) {
-      setActiveImage(product.colorImages[selectedColor]);
     } else {
-      setActiveImage(product.image);
+      const colorEntry = getColorEntry(selectedColor);
+      setActiveImage(colorEntry?.image || product.image);
     }
-  }, [selectedColor, selectedStorage, product.colorImages, product.image]);
+  }, [selectedColor, selectedStorage, product.image]);
 
   // Check if product has variant-based pricing (ProductVariant[] structure)
   const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
@@ -360,46 +373,49 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           {/* Configurable Attributes (Variants) */}
           <div className="space-y-5 pt-2">
             {/* Colors */}
-            {product.colors && (
+            {product.colors && product.colors.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   Colorway: <strong className="text-on-surface">{selectedColor}</strong>
                 </span>
                 <div className="flex gap-3">
-                  {product.colors.map((color) => {
-                    // Use admin-defined hex code, or fall back to preset color mappings
-                    const hexCode = product.colorCodes?.[color];
+                  {product.colors.map((colorEntry) => {
+                    // Support both legacy string[] and new ProductColor[] format
+                    const name = typeof colorEntry === 'string' ? colorEntry : (colorEntry as any).name;
+                    const hexCode = typeof colorEntry === 'string'
+                      ? product.colorCodes?.[name]
+                      : (colorEntry as any).code;
                     let bgStyle: React.CSSProperties | undefined;
                     let bgClass = "bg-gray-400";
                     if (hexCode) {
                       bgStyle = { backgroundColor: hexCode };
                     } else {
-                      if (color === "Silver") bgClass = "bg-[#EAEAEA]";
-                      else if (color === "Slate" || color === "Charcoal" || color === "Obsidian" || color === "Black") bgClass = "bg-[#1a1a1a]";
-                      else if (color === "Teal") bgClass = "bg-[#008080]";
-                      else if (color === "White" || color === "Snow") bgClass = "bg-[#F5F5F5] border border-outline/20";
-                      else if (color === "Copper") bgClass = "bg-[#b87333]";
-                      else if (color === "Coral") bgClass = "bg-[#FF7F50]";
-                      else if (color === "Gold" || color === "Yellow") bgClass = "bg-[#FFD700]";
-                      else if (color === "Pacific Blue" || color === "Blue") bgClass = "bg-[#007AFF]";
-                      else if (color === "Midnight Green") bgClass = "bg-[#004953]";
-                      else if (color === "Purple" || color === "Violet") bgClass = "bg-[#8B5CF6]";
-                      else if (color === "Green" || color === "Sage") bgClass = "bg-[#4CAF50]";
-                      else if (color === "Red" || color === "Product Red") bgClass = "bg-[#FF3B30]";
-                      else if (color === "Pink" || color === "Rose Gold" || color === "Rose") bgClass = "bg-[#FF2D55]";
-                      else if (color === "Orange") bgClass = "bg-[#FF9500]";
+                      if (name === "Silver") bgClass = "bg-[#EAEAEA]";
+                      else if (name === "Slate" || name === "Charcoal" || name === "Obsidian" || name === "Black") bgClass = "bg-[#1a1a1a]";
+                      else if (name === "Teal") bgClass = "bg-[#008080]";
+                      else if (name === "White" || name === "Snow") bgClass = "bg-[#F5F5F5] border border-outline/20";
+                      else if (name === "Copper") bgClass = "bg-[#b87333]";
+                      else if (name === "Coral") bgClass = "bg-[#FF7F50]";
+                      else if (name === "Gold" || name === "Yellow") bgClass = "bg-[#FFD700]";
+                      else if (name === "Pacific Blue" || name === "Blue") bgClass = "bg-[#007AFF]";
+                      else if (name === "Midnight Green") bgClass = "bg-[#004953]";
+                      else if (name === "Purple" || name === "Violet") bgClass = "bg-[#8B5CF6]";
+                      else if (name === "Green" || name === "Sage") bgClass = "bg-[#4CAF50]";
+                      else if (name === "Red" || name === "Product Red") bgClass = "bg-[#FF3B30]";
+                      else if (name === "Pink" || name === "Rose Gold" || name === "Rose") bgClass = "bg-[#FF2D55]";
+                      else if (name === "Orange") bgClass = "bg-[#FF9500]";
                     }
 
                     return (
                       <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
+                        key={name}
+                        onClick={() => setSelectedColor(name)}
                         style={bgStyle}
                         className={`w-8 h-8 rounded-full ${!hexCode ? bgClass : ""} transition-all duration-150 flex items-center justify-center ${
-                          selectedColor === color ? "ring-2 ring-primary ring-offset-2" : "opacity-85 hover:opacity-100 hover:scale-105"
+                          selectedColor === name ? "ring-2 ring-primary ring-offset-2" : "opacity-85 hover:opacity-100 hover:scale-105"
                         }`}
-                        title={color}
-                        id={`color-btn-${color}`}
+                        title={name}
+                        id={`color-btn-${name}`}
                       />
                     );
                   })}

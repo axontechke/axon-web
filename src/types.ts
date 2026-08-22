@@ -15,15 +15,20 @@ export interface Warranty {
   priceKsh: number;
 }
 
+// Unified color entry: name + hex code + swatch image URL
+// One color can be reused across multiple storage variants; variantImages override for specific combos
+export interface ProductColor {
+  name: string;        // e.g. "Midnight Black"
+  code: string;        // e.g. "#1a1a1a" (hex color)
+  image: string;      // e.g. "https://..." (swatch/product photo URL)
+}
+
 export interface ProductVariant {
   storage: string;
   color: string;
   stock: number;
   priceKsh?: number; // optional override price for this combination
 }
-
-// New flat variant map: { "512GB": { "Blue,Silver": 210000 } }
-export type VariantMap = Record<string, Record<string, number>>;
 
 // Stored in DB: multiple images per (storage, color) combo
 export interface VariantImageEntry {
@@ -54,11 +59,11 @@ export interface Product {
   brand: string;
   image: string;
   images?: string[];
-  colors?: string[];
-  colorCodes?: Record<string, string>; // { "Midnight Black": "#1a1a1a", "Silver": "#c0c0c0" }
+  colors: ProductColor[];             // unified color entries (name + hex + image)
+  colorCodes?: Record<string, string>; // legacy: { "Midnight Black": "#1a1a1a" } — migrated to colors[].code
   storages?: string[];
-  colorImages?: Record<string, string>; // { "Royal Blue": "https://...", "Silver": "https://..." }
-  variants?: ProductVariant[];       // legacy + new: per-combo variants with stock & price
+  colorImages?: Record<string, string>; // legacy: { "Royal Blue": "https://..." } — migrated to colors[].image
+  variants?: ProductVariant[];       // per-combo variants with stock & price
   variantImages?: VariantImagesMap;   // { "128GB|Obsidian": [...images], "base": [...] }
   rating: number;
   reviewsCount: number;

@@ -884,11 +884,14 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                           <td key={product.id} className="p-4 border-l border-outline/10">
                             {product.colors && product.colors.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                {product.colors.map((color) => (
-                                  <span key={color} className="px-1.5 py-0.5 bg-surface-container border border-outline/10 rounded-md text-[10px] font-medium text-on-surface">
-                                    {color}
-                                  </span>
-                                ))}
+                                {product.colors.map((colorEntry) => {
+                                  const name = typeof colorEntry === 'string' ? colorEntry : (colorEntry as any).name;
+                                  return (
+                                    <span key={name} className="px-1.5 py-0.5 bg-surface-container border border-outline/10 rounded-md text-[10px] font-medium text-on-surface">
+                                      {name}
+                                    </span>
+                                  );
+                                })}
                               </div>
                             ) : (
                               <span className="text-on-surface-variant/40">-</span>

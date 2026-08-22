@@ -151,7 +151,12 @@ function AppContent() {
 
   // Cart actions
   const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty) => {
-    const color = selectedColor || (product.colors ? product.colors[0] : undefined);
+    const getDefaultColor = () => {
+      if (!product.colors?.length) return undefined;
+      const first = product.colors[0];
+      return typeof first === 'string' ? first : (first as any).name;
+    };
+    const color = selectedColor || getDefaultColor();
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
     const warranty = selectedWarranty || (product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
 
