@@ -685,7 +685,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     <h3 className={`font-display font-extrabold ${isLarge ? "text-lg sm:text-2xl" : "text-sm sm:text-lg"} text-on-surface leading-tight group-hover:text-primary transition-colors`}>
                       {prod.name}
                     </h3>
-                    <p className="text-[11px] sm:text-xs text-on-surface-variant/80 leading-relaxed">
+                    <p className={`${isLarge ? "text-[11px] sm:text-xs" : "text-[9px] sm:text-[10px]"} text-on-surface-variant/80 leading-relaxed`}>
                       {slotItem.description || prod.description}
                     </p>
                     {isLarge && (
@@ -813,16 +813,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
       </section>
 
       {/* Brand Value Section */}
-      <section className="bg-surface-container py-12 px-5 sm:px-8 rounded-[32px] border border-outline/10 max-w-7xl mx-3 sm:mx-6 lg:mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-left">
-        <div className="space-y-3 max-w-lg">
-          <h3 className="font-display font-bold text-xl text-on-surface">
+      <section className="bg-surface-container py-8 px-5 sm:px-8 rounded-[32px] border border-outline/10 max-w-7xl mx-3 sm:mx-6 lg:mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-left">
+        <div className="space-y-2 max-w-lg">
+          <h3 className="font-display font-bold text-base sm:text-xl text-on-surface">
             {config?.protocolTitle || "Why Shop With Us"}
           </h3>
-          <p className="text-xs text-on-surface-variant/80 leading-relaxed">
+          <p className="text-[10px] sm:text-xs text-on-surface-variant/80 leading-relaxed">
             {config?.protocolDescription || "We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support."}
           </p>
         </div>
-        <div className="flex flex-wrap gap-4 shrink-0">
+        <div className="flex flex-nowrap gap-3 shrink-0 overflow-x-auto pb-1">
           {(() => {
             const iconMap: Record<string, any> = {
               Zap,
@@ -841,12 +841,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             return (
               <>
-                <div className="flex items-center gap-2 p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-xs font-semibold text-on-surface">
-                  <Badge1Icon className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap">
+                  <Badge1Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                   <span>{config?.protocolBadge1Text || "Fast Delivery"}</span>
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-xs font-semibold text-on-surface">
-                  <Badge2Icon className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap">
+                  <Badge2Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                   <span>{config?.protocolBadge2Text || "Secure Checkout"}</span>
                 </div>
               </>
