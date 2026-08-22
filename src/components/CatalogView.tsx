@@ -31,7 +31,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
 }) => {
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [maxPrice, setMaxPrice] = useState<number>(500000);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Product Comparison States
@@ -338,7 +338,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
           </div>
 
           {/* Active filter badges */}
-          {(selectedCategory !== "All" || selectedBrand !== "All" || searchQuery || inStockOnly || maxPrice < 5000) && (
+          {(selectedCategory !== "All" || selectedBrand !== "All" || searchQuery || inStockOnly || maxPrice < 500000) && (
             <div className="flex flex-wrap gap-2 text-left" id="active-filters-row">
               {selectedCategory !== "All" && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
@@ -364,10 +364,10 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setInStockOnly(false)} />
                 </span>
               )}
-              {maxPrice < 5000 && (
+              {maxPrice < 500000 && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
-                  Under ${maxPrice}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxPrice(1500)} />
+                  Under {CURRENCY_SYMBOL} {maxPrice.toLocaleString()}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxPrice(500000)} />
                 </span>
               )}
             </div>
