@@ -266,25 +266,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                 {/* Ultra-Clean Floating Device Pill Overlay */}
                 {highlightedProduct && (
-                  <div className="absolute bottom-4 left-4 right-auto sm:left-6 sm:bottom-6 z-10 flex flex-col sm:flex-row sm:items-center justify-between bg-black/60 backdrop-blur-xl border border-white/10 p-4 sm:py-3 sm:px-6 rounded-2xl sm:rounded-full gap-3 sm:gap-6 shadow-2xl max-w-[85%] sm:max-w-xl animate-in fade-in slide-in-from-bottom-6 duration-500" key={`pill-${activeSlide?.id}`}>
-                    <div className="text-left space-y-0.5 sm:space-y-1">
-                      <span className="text-[9px] uppercase tracking-widest text-white/50 font-bold block font-mono">
+                  <div className="absolute bottom-4 left-4 right-auto sm:left-6 sm:bottom-6 z-10 flex flex-row items-center justify-between bg-black/60 backdrop-blur-xl border border-white/10 p-2.5 pr-3 sm:py-3 sm:px-6 rounded-full gap-3 sm:gap-6 shadow-2xl max-w-[85%] sm:max-w-xl animate-in fade-in slide-in-from-bottom-6 duration-500" key={`pill-${activeSlide?.id}`}>
+                    <div className="text-left space-y-0.5 sm:space-y-1 overflow-hidden">
+                      <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-white/50 font-bold block font-mono truncate">
                         {activeSlide?.tag || "Featured Device"}
                       </span>
-                      <h2 className="font-display font-extrabold text-sm sm:text-base text-white tracking-tight leading-tight">
+                      <h2 className="font-display font-extrabold text-[11px] sm:text-base text-white tracking-tight leading-tight truncate">
                         {highlightedProduct.name}
                       </h2>
-                      <p className="text-emerald-400 font-mono font-black text-xs sm:text-sm">
+                      <p className="text-emerald-400 font-mono font-black text-[9px] sm:text-sm">
                         {formatProductPrice(highlightedProduct)}
                       </p>
                     </div>
                     
                     <button
                       onClick={handleMediaOnlyCTA}
-                      className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-white/90 text-black active:scale-95 rounded-xl sm:rounded-full text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-lg animate-in fade-in duration-300"
+                      className="shrink-0 w-auto px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white hover:bg-white/90 text-black active:scale-95 rounded-full text-[9px] sm:text-xs font-black flex items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-lg animate-in fade-in duration-300"
                     >
                       <span>Explore</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
                     </button>
                   </div>
                 )}
