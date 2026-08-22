@@ -3506,21 +3506,21 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <span className="font-mono text-primary font-bold">Slide #{sIdx + 1} ({slide.id})</span>
                           <button
                             onClick={() => {
-                              if (currentSlides.length <= 3) {
-                                showFeedback("Safety Constraint: A minimum of 3 hero slides must be maintained to preserve design layout.", true);
+                              if (currentSlides.length <= 1) {
+                                showFeedback("Cannot remove the last slide.", true);
                                 return;
                               }
                               const updated = currentSlides.filter((_, idx) => idx !== sIdx);
                               setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               showFeedback("Hero slide removed.");
                             }}
-                            disabled={currentSlides.length <= 3}
+                            disabled={currentSlides.length <= 1}
                             className={`px-2 py-1 text-[10px] rounded-md flex items-center gap-1 transition-colors ${
-                              currentSlides.length <= 3
+                              currentSlides.length <= 1
                                 ? "bg-outline/5 text-on-surface-variant/40 cursor-not-allowed border border-outline/10"
                                 : "bg-red-500/10 text-red-500 border border-red-500/15 hover:bg-red-500/15"
                             }`}
-                            title={currentSlides.length <= 3 ? "A minimum of 3 slides is required" : "Remove slide"}
+                            title={currentSlides.length <= 1 ? "Cannot remove the last slide" : "Remove slide"}
                           >
                             <Trash2 className="w-3 h-3" />
                             <span>Remove</span>

@@ -191,7 +191,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="space-y-4 sm:space-y-8 lg:space-y-12 animate-in fade-in duration-300" id="home-view-container">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 mt-1 sm:mt-4" id="hero-section">
-        {!config ? null : isMediaOnly ? (
+        {!config ? null : isMobile && ((config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) || activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
           (() => {
             const slideTargetProductId = activeSlide?.targetProductId || config?.heroTargetProduct || "axon-phone-1-pro";
             const highlightedProduct = products.find(p => p.id === slideTargetProductId) || products[0];
@@ -295,7 +295,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 {/* Glassy Floating Navigation Controls for Cinematic Mode */}
                 <div className="absolute top-4 right-4 z-10 flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 py-1.5 px-3 rounded-full shadow-lg">
                   <div className="flex items-center gap-1">
-                    {heroSlides.map((_, idx) => (
+                    {heroSlides.length > 1 && heroSlides.map((_, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleDotClick(idx)}
@@ -332,7 +332,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             );
           })()
-        ) : isMobile && ((config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) || activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
+        ) : isMediaOnly ? (
           // Mobile Video Overlay Layout - video takes full width, details overlay on top
           <div
             className="relative h-[160px] sm:h-[520px]"
