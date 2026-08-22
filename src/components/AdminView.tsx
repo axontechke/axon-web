@@ -3817,6 +3817,28 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   placeholder="https://example.com/image.jpg"
                                 />
                                 <p className="text-[8px] text-on-surface-variant/60">Fully qualified secure URL pointing to high-resolution landscape assets.</p>
+                                {/* Live media preview */}
+                                {slide.mediaUrl && (
+                                  <div className="mt-1 rounded-xl overflow-hidden border border-outline/10 bg-surface-container-low">
+                                    {slide.mediaType === "video" ? (
+                                      <video
+                                        src={slide.mediaUrl}
+                                        className="w-full h-28 object-contain bg-black/5"
+                                        muted
+                                        playsInline
+                                        preload="metadata"
+                                      />
+                                    ) : (
+                                      <img
+                                        src={slide.mediaUrl}
+                                        alt="Desktop preview"
+                                        className="w-full h-28 object-contain bg-black/5"
+                                        referrerPolicy="no-referrer"
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                      />
+                                    )}
+                                  </div>
+                                )}
                               </div>
 
                               <div className="space-y-1.5">
@@ -3835,6 +3857,18 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   placeholder="https://example.com/mobile-image.jpg"
                                 />
                                 <p className="text-[8px] text-on-surface-variant/60">Optimized portrait size asset. Enhances mobile rendering speed and visual framing.</p>
+                                {/* Live media preview */}
+                                {slide.mobileMediaUrl && (
+                                  <div className="mt-1 rounded-xl overflow-hidden border border-outline/10 bg-surface-container-low">
+                                    <img
+                                      src={slide.mobileMediaUrl}
+                                      alt="Mobile preview"
+                                      className="w-full h-28 object-contain bg-black/5"
+                                      referrerPolicy="no-referrer"
+                                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                    />
+                                  </div>
+                                )}
                               </div>
                             </div>
                           )}

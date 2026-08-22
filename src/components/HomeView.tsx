@@ -212,7 +212,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     ) : config?.heroMediaOverrideType === "video" ? (
                       <video
                         src={config?.heroMediaOverrideUrl}
-                        className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
+                        className="w-full h-full object-contain opacity-90 transition-opacity duration-700"
                         autoPlay
                         loop
                         muted
@@ -228,7 +228,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       <img
                         src={config?.heroMediaOverrideUrl}
                         alt="Hero media"
-                        className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
+                        className="w-full h-full object-contain opacity-90 transition-opacity duration-700"
                         referrerPolicy="no-referrer"
                       />
                     )
@@ -242,7 +242,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   ) : activeSlide?.effectiveMediaType === "video" ? (
                     <video
                       src={activeSlide?.effectiveMediaUrl}
-                      className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
+                      className="w-full h-full object-contain opacity-90 transition-opacity duration-700"
                       autoPlay
                       loop
                       muted
@@ -258,7 +258,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     <img
                       src={activeSlide?.effectiveMediaUrl}
                       alt={activeSlide?.mediaAlt || activeSlide?.title}
-                      className="w-full h-full object-cover opacity-90 transition-opacity duration-700"
+                      className="w-full h-full object-contain opacity-90 transition-opacity duration-700"
                       referrerPolicy="no-referrer"
                     />
                   )}
@@ -345,7 +345,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 config?.heroMediaOverrideType === "video" ? (
                   <video
                     src={config?.heroMediaOverrideUrl}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     autoPlay
                     loop
                     muted
@@ -360,12 +360,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 ) : config?.heroMediaOverrideType === "embed" ? (
                   <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
                 ) : (
-                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 )
               ) : (
                 <video
                   src={activeSlide?.effectiveMediaType === "video" ? activeSlide?.effectiveMediaUrl : undefined}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   autoPlay
                   loop
                   muted
@@ -426,16 +426,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 config?.heroMediaOverrideType === "embed" ? (
                   <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
                 ) : config?.heroMediaOverrideType === "video" ? (
-                  <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
+                  <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
                 ) : (
-                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
+                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
                 )
               ) : activeSlide?.effectiveMediaType === "embed" ? (
                 <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35" dangerouslySetInnerHTML={{ __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl }} />
               ) : activeSlide?.effectiveMediaType === "video" ? (
-                <video src={activeSlide?.effectiveMediaUrl} className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
+                <video src={activeSlide?.effectiveMediaUrl} className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
               ) : (
-                <img src={activeSlide?.effectiveMediaUrl} alt={activeSlide?.mediaAlt || activeSlide?.title} className="w-full h-full object-cover opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
+                <img src={activeSlide?.effectiveMediaUrl} alt={activeSlide?.mediaAlt || activeSlide?.title} className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
               )}
               {/* Glass & Gradient overlays for dynamic high-end typography legibility */}
               <div className="absolute inset-0 bg-gradient-to-r from-surface-container-low via-surface-container-low/95 to-surface-container-low/40 md:from-surface-container-low via-surface-container-low/90 lg:to-surface-container-low/30" />
@@ -532,9 +532,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     config?.heroMediaOverrideType === "embed" ? (
                       <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
                     ) : config?.heroMediaOverrideType === "video" ? (
-                      <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-cover select-none" autoPlay loop muted playsInline key={`hero-video-override`} />
+                      <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-contain select-none" autoPlay loop muted playsInline key={`hero-video-override`} />
                     ) : (
-                      <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-cover select-none" key={`hero-img-override`} referrerPolicy="no-referrer" />
+                      <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-contain select-none" key={`hero-img-override`} referrerPolicy="no-referrer" />
                     )
                   ) : activeSlide?.effectiveMediaType === "embed" ? (
                     <div
@@ -544,7 +544,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   ) : activeSlide?.effectiveMediaType === "video" ? (
                     <video
                       src={activeSlide?.effectiveMediaUrl}
-                      className="w-full h-full object-cover select-none"
+                      className="w-full h-full object-contain select-none"
                       autoPlay
                       loop
                       muted
@@ -555,7 +555,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     <img
                       src={activeSlide?.effectiveMediaUrl}
                       alt={activeSlide?.mediaAlt || activeSlide?.title}
-                      className="w-full h-full object-cover select-none"
+                      className="w-full h-full object-contain select-none"
                       key={`hero-img-${activeSlide?.id}`}
                       referrerPolicy="no-referrer"
                     />
@@ -606,7 +606,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <img 
                     src={cat.image} 
                     alt={cat.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-30 dark:opacity-45"
+                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 opacity-30 dark:opacity-45"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/80 to-transparent group-hover:via-surface-container/70 transition-all" />
