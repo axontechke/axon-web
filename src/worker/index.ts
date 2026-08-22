@@ -387,11 +387,11 @@ const INITIAL_CONFIG: Record<string, any> = {
   socialLinkedIn: "",
   contactEmail: "synergy@axon.net",
   supportEmail: "support@axon.net",
-  privacyPolicy: "AXON TECH collects information directly relevant to fulfilling your physical hardware logistics and ensuring high-fidelity system diagnostics.",
+  privacyPolicy: "AXON TECH collects information needed to process and deliver your orders. We do not share your data with third parties for marketing.",
   termsOfUse: "These Terms of Service govern all purchases and use of the AXON TECH online store.",
-  cookiePolicy: "AXON TECH uses cookies and persistent browser key-value sets (localStorage) strictly to provide core e-commerce capabilities.",
+  cookiePolicy: "We use cookies to remember your cart and preferences. No third-party tracking cookies.",
   refundPolicy: "We offer a complete 30-day, risk-free guarantee.",
-  deliveryPolicy: "AXON TECH ships all premium hardware in dual-box structural armors.",
+  deliveryPolicy: "AXON TECH ships all orders in secure packaging. Orders placed before 12 PM dispatch same day via trusted couriers.",
   aiCreditsLimit: 30,
   aiCreditsUsed: 0,
   footerBrandName: "AXON",
@@ -1227,6 +1227,13 @@ async function dispatchOrder(req: Request, env: Env, _ctx: ExecutionContext, par
   return corsResponse({ success: true, order: { ...order, status: "shipped", history } });
 }
 
+// DELETE /api/admin/orders/:id
+async function deleteOrder(_req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const result = await env.DB.prepare("DELETE FROM orders WHERE id = ?").bind(params.id).run();
+  if (result.meta?.changes === 0) return jsonError("Order not found", 404);
+  return corsResponse({ success: true, id: params.id });
+}
+
 // GET /api/blog
 async function getBlog(_req: Request, env: Env): Promise<Response> {
   await seedDatabase(env.DB);
@@ -1732,6 +1739,7 @@ const routes: Route[] = [
   route("DELETE", "/api/admin/products/:id", deleteProduct),
   route("PUT", "/api/admin/orders/:id/status", updateOrderStatus),
   route("POST", "/api/admin/orders/:id/dispatch", dispatchOrder),
+  route("DELETE", "/api/admin/orders/:id", deleteOrder),
   route("PUT", "/api/admin/config", updateConfig),
   route("PUT", "/api/admin/contact", updateContact),
   route("GET", "/api/admin/support-requests", getSupportRequests),

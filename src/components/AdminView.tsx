@@ -927,6 +927,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm(`Delete order ${orderId}? This cannot be undone.`)) return;
+    try {
+      const res = await authFetch(`/api/orders/${orderId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        showFeedback(`Order ${orderId} deleted.`);
+        setSelectedOrder(null);
+        loadAllAdminData();
+      } else {
+        throw new Error("Delete failed");
+      }
+    } catch {
+      showFeedback("Failed to delete order.", true);
+    }
+  };
+
   const handleAddPromoCode = async () => {
     if (!webConfig || !newPromoCode.trim()) return;
     const updatedPromos = [...webConfig.activePromos, {
@@ -2840,8 +2858,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                 <div className="flex gap-2 pt-2 border-t border-outline/10">
                   <button
+                    onClick={() => handleDeleteOrder(selectedOrder.id)}
+                    className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </button>
+                  <button
                     onClick={() => setSelectedOrder(null)}
-                    className="w-full py-2.5 bg-surface-container-highest hover:bg-surface-container text-on-surface text-xs font-bold rounded-xl transition-colors text-center"
+                    className="flex-1 py-2.5 bg-surface-container-highest hover:bg-surface-container text-on-surface text-xs font-bold rounded-xl transition-colors text-center"
                   >
                     Done
                   </button>
