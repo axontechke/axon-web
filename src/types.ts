@@ -59,6 +59,7 @@ export interface Product {
   brand: string;
   image: string;
   images?: string[];
+  priceRange?: string;
   colors: ProductColor[];             // unified color entries (name + hex + image)
   colorCodes?: Record<string, string>; // legacy: { "Midnight Black": "#1a1a1a" } — migrated to colors[].code
   storages?: string[];

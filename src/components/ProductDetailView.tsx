@@ -353,17 +353,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           {/* Pricing */}
           <div className="py-2 border-y border-outline/10 flex items-center justify-between">
             <span className="text-2xl font-black text-primary font-display">
-              {displayPriceKsh > 0 ? `${CURRENCY_SYMBOL} ${displayPriceKsh.toLocaleString()}` : formatProductPrice(product)}
+              {product.priceRange || (displayPriceKsh > 0 ? `${CURRENCY_SYMBOL} ${displayPriceKsh.toLocaleString()}` : formatProductPrice(product))}
             </span>
-            {product.inStock ? (
-              <span className="text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                Ready to Ship
-              </span>
-            ) : (
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-200">
-                Out of Stock
-              </span>
-            )}
           </div>
 
           <p className="text-sm text-on-surface-variant leading-relaxed">
@@ -622,27 +613,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 </table>
               </div>
 
-              {/* Honest why-buy this product box */}
-              <div className="space-y-4 bg-primary-fixed/30 p-6 rounded-2xl border border-primary/10">
-                <h3 className="font-display font-bold text-sm text-primary">Why Buy From Us</h3>
-                <p className="text-xs text-on-surface-variant/90 leading-relaxed">
-                  We source genuine products, ship fast across Kenya, and include a warranty on every device. Our team is available on WhatsApp if you need help choosing or tracking your order.
-                </p>
-                <ul className="text-xs text-on-surface-variant/85 space-y-2 pt-1">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>Original, genuine products only</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>Fast dispatch — usually same day</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>WhatsApp support before and after purchase</span>
-                  </li>
-                </ul>
-              </div>
+              {/* Removed why-buy box */}
             </div>
           </div>
         )}

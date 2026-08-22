@@ -147,7 +147,11 @@ const defaultCategories = [
   { name: "Audio", desc: "", icon: "Headphones", image: "" },
   { name: "Phones", desc: "", icon: "Smartphone", image: "" },
   { name: "Accessories", desc: "", icon: "Layers", image: "" },
-  { name: "Power", desc: "", icon: "Plug", image: "" }
+  { name: "Power", desc: "", icon: "Plug", image: "" },
+  { name: "Smart Home", desc: "", icon: "Home", image: "" },
+  { name: "Gaming", desc: "", icon: "Gamepad", image: "" },
+  { name: "Wearables", desc: "", icon: "Watch", image: "" },
+  { name: "Displays", desc: "", icon: "Monitor", image: "" }
 ];
 
 const defaultSlides = [
@@ -314,6 +318,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarImgStorage, setNewVarImgStorage] = useState("");
   const [newVarImgColor, setNewVarImgColor] = useState("");
   const [newVarImgUrl, setNewVarImgUrl] = useState("");
+  const [newSpecKey, setNewSpecKey] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
 
   // Form states for Promo Manager
   const [newPromoCode, setNewPromoCode] = useState("");
@@ -1979,7 +1985,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                       <div className="space-y-1">
                         <label className="text-[10px] text-on-surface-variant block uppercase">Price (USD)</label>
                         <input
@@ -2017,6 +2023,17 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <option value="Phones">Phones</option>
                         </select>
                       </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-on-surface-variant block uppercase">Price Range</label>
+                        <input
+                          type="text"
+                          value={editingProduct.priceRange || ""}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, priceRange: e.target.value })}
+                          placeholder="e.g. KSh 10k - 15k"
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none"
+                        />
+                      </div>
                     </div>                     <div className="space-y-1">
                       <label className="text-[10px] text-on-surface-variant block uppercase">Image URL</label>
                       <input
@@ -2038,6 +2055,99 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         placeholder="https://example.com/image1.jpg"
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none h-20"
                       />
+                    </div>
+
+                    {/* Technical Specifications Manager */}
+                    <div className="border-t border-outline/10 pt-4 space-y-3">
+                      <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Technical Specifications</h4>
+                      
+                      {editingProduct.specifications && Object.keys(editingProduct.specifications).length > 0 ? (
+                        <div className="border border-outline/10 rounded-xl overflow-hidden bg-surface-container-low max-h-48 overflow-y-auto">
+                          <table className="w-full text-left text-[11px] border-collapse">
+                            <thead>
+                              <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
+                                <th className="p-2">Specification</th>
+                                <th className="p-2">Value</th>
+                                <th className="p-2 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-outline/10">
+                              {Object.entries(editingProduct.specifications).map(([key, value]) => (
+                                <tr key={key} className="hover:bg-surface-container-high/30">
+                                  <td className="p-2 font-semibold">{key}</td>
+                                  <td className="p-2">{value}</td>
+                                  <td className="p-2 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newSpecs = { ...editingProduct.specifications };
+                                        delete newSpecs[key];
+                                        setEditingProduct({ ...editingProduct, specifications: newSpecs });
+                                      }}
+                                      className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
+                                    >
+                                      Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
+                          No specifications added yet. Add one below.
+                        </div>
+                      )}
+
+                      {/* Add new spec */}
+                      <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
+                        <span className="text-[10px] font-bold text-on-surface uppercase block">Add Specification</span>
+                        <div className="grid grid-cols-3 gap-2 items-end">
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Name</label>
+                            <input
+                              type="text"
+                              value={newSpecKey}
+                              onChange={(e) => setNewSpecKey(e.target.value)}
+                              placeholder="e.g. Processor"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Value</label>
+                            <input
+                              type="text"
+                              value={newSpecValue}
+                              onChange={(e) => setNewSpecValue(e.target.value)}
+                              placeholder="e.g. Quantum Core Architecture"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">&nbsp;</label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!newSpecKey.trim() || !newSpecValue.trim()) return;
+                                setEditingProduct({
+                                  ...editingProduct,
+                                  specifications: {
+                                    ...(editingProduct.specifications || {}),
+                                    [newSpecKey.trim()]: newSpecValue.trim()
+                                  }
+                                });
+                                setNewSpecKey("");
+                                setNewSpecValue("");
+                              }}
+                              disabled={!newSpecKey.trim() || !newSpecValue.trim()}
+                              className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg flex items-center justify-center gap-1"
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Add
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Unified Color Manager */}

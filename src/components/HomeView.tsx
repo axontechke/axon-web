@@ -188,7 +188,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="space-y-4 sm:space-y-8 lg:space-y-12 animate-in fade-in duration-300" id="home-view-container">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 mt-1 sm:mt-4" id="hero-section">
-        {!config ? null : isMobile && ((config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) || activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
+        {!config ? null : ((config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) || activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
           (() => {
             const slideTargetProductId = activeSlide?.targetProductId || config?.heroTargetProduct || "axon-phone-1-pro";
             const highlightedProduct = products.find(p => p.id === slideTargetProductId) || products[0];
@@ -203,6 +203,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   {(config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) ? (
                     config?.heroMediaOverrideType === "embed" ? (
                       <div
+                        key={config?.heroMediaOverrideUrl}
                         className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
                         dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }}
                       />
@@ -231,6 +232,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )
                   ) : activeSlide?.effectiveMediaType === "embed" ? (
                     <div
+                      key={activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl}
                       className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container"
                       dangerouslySetInnerHTML={{
                         __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl
@@ -323,11 +325,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     </div>
                   </div>
                 )}
-
-                {/* Layout Specifications Badge for Admin Guidance */}
-                <div className="absolute top-4 left-4 z-10 hidden sm:block bg-black/40 backdrop-blur-md border border-white/10 py-1 px-2.5 rounded-md text-[8px] font-mono font-bold uppercase tracking-wider text-white/50">
-                  {isMobile ? "Mobile Layout • 9:16 Optimized" : "Desktop Layout • 16:9 Cinema"}
-                </div>
               </div>
             );
           })()

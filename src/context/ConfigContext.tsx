@@ -94,42 +94,50 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
   const fetchController = useRef<AbortController | null>(null);
 
   const fetchData = useCallback(async (signal: AbortSignal) => {
-    const t = Date.now();
-    const [prodRes, configRes] = await Promise.all([
-      fetch(`${API_ROUTES.products.list}?t=${t}`, { signal }),
-      fetch(`${API_ROUTES.config.get}?t=${t}`, { signal }),
-    ]);
+    try {
+      const t = Date.now();
+      const [prodRes, configRes] = await Promise.all([
+        fetch(`${API_ROUTES.products.list}?t=${t}`, { signal }),
+        fetch(`${API_ROUTES.config.get}?t=${t}`, { signal }),
+      ]);
 
-    const newProducts: Product[] = [];
-    const newConfig: WebConfig | null = null;
+      const newProducts: Product[] = [];
+      const newConfig: WebConfig | null = null;
 
-    if (prodRes.ok) {
-      const prodData = await prodRes.json();
-      if (Array.isArray(prodData) && prodData.length > 0) {
-        newProducts.push(
-          ...prodData.filter((p: any) => p && typeof p?.name === "string")
-        );
+      if (prodRes.ok) {
+        const prodData = await prodRes.json();
+        if (Array.isArray(prodData) && prodData.length > 0) {
+          newProducts.push(
+            ...prodData.filter((p: any) => p && typeof p?.name === "string")
+          );
+        }
       }
-    }
 
-    if (configRes.ok) {
-      const cfg: WebConfig = await configRes.json();
-      if (cfg && typeof cfg === "object") {
-        writeCache(newProducts, cfg);
-        setConfig(cfg);
+      if (configRes.ok) {
+        const cfg: WebConfig = await configRes.json();
+        if (cfg && typeof cfg === "object") {
+          writeCache(newProducts, cfg);
+          setConfig(cfg);
+          setProducts(newProducts);
+          setIsLoading(false);
+          setIsFetching(false);
+          return;
+        }
+      }
+
+      // Partial or failed — still resolve so we stop loading
+      if (newProducts.length > 0) {
         setProducts(newProducts);
-        setIsLoading(false);
-        setIsFetching(false);
+      }
+      setIsLoading(false);
+      setIsFetching(false);
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
         return;
       }
+      setIsLoading(false);
+      setIsFetching(false);
     }
-
-    // Partial or failed — still resolve so we stop loading
-    if (newProducts.length > 0) {
-      setProducts(newProducts);
-    }
-    setIsLoading(false);
-    setIsFetching(false);
   }, []);
 
   const startFreshFetch = useCallback(() => {
