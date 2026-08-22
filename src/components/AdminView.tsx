@@ -121,6 +121,9 @@ interface WebConfig {
   socials?: { name: string; url: string; icon: string }[];
   navbarLogoUrl?: string;
   ogImage?: string;
+  faviconUrl?: string;
+  footerLogoUrl?: string;
+  brandAccentColor?: string;
   heroMediaOverrideEnabled?: boolean;
   heroMediaOverrideType?: string;
   heroMediaOverrideUrl?: string;
@@ -3111,9 +3114,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     Branding &amp; Logo
                   </h3>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 lg:grid lg:grid-cols-5 lg:overflow-visible lg:pb-0">
                     {/* Navbar Logo */}
-                    <div className="space-y-1.5">
+                    <div className="min-w-[280px] snap-center space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Navbar Logo URL</label>
                       <input
                         type="url"
@@ -3135,7 +3138,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     {/* OG Image */}
-                    <div className="space-y-1.5">
+                    <div className="min-w-[280px] snap-center space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">OG Image URL (social sharing)</label>
                       <input
                         type="url"
@@ -3154,6 +3157,71 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           />
                         </div>
                       )}
+                    </div>
+
+                    {/* Favicon */}
+                    <div className="min-w-[280px] snap-center space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">Favicon URL</label>
+                      <input
+                        type="url"
+                        value={webConfig.faviconUrl || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev, faviconUrl: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
+                        placeholder="https://example.com/favicon.ico"
+                      />
+                      {webConfig.faviconUrl && (
+                        <div className="mt-2 rounded-xl overflow-hidden border border-outline/10 w-fit">
+                          <img
+                            src={webConfig.faviconUrl}
+                            alt="Favicon preview"
+                            className="h-10 w-10 object-contain bg-surface-container"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Logo */}
+                    <div className="min-w-[280px] snap-center space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">Footer Logo URL</label>
+                      <input
+                        type="url"
+                        value={webConfig.footerLogoUrl || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev, footerLogoUrl: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
+                        placeholder="https://example.com/footer-logo.png"
+                      />
+                      {webConfig.footerLogoUrl && (
+                        <div className="mt-2 rounded-xl overflow-hidden border border-outline/10 w-fit">
+                          <img
+                            src={webConfig.footerLogoUrl}
+                            alt="Footer logo preview"
+                            className="h-12 object-contain bg-surface-container"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Brand Accent Color */}
+                    <div className="min-w-[280px] snap-center space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">Brand Accent Color</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={webConfig.brandAccentColor || "#3B82F6"}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev, brandAccentColor: e.target.value }))}
+                          className="w-12 h-10 rounded-xl border border-outline/15 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={webConfig.brandAccentColor || "#3B82F6"}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev, brandAccentColor: e.target.value }))}
+                          className="flex-1 px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none font-mono"
+                          placeholder="#3B82F6"
+                        />
+                      </div>
+                      <p className="text-[9px] text-on-surface-variant/60">Used for buttons, links, and highlight elements.</p>
                     </div>
                   </div>
                 </div>

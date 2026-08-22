@@ -37,7 +37,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
         icon: iconMap[c.icon] || Layers
       }));
     }
-    return [];
+    return [
+      { name: "Laptops", icon: Laptop, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853" },
+      { name: "Tablets", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0" },
+      { name: "Phones", icon: Smartphone, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
+      { name: "Audio", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e" },
+      { name: "Accessories", icon: Plug, image: "https://images.unsplash.com/photo-1583394838336-acd977736f90" }
+    ];
   }, [config?.categoriesList]);
 
   // Detect Mobile Width

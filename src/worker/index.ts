@@ -370,6 +370,9 @@ const INITIAL_CONFIG: Record<string, any> = {
   heroSlides: [],
   navbarLogoUrl: "",
   ogImage: "",
+  faviconUrl: "",
+  footerLogoUrl: "",
+  brandAccentColor: "#3B82F6",
   categoryThumbnails: {
     "Laptops": "",
     "Tablets": "",
