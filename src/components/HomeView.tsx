@@ -379,36 +379,34 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 />
               )}
               {/* Gradient overlay for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             </div>
 
-            {/* Overlaid content - compact bottom-left on mobile */}
-            <div className="absolute bottom-0 left-0 right-0 z-10 p-3 pb-4">
-              <div className="flex items-end justify-between gap-2">
-                {/* Minimal info: tag + title */}
+            {/* Overlaid content - ultra-compact bottom bar on mobile */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 px-2 pb-3">
+              <div className="flex items-end justify-between gap-1">
+                {/* Tag + title */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[8px] uppercase tracking-widest text-white/50 font-bold mb-0.5 truncate">
+                  <p className="text-[7px] uppercase tracking-widest text-white/40 font-bold truncate">
                     {activeSlide?.tag || "Featured"}
                   </p>
-                  <h2 className="font-display font-black text-sm text-white leading-tight truncate">
+                  <h2 className="font-display font-black text-xs text-white leading-tight truncate">
                     {activeSlide?.title || config?.heroTitle || "AXON TECH"}
                   </h2>
                 </div>
 
-                {/* Dot indicators + nav */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <div className="flex items-center gap-1">
-                    {heroSlides.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleDotClick(idx)}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          idx === currentSlide ? "w-4 bg-white" : "w-1.5 bg-white/40"
-                        }`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
+                {/* Dot indicators */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {heroSlides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleDotClick(idx)}
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        idx === currentSlide ? "w-3 bg-white" : "w-1 bg-white/40"
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
