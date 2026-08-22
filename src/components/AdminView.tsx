@@ -1167,7 +1167,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
         {/* Global Action Tools */}
         <div className="flex flex-wrap items-center gap-3">
-          <button 
+          <button
             onClick={onViewWeb}
             className="p-2 bg-primary/10 hover:bg-primary/15 text-primary border border-primary/15 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Return to store browsing"
@@ -1175,8 +1175,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
             <Eye className="w-3.5 h-3.5" />
             <span>View Web</span>
           </button>
-          <button 
-            onClick={loadAllAdminData} 
+          <button
+            onClick={handleSaveConfig}
+            className="p-2 bg-green-500/10 hover:bg-green-500/15 text-green-600 border border-green-500/15 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Save all pending changes"
+          >
+            <Check className="w-3.5 h-3.5" />
+            <span>Save</span>
+          </button>
+          <button
+            onClick={loadAllAdminData}
             disabled={loading}
             className="p-2 bg-surface-container border border-outline/15 text-on-surface hover:bg-surface-container-high rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
             title="Reload live database"
@@ -1184,7 +1192,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             <span>Sync Live</span>
           </button>
-          <button 
+          <button
             onClick={handleLogout}
             className="p-2 bg-red-500/10 hover:bg-red-500/15 text-red-600 border border-red-500/15 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
           >

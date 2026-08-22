@@ -513,13 +513,17 @@ function AppContent() {
           <Route
             path={ROUTES.admin}
             element={
-              <AdminView
-                onSelectProduct={handleSelectProduct}
-                onRefreshProducts={fetchProductsAndConfig}
-                isAdminAuthenticated={isAdminAuthenticated}
-                setIsAdminAuthenticated={setIsAdminAuthenticated}
-                onViewWeb={() => navigate(ROUTES.home)}
-              />
+              isAdminAuthenticated ? (
+                <AdminView
+                  onSelectProduct={handleSelectProduct}
+                  onRefreshProducts={fetchProductsAndConfig}
+                  isAdminAuthenticated={isAdminAuthenticated}
+                  setIsAdminAuthenticated={setIsAdminAuthenticated}
+                  onViewWeb={() => navigate(ROUTES.home)}
+                />
+              ) : (
+                <Navigate to={ROUTES.home} replace />
+              )
             }
           />
 
