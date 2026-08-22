@@ -33,7 +33,8 @@ import {
   TrendingDown,
   Sparkles,
   FileText,
-  Star
+  Star,
+  ImageIcon
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
@@ -3101,6 +3102,63 @@ export const AdminView: React.FC<AdminViewProps> = ({
           {/* ======================================= */}
           {configSubTab === "general" && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+              {/* ── Branding & Logo (prominent, top) ── */}
+              <div className="lg:col-span-12">
+                <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+                  <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-primary" />
+                    Branding &amp; Logo
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Navbar Logo */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">Navbar Logo URL</label>
+                      <input
+                        type="url"
+                        value={webConfig.navbarLogoUrl || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev, navbarLogoUrl: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
+                        placeholder="https://example.com/logo.png"
+                      />
+                      {webConfig.navbarLogoUrl && (
+                        <div className="mt-2 rounded-xl overflow-hidden border border-outline/10 w-fit">
+                          <img
+                            src={webConfig.navbarLogoUrl}
+                            alt="Navbar logo preview"
+                            className="h-12 object-contain bg-surface-container"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* OG Image */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">OG Image URL (social sharing)</label>
+                      <input
+                        type="url"
+                        value={webConfig.ogImage || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev, ogImage: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
+                        placeholder="https://example.com/og-image.png"
+                      />
+                      {webConfig.ogImage && (
+                        <div className="mt-2 rounded-xl overflow-hidden border border-outline/10 w-fit">
+                          <img
+                            src={webConfig.ogImage}
+                            alt="OG image preview"
+                            className="h-20 object-contain bg-surface-container"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Announcement bar & layout values */}
               <div className="lg:col-span-7 space-y-6">
                 <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
@@ -3382,27 +3440,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-on-surface-variant uppercase block">Navbar Logo URL</label>
-                      <input
-                        type="url"
-                        value={webConfig.navbarLogoUrl || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,navbarLogoUrl: e.target.value }))}
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                        placeholder="https://example.com/logo.png"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-on-surface-variant uppercase block">OG Image URL (social sharing)</label>
-                      <input
-                        type="url"
-                        value={webConfig.ogImage || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev,ogImage: e.target.value }))}
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                        placeholder="https://example.com/og-image.png"
-                      />
-                    </div>
                   </div>
                 </div>
 
