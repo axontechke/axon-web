@@ -70,12 +70,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
     let source = Array.isArray(list) ? [...list] : [];
 
-    // Ensure min 3 slides by padding with empty duplicates
-    while (source.length < 3) {
-      source.push({
-        ...source[0],
-        id: (source[0]?.id || "slide") + "_blank_" + source.length
-      });
+    // Ensure at least 1 slide to avoid rendering issues
+    if (source.length === 0) {
+      source.push({ id: "default_slide" });
     }
 
     return source.map((slide: any) => {
@@ -269,7 +266,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                 {/* Ultra-Clean Floating Device Pill Overlay */}
                 {highlightedProduct && (
-                  <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:left-6 sm:bottom-6 z-10 flex flex-col sm:flex-row sm:items-center justify-between bg-black/60 backdrop-blur-xl border border-white/10 p-4 sm:py-3 sm:px-6 rounded-2xl sm:rounded-full gap-3 sm:gap-6 shadow-2xl max-w-full sm:max-w-xl animate-in fade-in slide-in-from-bottom-6 duration-500" key={`pill-${activeSlide?.id}`}>
+                  <div className="absolute bottom-4 left-4 right-auto sm:left-6 sm:bottom-6 z-10 flex flex-col sm:flex-row sm:items-center justify-between bg-black/60 backdrop-blur-xl border border-white/10 p-4 sm:py-3 sm:px-6 rounded-2xl sm:rounded-full gap-3 sm:gap-6 shadow-2xl max-w-[85%] sm:max-w-xl animate-in fade-in slide-in-from-bottom-6 duration-500" key={`pill-${activeSlide?.id}`}>
                     <div className="text-left space-y-0.5 sm:space-y-1">
                       <span className="text-[9px] uppercase tracking-widest text-white/50 font-bold block font-mono">
                         {activeSlide?.tag || "Featured Device"}
@@ -293,37 +290,39 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 )}
 
                 {/* Glassy Floating Navigation Controls for Cinematic Mode */}
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 py-1.5 px-3 rounded-full shadow-lg">
-                  <div className="flex items-center gap-1">
-                    {heroSlides.length > 1 && heroSlides.map((_, idx) => (
+                {heroSlides.length > 1 && (
+                  <div className="absolute top-4 right-4 z-10 flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 py-1.5 px-3 rounded-full shadow-lg">
+                    <div className="flex items-center gap-1">
+                      {heroSlides.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleDotClick(idx)}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            idx === currentSlide ? "w-5 bg-white" : "w-1.5 bg-white/30 hover:bg-white/50"
+                          }`}
+                          aria-label={`Go to slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="h-4 w-px bg-white/15" />
+                    <div className="flex gap-1">
                       <button
-                        key={idx}
-                        onClick={() => handleDotClick(idx)}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          idx === currentSlide ? "w-5 bg-white" : "w-1.5 bg-white/30 hover:bg-white/50"
-                        }`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                      />
-                    ))}
+                        onClick={handlePrevSlide}
+                        className="p-1 rounded-lg hover:bg-white/10 text-white/75 hover:text-white transition-colors"
+                        aria-label="Previous slide"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={handleNextSlide}
+                        className="p-1 rounded-lg hover:bg-white/10 text-white/75 hover:text-white transition-colors"
+                        aria-label="Next slide"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="h-4 w-px bg-white/15" />
-                  <div className="flex gap-1">
-                    <button
-                      onClick={handlePrevSlide}
-                      className="p-1 rounded-lg hover:bg-white/10 text-white/75 hover:text-white transition-colors"
-                      aria-label="Previous slide"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={handleNextSlide}
-                      className="p-1 rounded-lg hover:bg-white/10 text-white/75 hover:text-white transition-colors"
-                      aria-label="Next slide"
-                    >
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+                )}
 
                 {/* Layout Specifications Badge for Admin Guidance */}
                 <div className="absolute top-4 left-4 z-10 hidden sm:block bg-black/40 backdrop-blur-md border border-white/10 py-1 px-2.5 rounded-md text-[8px] font-mono font-bold uppercase tracking-wider text-white/50">
@@ -383,20 +382,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
 
             {/* Minimal dots-only bar at very bottom */}
-            <div className="absolute bottom-0 left-0 right-0 z-10 px-2 pb-1">
-              <div className="flex items-center justify-center gap-0.5">
-                {heroSlides.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleDotClick(idx)}
-                    className={`h-0.5 rounded-full transition-all duration-300 ${
-                      idx === currentSlide ? "w-2 bg-white" : "w-0.5 bg-white/20"
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
+            {heroSlides.length > 1 && (
+              <div className="absolute bottom-0 left-0 right-0 z-10 px-2 pb-1">
+                <div className="flex items-center justify-center gap-0.5">
+                  {heroSlides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleDotClick(idx)}
+                      className={`h-0.5 rounded-full transition-all duration-300 ${
+                        idx === currentSlide ? "w-2 bg-white" : "w-0.5 bg-white/20"
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           // Default layout for non-video or desktop
@@ -473,37 +474,39 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </div>
 
                   {/* Carousel Controllers */}
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="flex items-center gap-1">
-                      {heroSlides.map((_, idx) => (
+                  {heroSlides.length > 1 && (
+                    <div className="flex items-center gap-3 pt-1">
+                      <div className="flex items-center gap-1">
+                        {heroSlides.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleDotClick(idx)}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              idx === currentSlide ? "w-5 sm:w-6 bg-primary" : "w-1.5 bg-outline/20 hover:bg-outline/40"
+                            }`}
+                            aria-label={`Go to slide ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                      <div className="h-4 w-px bg-outline/10 mx-1" />
+                      <div className="flex gap-1">
                         <button
-                          key={idx}
-                          onClick={() => handleDotClick(idx)}
-                          className={`h-1.5 rounded-full transition-all duration-300 ${
-                            idx === currentSlide ? "w-5 sm:w-6 bg-primary" : "w-1.5 bg-outline/20 hover:bg-outline/40"
-                          }`}
-                          aria-label={`Go to slide ${idx + 1}`}
-                        />
-                      ))}
+                          onClick={handlePrevSlide}
+                          className="p-1 rounded-lg border border-outline/10 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
+                          aria-label="Previous slide"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={handleNextSlide}
+                          className="p-1 rounded-lg border border-outline/10 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
+                          aria-label="Next slide"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="h-4 w-px bg-outline/10 mx-1" />
-                    <div className="flex gap-1">
-                      <button
-                        onClick={handlePrevSlide}
-                        className="p-1 rounded-lg border border-outline/10 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
-                        aria-label="Previous slide"
-                      >
-                        <ChevronLeft className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={handleNextSlide}
-                        className="p-1 rounded-lg border border-outline/10 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
-                        aria-label="Next slide"
-                      >
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
