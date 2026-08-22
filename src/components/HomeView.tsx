@@ -335,7 +335,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         ) : isMobile && ((config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) || activeSlide?.effectiveMediaType === "video" || activeSlide?.effectiveMediaType === "embed") ? (
           // Mobile Video Overlay Layout - video takes full width, details overlay on top
           <div
-            className="relative h-[220px] sm:h-[520px]"
+            className="relative h-[160px] sm:h-[520px]"
             onTouchStart={() => setIsPaused(true)}
             onTouchEnd={() => setIsPaused(false)}
           >
@@ -378,19 +378,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   }}
                 />
               )}
-              {/* Minimal gradient - just enough for text legibility */}
-              <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/50 to-transparent" />
+              {/* Tiny gradient strip at very bottom */}
+              <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
 
-            {/* Minimal dots-only overlay at very bottom */}
-            <div className="absolute bottom-0 left-0 right-0 z-10 px-3 pb-2">
-              <div className="flex items-center justify-center gap-1">
+            {/* Minimal dots-only bar at very bottom */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 px-2 pb-1">
+              <div className="flex items-center justify-center gap-0.5">
                 {heroSlides.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleDotClick(idx)}
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      idx === currentSlide ? "w-3 bg-white" : "w-1 bg-white/30"
+                    className={`h-0.5 rounded-full transition-all duration-300 ${
+                      idx === currentSlide ? "w-2 bg-white" : "w-0.5 bg-white/20"
                     }`}
                     aria-label={`Go to slide ${idx + 1}`}
                   />
