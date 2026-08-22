@@ -947,6 +947,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
         setNewPromoCode("");
         setNewPromoDesc("");
         loadAllAdminData();
+      } else {
+        showFeedback("Failed to add promo code.", true);
       }
     } catch (err) {
       showFeedback("Failed to publish coupon.", true);
@@ -967,6 +969,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
       if (res.ok) {
         showFeedback("Promo coupon disabled.");
         loadAllAdminData();
+      } else {
+        showFeedback("Failed to remove promo code.", true);
       }
     } catch (err) {
       showFeedback("Failed to delete promo coupon.", true);
@@ -1190,15 +1194,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
         </div>
       </div>
 
-      {/* Action Status Feedback Toast */}
+      {/* Action Status Feedback Toast — fixed bottom-right, stays visible while scrolling */}
       {actionMessage && (
-        <div className={`p-4 rounded-xl border flex items-center gap-2.5 animate-in slide-in-from-top-2 duration-200 text-xs font-semibold ${
-          actionMessage.isError 
-            ? "bg-red-500/5 text-red-500 border-red-500/15" 
-            : "bg-green-500/5 text-green-600 border-green-500/15"
+        <div className={`fixed bottom-6 right-6 z-[100] max-w-sm px-4 py-3 rounded-2xl border shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-2 duration-200 text-xs font-semibold ${
+          actionMessage.isError
+            ? "bg-red-500/10 text-red-500 border-red-500/25 backdrop-blur-md"
+            : "bg-green-500/10 text-green-600 border-green-500/25 backdrop-blur-md"
         }`}>
-          <AlertCircle className="w-4 h-4" />
-          <span>{actionMessage.text}</span>
+          <AlertCircle className={`w-4 h-4 flex-shrink-0 ${actionMessage.isError ? "text-red-400" : "text-green-500"}`} />
+          <span className="leading-snug">{actionMessage.text}</span>
         </div>
       )}
 
