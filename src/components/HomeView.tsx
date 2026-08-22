@@ -382,75 +382,33 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             </div>
 
-            {/* Overlaid content */}
-            <div className="relative z-10 flex flex-col justify-end min-h-[480px] sm:min-h-[520px] p-4 pb-6">
-              {/* Tag */}
-              <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-primary/90 text-white text-[9px] font-semibold tracking-wide w-fit mb-2">
-                <TagIcon className="w-2.5 h-2.5 text-white" />
-                <span>{activeSlide?.tag || config?.announcement?.slice(0, 30) || "AXON TECH"}</span>
-              </div>
-
-              {/* Title & Description */}
-              <h1 className="font-display font-black text-xl text-white leading-tight mb-1.5 animate-in fade-in slide-in-from-bottom-1 duration-400">
-                {activeSlide?.title || config?.heroTitle || "Tech Gadgets & Accessories"}
-              </h1>
-              <p className="text-white/80 text-[10px] leading-relaxed line-clamp-2 mb-3">
-                {activeSlide?.description || config?.heroDescription || "Phones, tablets, laptops, earphones and more. Genuine products, fast delivery across Kenya."}
-              </p>
-
-              {/* CTAs */}
-              <div className="flex gap-2 mb-3">
-                <button
-                  onClick={activeSlide?.primaryAction}
-                  className="px-4 py-2 rounded-full text-[10px] font-bold flex items-center gap-1.5 cursor-pointer bg-white text-black hover:bg-white/90 transition-colors"
-                >
-                  {activeSlide?.primaryBtnText}
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-                <button
-                  onClick={activeSlide?.secondaryAction}
-                  className="px-4 py-2 rounded-full text-[10px] font-bold cursor-pointer bg-white/20 text-white hover:bg-white/30 transition-colors border border-white/20"
-                >
-                  {activeSlide?.secondaryBtnText}
-                </button>
-              </div>
-
-              {/* Micro overlay tag */}
-              <div className="bg-black/50 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl text-left max-w-[200px] mb-3">
-                <div className="text-[9px] font-black text-primary uppercase tracking-wide truncate">{activeSlide?.overlayTitle}</div>
-                <div className="text-[8px] text-white/70 font-medium leading-tight truncate">{activeSlide?.overlayDesc}</div>
-              </div>
-
-              {/* Carousel Controls */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  {heroSlides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleDotClick(idx)}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        idx === currentSlide ? "w-5 bg-white" : "w-1.5 bg-white/40 hover:bg-white/60"
-                      }`}
-                      aria-label={`Go to slide ${idx + 1}`}
-                    />
-                  ))}
+            {/* Overlaid content - compact bottom-left on mobile */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 p-3 pb-4">
+              <div className="flex items-end justify-between gap-2">
+                {/* Minimal info: tag + title */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] uppercase tracking-widest text-white/50 font-bold mb-0.5 truncate">
+                    {activeSlide?.tag || "Featured"}
+                  </p>
+                  <h2 className="font-display font-black text-sm text-white leading-tight truncate">
+                    {activeSlide?.title || config?.heroTitle || "AXON TECH"}
+                  </h2>
                 </div>
-                <div className="h-4 w-px bg-white/20" />
-                <div className="flex gap-1">
-                  <button
-                    onClick={handlePrevSlide}
-                    className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-                    aria-label="Previous slide"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={handleNextSlide}
-                    className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-                    aria-label="Next slide"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+
+                {/* Dot indicators + nav */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1">
+                    {heroSlides.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleDotClick(idx)}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          idx === currentSlide ? "w-4 bg-white" : "w-1.5 bg-white/40"
+                        }`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
