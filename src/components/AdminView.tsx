@@ -212,11 +212,11 @@ const defaultSlides = [
 ];
 
 const defaultCol1Links = [
-  { text: "Tablets", target: "/catalog" },
-  { text: "Laptops", target: "/catalog" },
-  { text: "Audio", target: "/catalog" },
-  { text: "Power Banks", target: "/catalog" },
-  { text: "Accessories", target: "/catalog" }
+  { text: "Axon Slate Series", target: "/catalog" },
+  { text: "Axon Books (Laptops)", target: "/catalog" },
+  { text: "Studio Audio", target: "/catalog" },
+  { text: "Continuous Power Banks", target: "/catalog" },
+  { text: "Click Keyboards & Gear", target: "/catalog" }
 ];
 
 const defaultCol2Links = [
