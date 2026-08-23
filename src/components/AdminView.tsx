@@ -353,6 +353,28 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [orderStatusNotes, setOrderStatusNotes] = useState("");
 
+  // Validate stored token on mount — clear stale auth if token is invalid
+  useEffect(() => {
+    const storedToken = localStorage.getItem("axon_admin_token");
+    if (!storedToken) return;
+    fetch("/api/auth/me", {
+      headers: { Authorization: `Bearer ${storedToken}` }
+    }).then(res => {
+      if (!res.ok) {
+        localStorage.removeItem("axon_admin_token");
+        localStorage.removeItem("axon_admin_authed");
+        setIsAuthenticated(false);
+        setAuthToken("");
+      }
+    }).catch(() => {
+      // Network error — assume token is invalid
+      localStorage.removeItem("axon_admin_token");
+      localStorage.removeItem("axon_admin_authed");
+      setIsAuthenticated(false);
+      setAuthToken("");
+    });
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       loadAllAdminData();

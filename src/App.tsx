@@ -263,23 +263,6 @@ function AppContent() {
   // Cart Badge count
   const cartBadgeCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  // If super admin is fully authenticated and on the Admin panel, present a clean full-screen view
-  if (location.pathname === ROUTES.admin && isAdminAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background font-sans text-on-surface flex flex-col justify-between" id="app-wrapper">
-        <SEOHead config={{ title: "Admin Dashboard | AXON TECH Kenya", description: "AXON TECH administration panel." }} />
-        <main className="flex-1 py-4 md:py-8">
-          <AdminView 
-            onSelectProduct={handleSelectProduct}
-            onRefreshProducts={fetchProductsAndConfig}
-            isAdminAuthenticated={isAdminAuthenticated}
-            setIsAdminAuthenticated={setIsAdminAuthenticated}
-            onViewWeb={() => navigate("/")}
-          />
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background font-sans text-on-surface flex flex-col justify-between" id="app-wrapper">
@@ -491,17 +474,13 @@ function AppContent() {
           <Route
             path={ROUTES.admin}
             element={
-              isAdminAuthenticated ? (
-                <AdminView
-                  onSelectProduct={handleSelectProduct}
-                  onRefreshProducts={fetchProductsAndConfig}
-                  isAdminAuthenticated={isAdminAuthenticated}
-                  setIsAdminAuthenticated={setIsAdminAuthenticated}
-                  onViewWeb={() => navigate(ROUTES.home)}
-                />
-              ) : (
-                <Navigate to={ROUTES.home} replace />
-              )
+              <AdminView
+                onSelectProduct={handleSelectProduct}
+                onRefreshProducts={fetchProductsAndConfig}
+                isAdminAuthenticated={isAdminAuthenticated}
+                setIsAdminAuthenticated={setIsAdminAuthenticated}
+                onViewWeb={() => navigate(ROUTES.home)}
+              />
             }
           />
 

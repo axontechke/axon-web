@@ -604,36 +604,8 @@ async function seedSuperAdmin(db: D1Database, emails: string, password: string):
 }
 
 // ─── AUTH HANDLER ─────────────────────────────────────────────
-async function login(req: Request, env: Env): Promise<Response> {
-  const clientIp = getClientIp(req);
-  const { email, password } = await jsonBody<{ email?: string; password?: string }>(req);
-  if (!email || !password) return jsonError("Email and password required.");
-
-  const user = await env.DB.prepare(
-    "SELECT id, email, passwordHash, salt, role FROM users WHERE LOWER(email) = LOWER(?)"
-  ).bind(email).first<{ id: string; email: string; passwordHash: string; salt: string; role: string }>();
-
-  if (!user) {
-    recordFailedAttempt(clientIp);
-    return jsonError("Invalid credentials.", 401);
-  }
-
-  const valid = await verifyPassword(password, user.salt, user.passwordHash);
-  if (!valid) {
-    recordFailedAttempt(clientIp);
-    return jsonError("Invalid credentials.", 401);
-  }
-
-  const token = generateToken();
-  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-  // Store session token with login IP for audit trail
-  await env.DB.prepare(
-    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
-  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt, loginIp: clientIp })).run();
-
-  clearRateLimit(clientIp);
-  return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
+async function login(_req: Request, _env: Env): Promise<Response> {
+  return jsonError("Password login is disabled. Please use Google Sign-In.", 403);
 }
 
 // POST /api/auth/firebase-login — Google Sign-In via Firebase ID token
