@@ -743,7 +743,24 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     colorImages: JSON.parse(p.colorImages || "{}"),
     colorCodes: JSON.parse(p.colorCodes || "{}"),
     specifications: JSON.parse(p.specifications || "{}"),
-    variants: (() => { try { const v = JSON.parse(p.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
+    variants: (() => { 
+      try { 
+        const v = JSON.parse(p.variants || "[]"); 
+        if (Array.isArray(v)) return v;
+        if (typeof v === "object" && v !== null) {
+          const arr = [];
+          for (const [storage, colorObj] of Object.entries(v)) {
+            if (typeof colorObj === "object" && colorObj !== null) {
+              for (const [color, price] of Object.entries(colorObj)) {
+                arr.push({ storage, color, priceKsh: Number(price), stock: 10 });
+              }
+            }
+          }
+          return arr;
+        }
+        return []; 
+      } catch { return []; } 
+    })(),
     storageVariants: (() => { try { const sv = JSON.parse(p.storageVariants || "[]"); return Array.isArray(sv) ? sv : []; } catch { return []; } })(),
     simType: p.simType || undefined,
   }));

@@ -334,6 +334,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
   // StorageVariant editor state
   const [editingSv, setEditingSv] = useState<Partial<StorageVariant> | null>(null); // currently editing a StorageVariant
+  const [editingSvOriginalKey, setEditingSvOriginalKey] = useState<string | null>(null);
   const [svColors, setSvColors] = useState<ProductColor[]>([]);
   const [svWarranties, setSvWarranties] = useState<Warranty[]>([]);
   // simType is now a variant property, not per-storage — add multiple per storage
@@ -549,6 +550,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       }
     });
     setEditingSv(null);
+    setEditingSvOriginalKey(null);
     setSvColors([]);
     setSvWarranties([]);
     setNewVarStorage("");
@@ -571,13 +573,47 @@ export const AdminView: React.FC<AdminViewProps> = ({
       ? (prod.colors as ProductColor[])
       : migratedColors;
 
+    // Auto-migrate legacy variants to storageVariants if storageVariants is empty
+    let finalStorageVariants = prod.storageVariants || [];
+    if (finalStorageVariants.length === 0 && prod.variants && prod.variants.length > 0) {
+      const svMap = new Map<string, any>();
+      prod.variants.forEach(v => {
+        const key = `${v.storage}|physical`; // Default to physical SIM
+        if (!svMap.has(key)) {
+          svMap.set(key, {
+            storage: v.storage,
+            priceKsh: v.priceKsh || prod.priceKsh || 0,
+            simType: "physical",
+            colors: [],
+            warranties: [],
+            stock: v.stock || 10
+          });
+        }
+        const sv = svMap.get(key);
+        // Add color if not empty/default and not already present
+        if (v.color && v.color !== "Default" && v.color !== "") {
+          const colorsToAdd = v.color.split(',').map(c => c.trim());
+          colorsToAdd.forEach(cName => {
+             if (!sv.colors.some((c: any) => c.name === cName)) {
+               // Try to find full color info from migratedColors
+               const matched = finalColors.find(c => c.name === cName);
+               sv.colors.push(matched || { name: cName, code: "", image: "" });
+             }
+          });
+        }
+        // Update price if this variant has a price
+        if (v.priceKsh) sv.priceKsh = v.priceKsh;
+      });
+      finalStorageVariants = Array.from(svMap.values());
+    }
+
     setEditingProduct({
       ...prod,
       images: prod.images || [],
       colors: finalColors,
       storages: prod.storages || [],
       variants: prod.variants || [],
-      storageVariants: prod.storageVariants || []
+      storageVariants: finalStorageVariants
     });
     setNewVarStorage("");
     setNewVarColor("");
@@ -587,6 +623,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarImgColor(finalColors[0]?.name || "");
     setNewVarImgUrl("");
     setEditingSv(null);
+    setEditingSvOriginalKey(null);
     setSvColors([]);
     setSvWarranties([]);
     // Load existing variant images from DB
@@ -2468,6 +2505,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 setEditingSv({ storage: newSvStorage.trim(), simType: newSvSimType, priceKsh: 0, colors: [], warranties: [], stock: 0 });
                                 setSvColors([]);
                                 setSvWarranties([]);
+                                setEditingSvOriginalKey(null);
                               }}
                               className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
                             >
@@ -2477,7 +2515,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setEditingSv(null)}
+                            onClick={() => { setEditingSv(null); setEditingSvOriginalKey(null); }}
                             className="text-[10px] font-bold text-red-500 hover:text-red-700 flex items-center gap-1"
                           >
                             <X className="w-3 h-3" /> Cancel Editing
@@ -2496,23 +2534,32 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <button
                               type="button"
                               onClick={() => {
-                                if (!editingSv.storage.trim()) { alert("Storage name is required."); return; }
-                                // Check duplicate
-                                const dup = (editingProduct?.storageVariants || []).some(
-                                  sv => sv.storage.toLowerCase() === editingSv.storage!.toLowerCase() && sv.simType === editingSv.simType
-                                );
-                                if (dup) { alert("This storage + SIM variant already exists."); return; }
+                                if (!editingSv.storage?.trim()) { alert("Storage name is required."); return; }
+                                const newKey = `${editingSv.storage}|${editingSv.simType}`.toLowerCase();
+                                const currentSv = editingProduct?.storageVariants || [];
+                                
+                                if (editingSvOriginalKey) {
+                                  if (editingSvOriginalKey !== newKey) {
+                                    if (currentSv.some(sv => `${sv.storage}|${sv.simType}`.toLowerCase() === newKey)) {
+                                      alert("This storage + SIM variant already exists."); return;
+                                    }
+                                  }
+                                } else {
+                                  if (currentSv.some(sv => `${sv.storage}|${sv.simType}`.toLowerCase() === newKey)) {
+                                    alert("This storage + SIM variant already exists."); return;
+                                  }
+                                }
+
                                 setEditingProduct(prev => {
-                                  const current = prev || {};
-                                  // Always work from current storageVariants to avoid stale-closure bugs
-                                  const currentSv = current.storageVariants || [];
-                                  const existing = currentSv.filter(
-                                    sv => !(sv.storage.toLowerCase() === editingSv.storage!.toLowerCase() && sv.simType === editingSv.simType)
+                                  const current = prev || {} as any;
+                                  const existing = (current.storageVariants || []).filter(
+                                    (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== (editingSvOriginalKey || newKey)
                                   );
                                   const updated = [...existing, { ...editingSv, colors: svColors, warranties: svWarranties } as StorageVariant];
                                   return { ...current, storageVariants: updated };
                                 });
                                 setEditingSv(null);
+                                setEditingSvOriginalKey(null);
                                 setSvColors([]);
                                 setSvWarranties([]);
                               }}
@@ -2683,6 +2730,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                       type="button"
                                       onClick={() => {
                                         setEditingSv({ ...sv });
+                                        setEditingSvOriginalKey(`${sv.storage}|${sv.simType}`.toLowerCase());
                                         setSvColors([...sv.colors]);
                                         setSvWarranties([...sv.warranties]);
                                       }}
