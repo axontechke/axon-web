@@ -325,7 +325,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newSpecKey, setNewSpecKey] = useState("");
   const [newSpecValue, setNewSpecValue] = useState("");
   // Existing colors from DB for reuse
-  const [existingColors, setExistingColors] = useState<{name: string; code: string; image: string}[]>([]);
   // Legacy warranty state (unused — warranties now set per StorageVariant)
   const [_warrantyName, _setWarrantyName] = useState("");
 
@@ -373,7 +372,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         .then(data => setAdminReviews(data))
         .catch(err => console.error("Error loading reviews:", err));
     }
-    if (isAuthenticated && activeTab === "colors") {
+    if (isAuthenticated && (activeTab === "colors" || activeTab === "products") && globalColors.length === 0) {
       authFetch("/api/admin/colors")
         .then(res => res.json())
         .then(data => setGlobalColors(data))
@@ -570,11 +569,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
         setVariantImgMap(grouped);
       })
       .catch(() => setVariantImgMap({}));
-    // Load existing colors from DB
-    authFetch("/api/admin/colors")
-      .then(res => res.ok ? res.json() : [])
-      .then((colors: {name: string; code: string; image: string}[]) => setExistingColors(colors))
-      .catch(() => setExistingColors([]));
     setIsProductFormOpen(true);
   };
 
