@@ -2692,7 +2692,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 <span key={i} className="flex items-center gap-1 bg-surface border border-outline/20 rounded-lg px-2 py-0.5 text-[10px]">
                                   <span className="font-semibold text-on-surface">{w.name}</span>
                                   <span className="text-on-surface-variant/60">({w.duration})</span>
-                                  <span className="text-primary font-bold">{w.priceKsh === 0 ? "Free" : `+KSh ${w.priceKsh.toLocaleString()}`}</span>
+                                  <span className="text-primary font-bold">{w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}</span>
                                   <button type="button" onClick={() => setSvWarranties(svWarranties.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 ml-1"><X className="w-2.5 h-2.5" /></button>
                                 </span>
                               ))}
