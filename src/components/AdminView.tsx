@@ -215,11 +215,11 @@ const defaultSlides = [
 ];
 
 const defaultCol1Links = [
-  { text: "Axon Slate Series", target: "/catalog" },
-  { text: "Axon Books (Laptops)", target: "/catalog" },
-  { text: "Studio Audio", target: "/catalog" },
-  { text: "Continuous Power Banks", target: "/catalog" },
-  { text: "Click Keyboards & Gear", target: "/catalog" }
+  { text: "Tablets", target: "/catalog" },
+  { text: "Laptops", target: "/catalog" },
+  { text: "Audio", target: "/catalog" },
+  { text: "Power Banks", target: "/catalog" },
+  { text: "Accessories", target: "/catalog" }
 ];
 
 const defaultCol2Links = [
@@ -4899,7 +4899,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           >
                             <optgroup label="Pages">
                               <option value="/">Home</option>
-                              <option value="/catalog">Catalog</option>
+                              <option value="/catalog">All Products (Catalog)</option>
                               <option value="/contact">Contact</option>
                               <option value="/track-order">Track Order</option>
                               <option value="/blog">Blog</option>
