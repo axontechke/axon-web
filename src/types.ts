@@ -23,13 +23,13 @@ export interface ProductColor {
   image: string;      // e.g. "https://..." (swatch/product photo URL)
 }
 
-// A complete SKU at storage level — holds colors, warranties, simType and price for that storage
+// A complete SKU at storage level — holds colors, warranty IDs, simType and price for that storage
 export interface StorageVariant {
   storage: string;              // e.g. "256GB", "512GB", "1TB"
   priceKsh: number;             // price for this storage SKU
   simType: "esim" | "physical" | "both";
   colors: ProductColor[];        // colors available for this storage (each with name, code, image, and optional priceKsh override)
-  warranties: Warranty[];        // warranty plans available for this storage SKU
+  warrantyIds: string[];         // IDs of warranty plans from product.warranties assigned to this variant
   stock: number;
 }
 

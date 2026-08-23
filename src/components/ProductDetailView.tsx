@@ -76,12 +76,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const availableColors = hasStorageVariants && selectedStorageVariant
     ? selectedStorageVariant.colors
     : product.colors ?? [];
-  // Fallback chain: SV warranties → top-level warranties (from storageVariants SV data) → default warranty
+  // Resolve warranty objects from the product-level pool using warrantyIds
+  const resolvedWarranties: Warranty[] = (selectedStorageVariant?.warrantyIds ?? [])
+    .map((id: string) => (product.warranties ?? []).find(w => w.id === id))
+    .filter(Boolean) as Warranty[];
   const DEFAULT_WARRANTIES: Warranty[] = [
     { id: "default-1yr", name: "1 Year Official Warranty", duration: "1 Year", priceKsh: 0 },
   ];
   const availableWarranties = hasStorageVariants && selectedStorageVariant
-    ? selectedStorageVariant.warranties
+    ? (resolvedWarranties.length > 0 ? resolvedWarranties : DEFAULT_WARRANTIES)
     : (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
   // When multiple SIM types exist for the selected storage, show the selector
   const storageSimTypes = hasStorageVariants && selectedStorage
@@ -134,12 +137,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (opts[0] || "").toLowerCase());
       const sim = variants.length === 1 ? variants[0].simType : null;
       setSelectedSimType(sim as "esim" | "physical" | null);
-      const warranties = variants.length > 0
-        ? (variants.find(sv => !sim || sv.simType === sim)?.warranties ?? [])
-        : [];
-      if (warranties.length > 0) {
-        const free = warranties.find((w: Warranty) => w.priceKsh === 0);
-        setSelectedWarranty(free || warranties[0]);
+      const matchedSv = variants.find(sv => !sim || sv.simType === sim);
+      const resolved = (matchedSv?.warrantyIds ?? [])
+        .map((id: string) => (product.warranties ?? []).find(w => w.id === id))
+        .filter(Boolean) as Warranty[];
+      if (resolved.length > 0) {
+        const free = resolved.find((w: Warranty) => w.priceKsh === 0);
+        setSelectedWarranty(free || resolved[0]);
       } else {
         setSelectedWarranty(undefined);
       }

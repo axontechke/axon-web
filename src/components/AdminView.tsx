@@ -336,7 +336,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [editingSv, setEditingSv] = useState<Partial<StorageVariant> | null>(null); // currently editing a StorageVariant
   const [editingSvOriginalKey, setEditingSvOriginalKey] = useState<string | null>(null);
   const [svColors, setSvColors] = useState<ProductColor[]>([]);
-  const [svWarranties, setSvWarranties] = useState<Warranty[]>([]);
+  const [svWarrantyIds, setSvWarrantyIds] = useState<string[]>([]);
   // simType is now a variant property, not per-storage — add multiple per storage
   const [newSvStorage, setNewSvStorage] = useState("");
   const [newSvSimType, setNewSvSimType] = useState<"esim" | "physical" | "both">("physical");
@@ -543,6 +543,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       storages: ["128GB"],
       images: [],
       variants: [],
+      warranties: [],
       storageVariants: [],
       specifications: {
         "Processor": "Quantum Core Architecture",
@@ -552,7 +553,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setEditingSv(null);
     setEditingSvOriginalKey(null);
     setSvColors([]);
-    setSvWarranties([]);
+    setSvWarrantyIds([]);
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
@@ -574,7 +575,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
       : migratedColors;
 
     // Auto-migrate legacy variants to storageVariants if storageVariants is empty
-    let finalStorageVariants = prod.storageVariants || [];
+    // Normalize storageVariants: rename legacy `warranties` field to `warrantyIds`
+    let finalStorageVariants = (prod.storageVariants || []).map((sv: any) => ({
+      ...sv,
+      warrantyIds: sv.warrantyIds ?? (sv.warranties || []).map((w: any) => w.id ?? w),
+    }));
     if (finalStorageVariants.length === 0 && prod.variants && prod.variants.length > 0) {
       const svMap = new Map<string, any>();
       prod.variants.forEach(v => {
@@ -585,7 +590,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
             priceKsh: v.priceKsh || prod.priceKsh || 0,
             simType: "physical",
             colors: [],
-            warranties: [],
+            warrantyIds: [],
             stock: v.stock || 10
           });
         }
@@ -625,7 +630,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setEditingSv(null);
     setEditingSvOriginalKey(null);
     setSvColors([]);
-    setSvWarranties([]);
+    setSvWarrantyIds([]);
+    setSvWarrantyIds([]);
     // Load existing variant images from DB
     authFetch(`/api/admin/product-variant-images?productId=${prod.id}`)
       .then(res => res.ok ? res.json() : [])
@@ -2504,7 +2510,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 if (!newSvStorage.trim()) { alert("Enter a storage name first."); return; }
                                 setEditingSv({ storage: newSvStorage.trim(), simType: newSvSimType, priceKsh: 0, colors: [], warranties: [], stock: 0 });
                                 setSvColors([]);
-                                setSvWarranties([]);
+                                setSvWarrantyIds([]);
                                 setEditingSvOriginalKey(null);
                               }}
                               className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
@@ -2555,13 +2561,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   const existing = (current.storageVariants || []).filter(
                                     (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== (editingSvOriginalKey || newKey)
                                   );
-                                  const updated = [...existing, { ...editingSv, colors: svColors, warranties: svWarranties } as StorageVariant];
+                                  const updated = [...existing, { ...editingSv, colors: svColors, warrantyIds: svWarrantyIds } as StorageVariant];
                                   return { ...current, storageVariants: updated };
                                 });
                                 setEditingSv(null);
                                 setEditingSvOriginalKey(null);
                                 setSvColors([]);
-                                setSvWarranties([]);
+                                setSvWarrantyIds([]);
                               }}
                               className="text-[10px] font-bold text-green-600 hover:text-green-800 flex items-center gap-1"
                             >
@@ -2651,7 +2657,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
                                   </select>
                                 </div>
-                                <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarranties([]); }}
+                                <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarrantyIds([]); }}
                                   className="py-1.5 px-3 text-[9px] font-bold text-red-500 hover:text-red-700 rounded-lg border border-red-500/10">Clear</button>
                               </div>
                             ) : (
@@ -2659,42 +2665,37 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             )}
                           </div>
 
-                          {/* Warranties */}
+                          {/* Warranties — assign from product-level pool */}
                           <div className="space-y-1.5">
-                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Warranties</span>
-                            <div className="flex flex-wrap gap-1">
-                              {svWarranties.map((w, i) => (
-                                <span key={i} className="flex items-center gap-1 bg-surface border border-outline/20 rounded-lg px-2 py-0.5 text-[10px]">
-                                  <span className="font-semibold text-on-surface">{w.name}</span>
-                                  <span className="text-on-surface-variant/60">({w.duration})</span>
-                                  <span className="text-primary font-bold">{w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}</span>
-                                  <button type="button" onClick={() => setSvWarranties(svWarranties.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 ml-1"><X className="w-2.5 h-2.5" /></button>
-                                </span>
-                              ))}
-                            </div>
-                            <div className="grid grid-cols-4 gap-2">
-                              <input type="text" id="sv-warranty-name" placeholder="Plan name" className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]" />
-                              <input type="text" id="sv-warranty-duration" placeholder="Duration (e.g. 1 Year)" className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]" />
-                              <input type="number" id="sv-warranty-price" placeholder="Price KSh (0=free)" className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]" min="0" />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const nameInput = document.getElementById("sv-warranty-name") as HTMLInputElement;
-                                  const durationInput = document.getElementById("sv-warranty-duration") as HTMLInputElement;
-                                  const priceInput = document.getElementById("sv-warranty-price") as HTMLInputElement;
-                                  const name = nameInput?.value.trim();
-                                  const duration = durationInput?.value.trim();
-                                  const priceKsh = Number(priceInput?.value) || 0;
-                                  if (!name) { alert("Warranty name is required."); return; }
-                                  if (svWarranties.some(w => w.name.toLowerCase() === name.toLowerCase())) { alert("Warranty already added."); return; }
-                                  setSvWarranties([...svWarranties, { id: `sv-w-${Date.now()}`, name, duration: duration || "1 Year", priceKsh }]);
-                                  nameInput.value = ""; durationInput.value = ""; priceInput.value = "";
-                                }}
-                                className="py-1 bg-secondary hover:bg-secondary-hover text-[10px] font-bold rounded-lg"
-                              >
-                                Add
-                              </button>
-                            </div>
+                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Warranties (assign from pool)</span>
+                            {(editingProduct.warranties || []).length === 0 ? (
+                              <p className="text-[9px] text-on-surface-variant/50 italic">No warranties defined. Add warranty plans above first.</p>
+                            ) : (
+                              <div className="flex flex-wrap gap-1.5">
+                                {editingProduct.warranties!.map((w) => {
+                                  const checked = svWarrantyIds.includes(w.id);
+                                  return (
+                                    <label key={w.id} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border cursor-pointer text-[10px] transition-all ${checked ? "bg-primary/5 border-primary text-on-surface" : "bg-surface border-outline/20 text-on-surface-variant hover:border-outline/40"}`}>
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={() => {
+                                          if (checked) {
+                                            setSvWarrantyIds(svWarrantyIds.filter(id => id !== w.id));
+                                          } else {
+                                            setSvWarrantyIds([...svWarrantyIds, w.id]);
+                                          }
+                                        }}
+                                        className="w-3 h-3 rounded accent-primary"
+                                      />
+                                      <span className="font-semibold">{w.name}</span>
+                                      <span className="text-[9px] text-on-surface-variant/60">({w.duration})</span>
+                                      <span className={`font-bold ${w.priceKsh === 0 ? "text-green-600" : "text-primary"}`}>{w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -2724,7 +2725,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   </td>
                                   <td className="p-2 font-mono">KSh {sv.priceKsh.toLocaleString()}</td>
                                   <td className="p-2 text-[10px]">{sv.colors.length} color(s)</td>
-                                  <td className="p-2 text-[10px]">{sv.warranties.length} plan(s)</td>
+                                  <td className="p-2 text-[10px]">
+                                    {(() => {
+                                      const names = (sv.warrantyIds || []).map((id: string) => editingProduct.warranties?.find(w => w.id === id)?.name).filter(Boolean);
+                                      return names.length > 0 ? names.join(", ") : <span className="text-on-surface-variant/40 italic">None</span>;
+                                    })()}
+                                  </td>
                                   <td className="p-2 text-right">
                                     <button
                                       type="button"
@@ -2732,7 +2738,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                         setEditingSv({ ...sv });
                                         setEditingSvOriginalKey(`${sv.storage}|${sv.simType}`.toLowerCase());
                                         setSvColors([...sv.colors]);
-                                        setSvWarranties([...sv.warranties]);
+                                        setSvWarrantyIds([...(sv.warrantyIds || [])]);
                                       }}
                                       className="text-primary hover:text-primary-hover font-bold text-[10px] px-2 py-1"
                                     >
