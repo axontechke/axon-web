@@ -8,3 +8,5 @@ INSERT OR IGNORE INTO config (key, value) VALUES ('metaPixelId', '""');
 INSERT OR IGNORE INTO config (key, value) VALUES ('protocolTitle', '"Why Shop With Us"');
 INSERT OR IGNORE INTO config (key, value) VALUES ('protocolDescription', '"We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support."');
 INSERT OR IGNORE INTO config (key, value) VALUES ('protocolBadges', '[{"text":"Fast Delivery","icon":"Zap","url":""},{"text":"Secure Checkout","icon":"ShieldCheck","url":""}]');
+INSERT OR IGNORE INTO config (key, value) VALUES ('footerDeveloperCreditText', '"Built & Hosted by Kaste Brands"');
+INSERT OR IGNORE INTO config (key, value) VALUES ('footerDeveloperCreditUrl', '"https://instagram.com/kaste_brands"');

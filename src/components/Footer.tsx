@@ -277,15 +277,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
         <span>{copyrightText}</span>
         <div className="flex flex-wrap gap-4 justify-start">
           {bottomLinks.map((link: any, idx: number) => (
-            <button 
+            <button
               key={idx}
-              onClick={() => handleBottomLinkClick(link.target)} 
+              onClick={() => handleBottomLinkClick(link.target)}
               className={`hover:underline hover:text-white transition-colors ${link.target === "dns" ? "text-primary font-medium" : ""}`}
             >
               {link.text}
             </button>
           ))}
         </div>
+        {config?.footerDeveloperCreditText && (
+          <a
+            href={config.footerDeveloperCreditUrl || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline hover:text-white transition-colors"
+          >
+            {config.footerDeveloperCreditText}
+          </a>
+        )}
       </div>
 
       {/* FULL POLICY DOCUMENT MODAL OVERLAY */}

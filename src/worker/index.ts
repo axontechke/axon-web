@@ -426,6 +426,8 @@ const INITIAL_CONFIG: Record<string, any> = {
     { text: "Privacy & Security", target: "privacy" }
   ],
   footerCopyrightText: "",
+  footerDeveloperCreditText: "Built & Hosted by Kaste Brands",
+  footerDeveloperCreditUrl: "https://instagram.com/kaste_brands",
   footerNewsletterTitle: "Stay Updated",
   footerNewsletterDescription: "Subscribe to receive notifications on new arrivals, deals, and exclusive bundles.",
   footerBottomLinks: [

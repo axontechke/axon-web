@@ -118,6 +118,8 @@ interface WebConfig {
   footerCol2Title?: string;
   footerCol2Links?: any[];
   footerCopyrightText?: string;
+  footerDeveloperCreditText?: string;
+  footerDeveloperCreditUrl?: string;
   footerBrandName?: string;
   footerBrandSuffix?: string;
   footerBrandLogoUrl?: string;
@@ -5077,6 +5079,29 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onChange={(e) => setWebConfig(prev => ({ ...prev,footerCopyrightText: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                       placeholder="© 2026 AXON TECH INC. ALL RIGHTS RESERVED."
+                    />
+                  </div>
+
+                  {/* Developer Credit */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-on-surface-variant uppercase block">Developer Credit Text</label>
+                    <input
+                      type="text"
+                      value={webConfig.footerDeveloperCreditText || ""}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev, footerDeveloperCreditText: e.target.value }))}
+                      className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                      placeholder="Built & Hosted by Kaste Brands"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-on-surface-variant uppercase block">Developer Credit URL</label>
+                    <input
+                      type="url"
+                      value={webConfig.footerDeveloperCreditUrl || ""}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev, footerDeveloperCreditUrl: e.target.value }))}
+                      className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface font-mono"
+                      placeholder="https://instagram.com/kaste_brands"
                     />
                   </div>
                 </div>
