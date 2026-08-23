@@ -564,7 +564,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setIsProductFormOpen(true);
   };
 
-  const handleOpenEditProduct = (prod: Product) => {
+  const handleOpenEditProduct = async (prod: Product) => {
     // Migrate legacy separate color fields into unified colors[] array
     const legacyColors: string[] = prod.colors && prod.colors.length > 0 && typeof prod.colors[0] === 'string'
       ? (prod.colors as unknown as string[]) : [];
@@ -616,9 +616,36 @@ export const AdminView: React.FC<AdminViewProps> = ({
       finalStorageVariants = Array.from(svMap.values());
     }
 
+    // Load variant images from DB
+    let variantImgs: any[] = [];
+    try {
+      const res = await authFetch(`/api/admin/product-variant-images?productId=${prod.id}`);
+      variantImgs = res.ok ? await res.json() : [];
+    } catch {
+      variantImgs = [];
+    }
+
+    const grouped: Record<string, any[]> = {};
+    for (const img of variantImgs) {
+      const key = img.storage && img.color ? `${img.storage}|${img.color}` : "base";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(img);
+    }
+    setVariantImgMap(grouped);
+
+    // Backfill variant image URLs into product.images if not already present
+    const existingUrls = new Set<string>(prod.images || []);
+    const additionalUrls: string[] = [];
+    for (const img of variantImgs) {
+      if (img.imageUrl && !existingUrls.has(img.imageUrl)) {
+        existingUrls.add(img.imageUrl);
+        additionalUrls.push(img.imageUrl);
+      }
+    }
+
     setEditingProduct({
       ...prod,
-      images: prod.images || [],
+      images: [...(prod.images || []), ...additionalUrls],
       colors: finalColors,
       storages: prod.storages || [],
       variants: prod.variants || [],
@@ -635,20 +662,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setEditingSvOriginalKey(null);
     setSvColors([]);
     setSvWarrantyIds([]);
-    setSvWarrantyIds([]);
-    // Load existing variant images from DB
-    authFetch(`/api/admin/product-variant-images?productId=${prod.id}`)
-      .then(res => res.ok ? res.json() : [])
-      .then((imgs: any[]) => {
-        const grouped: Record<string, any[]> = {};
-        for (const img of imgs) {
-          const key = img.storage && img.color ? `${img.storage}|${img.color}` : "base";
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(img);
-        }
-        setVariantImgMap(grouped);
-      })
-      .catch(() => setVariantImgMap({}));
+    setSvColorProductAssignment({});
+    setNewProductImageUrl("");
     setIsProductFormOpen(true);
   };
 
@@ -733,20 +748,35 @@ export const AdminView: React.FC<AdminViewProps> = ({
         ...prev,
         [key]: [...(prev[key] || []), saved]
       }));
+      // Also add to product-level images if not already present
+      if (newVarImgUrl.trim() && !(editingProduct.images || []).includes(newVarImgUrl.trim())) {
+        setEditingProduct(prev => ({
+          ...prev!,
+          images: [...(prev!.images || []), newVarImgUrl.trim()]
+        }));
+      }
       setNewVarImgUrl("");
     } catch {
       alert("Failed to save image");
     }
   };
 
-  const handleRemoveVariantImage = async (storage: string, color: string, imageId: string) => {
+  const handleRemoveVariantImage = async (storage: string, color: string, imageId: string, imageUrl: string) => {
     const key = `${storage}|${color}`;
     try {
       await authFetch(`/api/admin/product-variant-images/${imageId}`, { method: "DELETE" });
-      setVariantImgMap(prev => ({
-        ...prev,
-        [key]: (prev[key] || []).filter((img: any) => img.id !== imageId)
-      }));
+      const remaining = (variantImgMap[key] || []).filter((img: any) => img.id !== imageId);
+      setVariantImgMap(prev => ({ ...prev, [key]: remaining }));
+      // If no other variant uses this URL, remove from product-level images
+      const usedElsewhere = Object.entries(variantImgMap).some(([k, imgs]) =>
+        k !== key && imgs.some((img: any) => img.imageUrl === imageUrl)
+      );
+      if (!usedElsewhere) {
+        setEditingProduct(prev => ({
+          ...prev!,
+          images: (prev!.images || []).filter((u: string) => u !== imageUrl)
+        }));
+      }
     } catch {
       alert("Failed to delete image");
     }
@@ -781,6 +811,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
         ...prev,
         [key]: [...(prev[key] || []), saved]
       }));
+      // Also add to product-level images if not already present
+      if (url && !(editingProduct.images || []).includes(url)) {
+        setEditingProduct(prev => ({
+          ...prev!,
+          images: [...(prev!.images || []), url]
+        }));
+      }
     } catch {
       alert("Failed to assign image");
     }
@@ -2874,7 +2911,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                             <img src={img.imageUrl} alt="" className="w-8 h-8 rounded-lg object-cover border border-outline/10" />
                                             <button
                                               type="button"
-                                              onClick={() => handleRemoveVariantImage(editingSv.storage!, c.name, img.id)}
+                                              onClick={() => handleRemoveVariantImage(editingSv.storage!, c.name, img.id, img.imageUrl)}
                                               className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[7px]"
                                             >
                                               <X className="w-2.5 h-2.5" />
@@ -3047,7 +3084,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                             <img src={img.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover border border-outline/10" />
                                             <button
                                               type="button"
-                                              onClick={() => handleRemoveVariantImage(editingSv.storage!, c.name, img.id)}
+                                              onClick={() => handleRemoveVariantImage(editingSv.storage!, c.name, img.id, img.imageUrl)}
                                               className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[8px]"
                                             >
                                               <X className="w-2.5 h-2.5" />

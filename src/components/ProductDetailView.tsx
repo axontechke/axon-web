@@ -151,7 +151,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     if (availableImages.length <= 1) return;
     const timer = setInterval(() => {
       setSlideIndex(i => (i + 1) % availableImages.length);
-    }, 2500);
+    }, 3000);
     return () => clearInterval(timer);
   }, [availableImages.length]);
 
@@ -504,8 +504,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                     const hasColorImage = !!(typeof colorEntry === 'object' ? (colorEntry as any).image : product.colorImages?.[name]);
                     const hasBaseImage = !!product.image;
                     const isAvailable = hasImageForStorage || hasColorImage || hasBaseImage;
-                    // If storage is selected and no image for this color at this storage, hide it
-                    if (selectedStorage && !isAvailable) return null;
                     let bgStyle: React.CSSProperties | undefined;
                     let bgClass = "bg-gray-400";
                     if (hexCode) {
