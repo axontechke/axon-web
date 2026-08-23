@@ -41,7 +41,9 @@ import {
   Smartphone,
   Layers,
   Plug,
-  Palette
+  Palette,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
@@ -798,6 +800,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
     if ((editingProduct.images || []).includes(url)) { alert("Image URL already exists."); return; }
     setEditingProduct({ ...editingProduct, images: [...(editingProduct.images || []), url] });
     setNewProductImageUrl("");
+  };
+
+  const handleMoveSv = (index: number, direction: "up" | "down") => {
+    if (!editingProduct?.storageVariants) return;
+    const arr = [...editingProduct.storageVariants];
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= arr.length) return;
+    [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+    setEditingProduct({ ...editingProduct, storageVariants: arr });
   };
 
   const handleAssignColorImage = async (storage: string, color: string, url: string) => {
@@ -3122,6 +3133,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 <th className="p-2">Price KSh</th>
                                 <th className="p-2">Colors</th>
                                 <th className="p-2">Warranties</th>
+                                <th className="p-2 w-16 text-center">Order</th>
                                 <th className="p-2 text-right">Action</th>
                               </tr>
                             </thead>
@@ -3167,6 +3179,28 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                       const names = (sv.warrantyIds || []).map((id: string) => editingProduct.warranties?.find(w => w.id === id)?.name).filter(Boolean);
                                       return names.length > 0 ? names.join(", ") : <span className="text-on-surface-variant/40 italic">None</span>;
                                     })()}
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="flex items-center justify-center gap-0.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleMoveSv(i, "up")}
+                                        disabled={i === 0}
+                                        className="p-1 rounded hover:bg-surface-container-high disabled:opacity-30 text-on-surface-variant"
+                                        title="Move up"
+                                      >
+                                        <ChevronUp className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleMoveSv(i, "down")}
+                                        disabled={i === ((editingProduct?.storageVariants || []).length - 1)}
+                                        className="p-1 rounded hover:bg-surface-container-high disabled:opacity-30 text-on-surface-variant"
+                                        title="Move down"
+                                      >
+                                        <ChevronDown className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
                                   </td>
                                   <td className="p-2 text-right">
                                     <button
