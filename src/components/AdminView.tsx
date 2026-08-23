@@ -2312,62 +2312,80 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                     {/* Product Colors — picked from global library */}
                     <div className="border-t border-outline/10 pt-4 space-y-3">
-                      <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Colors for this Product</h4>
-                      <p className="text-[10px] text-on-surface-variant/70 -mt-1">
-                        Select colors from the global library to assign to this product.
-                      </p>
-
-                      {/* Existing colors */}
-                      {editingProduct.colors && editingProduct.colors.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {editingProduct.colors.map((color, idx) => (
-                            <span key={idx} className="flex items-center gap-1.5 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
-                              <span className="w-3 h-3 rounded-full border border-outline/20 shrink-0" style={{ backgroundColor: color.code || "#ccc" }} />
-                              <span className="font-semibold text-on-surface">{color.name}</span>
-                              <button type="button" onClick={() => setEditingProduct({ ...editingProduct, colors: editingProduct.colors.filter((_, i) => i !== idx) })}
-                                className="text-red-400 hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
-                          No colors assigned yet. Add from the library below.
-                        </div>
-                      )}
-
-                      {/* Add from global library */}
-                      {globalColors.length > 0 && (
-                        <div className="flex items-end gap-2">
-                          <div className="flex-1 space-y-1">
-                            <label className="text-[9px] text-on-surface-variant/70 block">Add from library</label>
-                            <select
-                              id="product-color-picker"
-                              value=""
-                              onChange={e => {
-                                const name = e.target.value;
-                                if (!name) return;
-                                if (editingProduct.colors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
-                                const colorEntry = globalColors.find(c => c.name === name);
-                                setEditingProduct({
-                                  ...editingProduct,
-                                  colors: [...editingProduct.colors, {
-                                    name,
-                                    code: colorEntry?.code || "",
-                                    image: colorEntry?.image || ""
-                                  }]
-                                });
-                                (document.getElementById("product-color-picker") as HTMLSelectElement).value = "";
-                              }}
-                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[11px] text-on-surface focus:outline-none focus:border-primary"
-                            >
-                              <option value="">— Select a color —</option>
-                              {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
-                            </select>
+                      {/* Colors for this Product */}
+                      {editingProduct.storageVariants && editingProduct.storageVariants.length > 0 ? (
+                        <div className="opacity-50 pointer-events-none select-none">
+                          <h4 className="text-[10px] font-black uppercase text-on-surface-variant/50 tracking-wider">Colors for this Product</h4>
+                          <p className="text-[10px] text-on-surface-variant/50 -mt-1">Managed via storage variants below — this section is inactive.</p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {editingProduct.colors.map((color, idx) => (
+                              <span key={idx} className="flex items-center gap-1.5 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
+                                <span className="w-3 h-3 rounded-full border border-outline/20 shrink-0" style={{ backgroundColor: color.code || "#ccc" }} />
+                                <span className="font-semibold text-on-surface">{color.name}</span>
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      )}
-                      {globalColors.length === 0 && (
-                        <p className="text-[9px] text-on-surface-variant/50 italic">No global colors available. Add colors in the Colors tab first.</p>
+                      ) : (
+                        <>
+                          <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Colors for this Product</h4>
+                          <p className="text-[10px] text-on-surface-variant/70 -mt-1">
+                            Select colors from the global library to assign to this product.
+                          </p>
+
+                          {/* Existing colors */}
+                          {editingProduct.colors && editingProduct.colors.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {editingProduct.colors.map((color, idx) => (
+                                <span key={idx} className="flex items-center gap-1.5 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
+                                  <span className="w-3 h-3 rounded-full border border-outline/20 shrink-0" style={{ backgroundColor: color.code || "#ccc" }} />
+                                  <span className="font-semibold text-on-surface">{color.name}</span>
+                                  <button type="button" onClick={() => setEditingProduct({ ...editingProduct, colors: editingProduct.colors.filter((_, i) => i !== idx) })}
+                                    className="text-red-400 hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
+                              No colors assigned yet. Add from the library below.
+                            </div>
+                          )}
+
+                          {/* Add from global library */}
+                          {globalColors.length > 0 && (
+                            <div className="flex items-end gap-2">
+                              <div className="flex-1 space-y-1">
+                                <label className="text-[9px] text-on-surface-variant/70 block">Add from library</label>
+                                <select
+                                  id="product-color-picker"
+                                  value=""
+                                  onChange={e => {
+                                    const name = e.target.value;
+                                    if (!name) return;
+                                    if (editingProduct.colors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
+                                    const colorEntry = globalColors.find(c => c.name === name);
+                                    setEditingProduct({
+                                      ...editingProduct,
+                                      colors: [...editingProduct.colors, {
+                                        name,
+                                        code: colorEntry?.code || "",
+                                        image: colorEntry?.image || ""
+                                      }]
+                                    });
+                                    (document.getElementById("product-color-picker") as HTMLSelectElement).value = "";
+                                  }}
+                                  className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[11px] text-on-surface focus:outline-none focus:border-primary"
+                                >
+                                  <option value="">— Select a color —</option>
+                                  {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
+                                </select>
+                              </div>
+                            </div>
+                          )}
+                          {globalColors.length === 0 && (
+                            <p className="text-[9px] text-on-surface-variant/50 italic">No global colors available. Add colors in the Colors tab first.</p>
+                          )}
+                        </>
                       )}
                     </div>
 
@@ -2749,14 +2767,52 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           {/* Colors — select from global library */}
                           <div className="space-y-1.5">
                             <span className="text-[9px] font-bold text-on-surface-variant uppercase">Colors in this variant</span>
-                            <div className="flex flex-wrap gap-1">
-                              {svColors.map((c, i) => (
-                                <span key={i} className="flex items-center gap-1 bg-surface border border-outline/20 rounded-lg px-2 py-0.5 text-[10px]">
-                                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.code || "#ccc" }} />
-                                  <span className="font-semibold text-on-surface">{c.name}</span>
-                                  <button type="button" onClick={() => setSvColors(svColors.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 ml-1"><X className="w-2.5 h-2.5" /></button>
-                                </span>
-                              ))}
+                            <div className="flex flex-wrap gap-2">
+                              {svColors.map((c, i) => {
+                                const key = `${editingSv.storage}|${c.name}`;
+                                const imgs = variantImgMap[key] || [];
+                                return (
+                                  <div key={i} className="flex flex-col gap-1 bg-surface border border-outline/20 rounded-xl p-2 text-[10px] min-w-[80px]">
+                                    {/* Color dot + name + remove */}
+                                    <div className="flex items-center gap-1">
+                                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.code || "#ccc" }} />
+                                      <span className="font-semibold text-on-surface truncate">{c.name}</span>
+                                      <button type="button" onClick={() => setSvColors(svColors.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 ml-auto shrink-0"><X className="w-3 h-3" /></button>
+                                    </div>
+                                    {/* Image thumbnails */}
+                                    {imgs.length > 0 ? (
+                                      <div className="flex gap-0.5 flex-wrap">
+                                        {imgs.map((img: any) => (
+                                          <img key={img.id} src={img.imageUrl} alt="" className="w-8 h-8 rounded-lg object-cover border border-outline/10" />
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <span className="text-[8px] text-on-surface-variant/40 italic">No images</span>
+                                    )}
+                                    {/* Inline image URL editor for this color */}
+                                    <div className="mt-1">
+                                      <select
+                                        value=""
+                                        onChange={e => {
+                                          const url = e.target.value;
+                                          if (!url) return;
+                                          if (imgs.some((img: any) => img.imageUrl === url)) { alert("Image already assigned."); return; }
+                                          setVariantImgMap(prev => ({
+                                            ...prev,
+                                            [key]: [...(prev[key] || []), { id: `img-${Date.now()}`, imageUrl: url, sortOrder: imgs.length }]
+                                          }));
+                                        }}
+                                        className="w-full px-1 py-1 bg-surface-container-low border border-outline/15 rounded-lg text-[9px] text-on-surface focus:outline-none focus:border-primary"
+                                      >
+                                        <option value="">+ Assign image</option>
+                                        {(editingProduct.images || []).map((url, idx) => (
+                                          <option key={idx} value={url}>{url}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                               {svColors.length === 0 && <span className="text-[9px] text-on-surface-variant/40 italic">No colors added yet.</span>}
                             </div>
                             {globalColors.length > 0 ? (
@@ -2939,7 +2995,33 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     </span>
                                   </td>
                                   <td className="p-2 font-mono">KSh {sv.priceKsh.toLocaleString()}</td>
-                                  <td className="p-2 text-[10px]">{sv.colors.length} color(s)</td>
+                                  <td className="p-2 text-[10px]">
+                                    {sv.colors.length === 0 ? (
+                                      <span className="text-on-surface-variant/40 italic">None</span>
+                                    ) : (
+                                      <div className="flex flex-wrap gap-1">
+                                        {sv.colors.map((c: any, ci: number) => {
+                                          const key = `${sv.storage}|${c.name}`;
+                                          const imgs = (variantImgMap[key] || []);
+                                          return (
+                                            <div key={ci} className="relative group flex flex-col items-center gap-0.5">
+                                              <span className="w-5 h-5 rounded-full border border-outline/20" style={{ backgroundColor: c.code || "#ccc" }} />
+                                              {imgs.length > 0 ? (
+                                                <div className="flex gap-0.5">
+                                                  {imgs.slice(0, 3).map((img: any) => (
+                                                    <img key={img.id} src={img.imageUrl} alt="" className="w-5 h-5 rounded object-cover border border-outline/10" />
+                                                  ))}
+                                                  {imgs.length > 3 && <span className="text-[8px] text-on-surface-variant/50">+{imgs.length - 3}</span>}
+                                                </div>
+                                              ) : (
+                                                <span className="text-[7px] text-on-surface-variant/40">no img</span>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </td>
                                   <td className="p-2 text-[10px]">
                                     {(() => {
                                       const names = (sv.warrantyIds || []).map((id: string) => editingProduct.warranties?.find(w => w.id === id)?.name).filter(Boolean);

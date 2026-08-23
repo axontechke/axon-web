@@ -114,7 +114,38 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   });
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
-  const [activeImage, setActiveImage] = useState(product.image);
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  // Auto-cycle slideshow for product images
+  const availableImages = React.useMemo(() => {
+    const baseImages: string[] = [product.image].filter(Boolean);
+    const variantKey = selectedStorage && selectedColor
+      ? `${selectedStorage}|${selectedColor}`
+      : selectedColor
+        ? `|${selectedColor}`
+        : null;
+    const variantImgs: string[] = variantKey
+      ? (product.variantImages as VariantImagesMap)?.[variantKey]?.map(vi => vi.imageUrl).filter(Boolean) || []
+      : [];
+    const colorEntry = getColorEntry(selectedColor);
+    const colorImg: string[] = colorEntry?.image ? [colorEntry.image] : [];
+    const extraImgs: string[] = product.images?.filter(
+      img => !baseImages.includes(img) && !colorImg.includes(img) && !variantImgs.includes(img)
+    ) || [];
+    return [...new Set([...baseImages, ...colorImg, ...variantImgs, ...extraImgs])];
+  }, [product.image, product.images, product.variantImages, selectedStorage, selectedColor, product.colors]);
+
+  React.useEffect(() => {
+    setSlideIndex(0);
+  }, [selectedColor, selectedStorage]);
+
+  React.useEffect(() => {
+    if (availableImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setSlideIndex(i => (i + 1) % availableImages.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [availableImages.length]);
 
   // Helper to get color entry by name (handles both legacy string[] and new ProductColor[])
   const getColorEntry = (name: string | undefined) => {
@@ -126,7 +157,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
 
   React.useEffect(() => {
-    setActiveImage(product.image);
+    setSlideIndex(0);
     setSelectedColor(getInitialColor());
     const opts = hasStorageVariants
       ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
@@ -157,43 +188,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     }
     setQuantity(1);
   }, [product.id, product.image]);
-
-  // Collect all available images for the selected storage+color combination
-  const getAvailableImages = (): string[] => {
-    const baseImages: string[] = [product.image].filter(Boolean);
-    const variantKey = selectedStorage && selectedColor
-      ? `${selectedStorage}|${selectedColor}`
-      : selectedColor
-        ? `|${selectedColor}`
-        : null;
-    const variantImgs: string[] = variantKey
-      ? (product.variantImages as VariantImagesMap)?.[variantKey]?.map(vi => vi.imageUrl).filter(Boolean) || []
-      : [];
-    // Color-specific image from unified colors[] entry
-    const colorEntry = getColorEntry(selectedColor);
-    const colorImg: string[] = colorEntry?.image ? [colorEntry.image] : [];
-    // Extra gallery images
-    const extraImgs: string[] = product.images?.filter(
-      img => !baseImages.includes(img) && !colorImg.includes(img) && !variantImgs.includes(img)
-    ) || [];
-    return [...new Set([...baseImages, ...colorImg, ...variantImgs, ...extraImgs])];
-  };
-
-  // Switch displayed image when a color with a mapped URL is selected
-  React.useEffect(() => {
-    if (!selectedColor) {
-      setActiveImage(product.image);
-      return;
-    }
-    const variantKey = selectedStorage ? `${selectedStorage}|${selectedColor}` : `|${selectedColor}`;
-    const variantImgs = (product.variantImages as VariantImagesMap)?.[variantKey];
-    if (variantImgs && variantImgs.length > 0) {
-      setActiveImage(variantImgs[0].imageUrl);
-    } else {
-      const colorEntry = getColorEntry(selectedColor);
-      setActiveImage(colorEntry?.image || product.image);
-    }
-  }, [selectedColor, selectedStorage, product.image]);
 
   // Check if product has legacy variant-based pricing (ProductVariant[] structure)
   const hasLegacyVariants = Array.isArray(product.variants) && product.variants.length > 0;
@@ -410,7 +404,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             )}
             
             <img
-              src={activeImage || product.image}
+              src={availableImages[slideIndex] || product.image}
               alt={product.name}
               referrerPolicy="no-referrer"
               className="w-full max-w-[420px] h-auto object-contain select-none pointer-events-none transition-transform duration-200 ease-out"
@@ -430,16 +424,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
           {/* Multiple Images Gallery — shows all images for selected color+storage combo */}
           {(() => {
-            const availableImages = getAvailableImages();
             if (availableImages.length <= 1) return null;
             return (
               <div className="flex flex-wrap gap-2 justify-center pt-2">
                 {availableImages.map((imgUrl, idx) => (
                   <button
                     key={`${imgUrl}-${idx}`}
-                    onClick={() => setActiveImage(imgUrl)}
+                    onClick={() => setSlideIndex(idx)}
                     className={`w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low border p-1 transition-all ${
-                      activeImage === imgUrl
+                      slideIndex === idx
                         ? "ring-2 ring-primary border-transparent animate-in zoom-in-75 duration-200"
                         : "border-outline/15 hover:border-outline/30"
                     }`}
