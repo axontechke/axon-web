@@ -110,7 +110,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
 
   const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
-  const displayPriceKsh = dynamicPriceKsh ?? product.priceKsh ?? 0;
+  const basePriceKsh = dynamicPriceKsh ?? product.priceKsh ?? 0;
+  const warrantyPriceKsh = selectedWarranty?.priceKsh ?? 0;
+  const displayPriceKsh = basePriceKsh + warrantyPriceKsh;
 
   // All in-stock (variants always in stock for now)
   const isSelectedVariantInStock = hasVariants ? true : product.inStock;
