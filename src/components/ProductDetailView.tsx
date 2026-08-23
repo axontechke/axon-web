@@ -116,6 +116,14 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
   const [slideIndex, setSlideIndex] = useState(0);
 
+  // Helper to get color entry by name (handles both legacy string[] and new ProductColor[])
+  const getColorEntry = (name: string | undefined) => {
+    if (!name || !product.colors?.length) return undefined;
+    const first = product.colors[0];
+    if (typeof first === 'string') return undefined; // legacy, no data
+    return (product.colors as any[]).find((c: any) => c.name === name) as any;
+  };
+
   // Auto-cycle slideshow for product images
   const availableImages = React.useMemo(() => {
     const baseImages: string[] = [product.image].filter(Boolean);
@@ -146,15 +154,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     }, 2500);
     return () => clearInterval(timer);
   }, [availableImages.length]);
-
-  // Helper to get color entry by name (handles both legacy string[] and new ProductColor[])
-  const getColorEntry = (name: string | undefined) => {
-    if (!name || !product.colors?.length) return undefined;
-    const first = product.colors[0];
-    if (typeof first === 'string') return undefined; // legacy, no data
-    return (product.colors as any[]).find((c: any) => c.name === name) as any;
-  };
-
 
   React.useEffect(() => {
     setSlideIndex(0);
