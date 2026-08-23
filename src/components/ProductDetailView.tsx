@@ -21,28 +21,60 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   // When storageVariants is populated, each storage tier has its own colors, warranties, simType, and price.
   const hasStorageVariants = Array.isArray(product.storageVariants) && product.storageVariants.length > 0;
 
-  // Derive the effective list of storage options
+  // Derive the effective list of storage options (unique storage strings in StorageVariant mode)
   const storageOptions: string[] = hasStorageVariants
-    ? product.storageVariants!.map(sv => sv.storage)
+    ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
     : (product.storages ?? []);
 
-  // Find the currently selected StorageVariant (null in legacy mode)
-  const getStorageVariant = (storage: string | undefined) =>
+  // In StorageVariant mode, build a list of unique (storage, simType) variant keys for the selector
+  type SvOption = { storage: string; simType: "esim" | "physical"; label: string };
+  const svOptions: SvOption[] = hasStorageVariants
+    ? (() => {
+        const seen = new Set<string>();
+        const opts: SvOption[] = [];
+        for (const sv of product.storageVariants!) {
+          const key = `${sv.storage}|${sv.simType}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            opts.push({ storage: sv.storage, simType: sv.simType, label: sv.simType === "esim" ? `${sv.storage} eSIM` : `${sv.storage} Physical` });
+          }
+        }
+        return opts;
+      })()
+    : [];
+
+  // Current SV selector key
+  const svKey = selectedSimType ? `${selectedStorage}|${selectedSimType}` : (selectedStorage ?? "");
+
+  // In StorageVariant mode, find the first matching variant for the given storage+simType combo
+  const getStorageVariant = (storage: string | undefined, simType?: string) =>
     hasStorageVariants && storage
-      ? product.storageVariants!.find(sv => sv.storage.toLowerCase() === storage.toLowerCase())
+      ? product.storageVariants!.find(sv =>
+          sv.storage.toLowerCase() === storage.toLowerCase() &&
+          (!simType || sv.simType === simType)
+        )
       : null;
 
   // Derive colors, warranties, and simType from the selected StorageVariant or fall back to product-level
-  const selectedStorageVariant = getStorageVariant(selectedStorage);
+  const selectedStorageVariant = hasStorageVariants && selectedStorage
+    ? (product.storageVariants!.find(sv =>
+        sv.storage.toLowerCase() === selectedStorage.toLowerCase() &&
+        (!selectedSimType || sv.simType === selectedSimType)
+      ) ?? null)
+    : null;
   const availableColors = hasStorageVariants && selectedStorageVariant
     ? selectedStorageVariant.colors
     : product.colors ?? [];
   const availableWarranties = hasStorageVariants && selectedStorageVariant
     ? selectedStorageVariant.warranties
     : product.warranties ?? [];
-  const availableSimType = hasStorageVariants && selectedStorageVariant
-    ? selectedStorageVariant.simType
-    : product.simType;
+  // When multiple SIM types exist for the selected storage, show the selector
+  const storageSimTypes = hasStorageVariants && selectedStorage
+    ? product.storageVariants!.filter(sv => sv.storage.toLowerCase() === selectedStorage.toLowerCase()).map(sv => sv.simType)
+    : [];
+  const hasMultipleSimTypes = storageSimTypes.length > 1;
+  // availableSimType: used for the SIM type selector UI (null = show selector)
+  const availableSimType = hasMultipleSimTypes ? null : (hasStorageVariants && selectedStorageVariant ? selectedStorageVariant.simType : product.simType);
 
   // selectedColor stores the color NAME string, not the whole ProductColor object
   const getInitialColor = () => {
@@ -57,6 +89,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const [selectedStorage, setSelectedStorage] = useState<string | undefined>(
     storageOptions.length > 0 ? storageOptions[0] : undefined
   );
+  // In StorageVariant mode, track the SIM type choice separately (null = not yet selected / single option)
+  const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | null>(() => {
+    if (!hasStorageVariants) return null;
+    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (storageOptions[0] || "").toLowerCase());
+    return variants.length === 1 ? variants[0].simType : null;
+  });
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
     // Default to free warranty (priceKsh === 0) if available
     if (availableWarranties.length > 0) {
@@ -81,17 +119,30 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     setActiveImage(product.image);
     setSelectedColor(getInitialColor());
     const opts = hasStorageVariants
-      ? product.storageVariants!.map(sv => sv.storage)
+      ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
       : (product.storages ?? []);
     setSelectedStorage(opts.length > 0 ? opts[0] : undefined);
-    const warranties = hasStorageVariants && getStorageVariant(opts[0])
-      ? (getStorageVariant(opts[0])?.warranties ?? [])
-      : (product.warranties ?? []);
-    if (warranties.length > 0) {
-      const free = warranties.find((w: Warranty) => w.priceKsh === 0);
-      setSelectedWarranty(free || warranties[0]);
+    // Reset SIM type when storage changes
+    if (hasStorageVariants) {
+      const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (opts[0] || "").toLowerCase());
+      const sim = variants.length === 1 ? variants[0].simType : null;
+      setSelectedSimType(sim);
+      const warranties = variants.length > 0 ? (variants.find(sv => (!sim || sv.simType === sim)?.warranties) ?? []) : [];
+      if (warranties.length > 0) {
+        const free = warranties.find((w: Warranty) => w.priceKsh === 0);
+        setSelectedWarranty(free || warranties[0]);
+      } else {
+        setSelectedWarranty(undefined);
+      }
     } else {
-      setSelectedWarranty(undefined);
+      setSelectedSimType(null);
+      const warranties = product.warranties ?? [];
+      if (warranties.length > 0) {
+        const free = warranties.find((w: Warranty) => w.priceKsh === 0);
+        setSelectedWarranty(free || warranties[0]);
+      } else {
+        setSelectedWarranty(undefined);
+      }
     }
     setQuantity(1);
   }, [product.id, product.image]);
@@ -138,8 +189,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   // Compute dynamic price — prefer StorageVariant price, fall back to legacy variants, then product.priceKsh
   const getVariantPriceKsh = (storage: string | undefined, color: string | undefined): number | null => {
-    // StorageVariant takes precedence
-    const sv = getStorageVariant(storage);
+    // StorageVariant takes precedence (matches storage + selectedSimType)
+    const sv = getStorageVariant(storage, selectedSimType ?? undefined);
     if (sv?.priceKsh != null) return sv.priceKsh;
     // Legacy per-combo variants
     if (!hasLegacyVariants || !storage) return null;
@@ -490,8 +541,48 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </div>
             )}
 
-            {/* Storage capacity */}
-            {storageOptions.length > 0 && (
+            {/* Storage + SIM Type selector */}
+            {hasStorageVariants ? (
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                  Model: <strong className="text-on-surface">{svOptions.find(o => o.storage === selectedStorage && o.simType === selectedSimType)?.label ?? selectedStorage}</strong>
+                </span>
+                <div className="flex gap-2 flex-wrap">
+                  {svOptions.map((opt) => {
+                    const key = `${opt.storage}|${opt.simType}`;
+                    const isSelected = key === svKey;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setSelectedStorage(opt.storage);
+                          setSelectedSimType(opt.simType);
+                          setSelectedColor(undefined);
+                          // Reset warranty for new variant
+                          const sv = product.storageVariants!.find(s =>
+                            s.storage.toLowerCase() === opt.storage.toLowerCase() && s.simType === opt.simType
+                          );
+                          if (sv?.warranties?.length) {
+                            const free = sv.warranties.find((w: Warranty) => w.priceKsh === 0);
+                            setSelectedWarranty(free || sv.warranties[0]);
+                          } else {
+                            setSelectedWarranty(undefined);
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                          isSelected
+                            ? "bg-on-surface text-surface border-on-surface"
+                            : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                        }`}
+                        id={`storage-btn-${key}`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : storageOptions.length > 0 ? (
               <div className="space-y-2">
                 <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   Storage Capacity: <strong className="text-on-surface">{selectedStorage}</strong>
@@ -501,7 +592,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                     <button
                       key={storage}
                       onClick={() => {
-                        // If selected color doesn't have image for new storage, reset color
                         if (selectedColor) {
                           const variantKey = `${storage}|${selectedColor}`;
                           const hasImg = !!(product.variantImages as VariantImagesMap)?.[variantKey]?.length;
@@ -512,7 +602,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           if (!hasImg && !hasColorImg) setSelectedColor(undefined);
                         }
                         setSelectedStorage(storage);
-                        // Reset warranty when storage changes (new storage may have different warranty options)
                         if (hasStorageVariants) {
                           const sv = product.storageVariants?.find(s => s.storage.toLowerCase() === storage.toLowerCase());
                           if (sv?.warranties?.length) {
@@ -535,7 +624,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* SIM Type */}
             {availableSimType && (
