@@ -214,7 +214,7 @@ const defaultSlides = [
 const defaultCol1Links = [
   { text: "Axon Slate Series", target: "/catalog" },
   { text: "Axon Books (Laptops)", target: "/catalog" },
-  { text: "Axon Studio Audio", target: "/catalog" },
+  { text: "Studio Audio", target: "/catalog" },
   { text: "Continuous Power Banks", target: "/catalog" },
   { text: "Click Keyboards & Gear", target: "/catalog" }
 ];

@@ -405,11 +405,11 @@ const INITIAL_CONFIG: Record<string, any> = {
   footerWarrantyText: "Authorized Retailer warranty included",
   footerCol1Title: "Shop",
   footerCol1Links: [
-    { text: "Axon Slate Series", target: "terms" },
-    { text: "Axon Books (Laptops)", target: "terms" },
-    { text: "Axon Studio Audio", target: "terms" },
-    { text: "Continuous Power Banks", target: "terms" },
-    { text: "Click Keyboards & Gear", target: "terms" }
+    { text: "Axon Slate Series", target: "/catalog" },
+    { text: "Axon Books (Laptops)", target: "/catalog" },
+    { text: "Studio Audio", target: "/catalog" },
+    { text: "Continuous Power Banks", target: "/catalog" },
+    { text: "Click Keyboards & Gear", target: "/catalog" }
   ],
   footerCol2Title: "Support & Care",
   footerCol2Links: [
