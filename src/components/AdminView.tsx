@@ -65,6 +65,8 @@ interface AdminViewProps {
   isAdminAuthenticated: boolean;
   setIsAdminAuthenticated: (auth: boolean) => void;
   onViewWeb: () => void;
+  isAuthValidating?: boolean;
+  setIsAuthValidating?: (v: boolean) => void;
 }
 
 interface AnalyticsData {
@@ -233,12 +235,14 @@ const defaultCol2Links = [
   { text: "Catalog Security", target: "privacy" }
 ];
 
-export const AdminView: React.FC<AdminViewProps> = ({ 
-  onSelectProduct, 
+export const AdminView: React.FC<AdminViewProps> = ({
+  onSelectProduct,
   onRefreshProducts,
   isAdminAuthenticated,
   setIsAdminAuthenticated,
-  onViewWeb
+  onViewWeb,
+  isAuthValidating,
+  setIsAuthValidating,
 }) => {
   // Firebase Auth
   const { signInWithGoogle } = useFirebaseAuth();
@@ -356,7 +360,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
   // Validate stored token on mount — clear stale auth if token is invalid
   useEffect(() => {
     const storedToken = localStorage.getItem("axon_admin_token");
-    if (!storedToken) return;
+    if (!storedToken) {
+      setIsAuthValidating?.(false);
+      return;
+    }
     fetch("/api/auth/me", {
       headers: { Authorization: `Bearer ${storedToken}` }
     }).then(res => {
@@ -366,12 +373,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
         setIsAuthenticated(false);
         setAuthToken("");
       }
+      setIsAuthValidating?.(false);
     }).catch(() => {
       // Network error — assume token is invalid
       localStorage.removeItem("axon_admin_token");
       localStorage.removeItem("axon_admin_authed");
       setIsAuthenticated(false);
       setAuthToken("");
+      setIsAuthValidating?.(false);
     });
   }, []);
 
@@ -1199,6 +1208,23 @@ export const AdminView: React.FC<AdminViewProps> = ({
       <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
     </svg>
   );
+
+  // Show loading spinner while validating stored token
+  if (isAuthValidating) {
+    return (
+      <div className="max-w-md mx-auto my-16 px-4">
+        <div className="bg-surface-container border border-outline/15 rounded-3xl p-8 text-center space-y-6 shadow-xl">
+          <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto ring-4 ring-primary/5">
+            <Lock className="w-8 h-8 animate-pulse" />
+          </div>
+          <div className="space-y-1.5">
+            <h1 className="font-display font-black text-xl text-on-surface">Verifying session…</h1>
+            <p className="text-xs text-on-surface-variant/70">Please wait while we verify your credentials.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Render Login overlay if unauthenticated
   if (!isAuthenticated) {

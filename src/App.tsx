@@ -33,10 +33,18 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Super Admin Authenticated state
+  // Super Admin Authenticated state — start validating if a token exists
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     try {
       return localStorage.getItem("axon_admin_authed") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [isAuthValidating, setIsAuthValidating] = useState<boolean>(() => {
+    // Start in "validating" state if a token is present (to prevent premature API calls)
+    try {
+      return localStorage.getItem("axon_admin_token") !== null;
     } catch {
       return false;
     }
@@ -480,6 +488,8 @@ function AppContent() {
                 isAdminAuthenticated={isAdminAuthenticated}
                 setIsAdminAuthenticated={setIsAdminAuthenticated}
                 onViewWeb={() => navigate(ROUTES.home)}
+                isAuthValidating={isAuthValidating}
+                setIsAuthValidating={setIsAuthValidating}
               />
             }
           />
