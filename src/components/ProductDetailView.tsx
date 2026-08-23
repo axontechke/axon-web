@@ -76,9 +76,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const availableColors = hasStorageVariants && selectedStorageVariant
     ? selectedStorageVariant.colors
     : product.colors ?? [];
+  // Fallback chain: SV warranties → top-level warranties (from storageVariants SV data) → default warranty
+  const DEFAULT_WARRANTIES: Warranty[] = [
+    { id: "default-1yr", name: "1 Year Official Warranty", duration: "1 Year", priceKsh: 0 },
+  ];
   const availableWarranties = hasStorageVariants && selectedStorageVariant
     ? selectedStorageVariant.warranties
-    : product.warranties ?? [];
+    : (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
   // When multiple SIM types exist for the selected storage, show the selector
   const storageSimTypes = hasStorageVariants && selectedStorage
     ? product.storageVariants!.filter(sv => sv.storage.toLowerCase() === selectedStorage.toLowerCase()).map(sv => sv.simType)
@@ -141,13 +145,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       }
     } else {
       setSelectedSimType(null);
-      const warranties = product.warranties ?? [];
-      if (warranties.length > 0) {
-        const free = warranties.find((w: Warranty) => w.priceKsh === 0);
-        setSelectedWarranty(free || warranties[0]);
-      } else {
-        setSelectedWarranty(undefined);
-      }
+      const warranties = (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
+      const free = warranties.find((w: Warranty) => w.priceKsh === 0);
+      setSelectedWarranty(free || warranties[0]);
     }
     setQuantity(1);
   }, [product.id, product.image]);

@@ -677,11 +677,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
       const url = isNew ? "/api/admin/products" : `/api/admin/products/${editingProduct.id}`;
       const method = isNew ? "POST" : "PUT";
 
+      // DEBUG: log storageVariants being sent
+      console.log("[DEBUG] Saving product storageVariants:", JSON.stringify(editingProduct.storageVariants));
       const res = await authFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingProduct)
       });
+      // DEBUG: log raw response
+      const text = await res.text();
+      console.log("[DEBUG] Save response status:", res.status, "body:", text.slice(0, 500));
 
       if (res.ok) {
         showFeedback(`Product successfully ${isNew ? "created" : "updated"}.`);
@@ -690,7 +695,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         loadAllAdminData();
         onRefreshProducts(); // Trigger app-wide reload
       } else {
-        throw new Error("Failed product transaction");
+        throw new Error("Failed product transaction: " + text.slice(0, 200));
       }
     } catch (err) {
       showFeedback("Failed to update database item.", true);
@@ -2499,10 +2504,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 if (dup) { alert("This storage + SIM variant already exists."); return; }
                                 setEditingProduct(prev => {
                                   const current = prev || {};
-                                  const existing = (current.storageVariants || []).filter(
+                                  // Always work from current storageVariants to avoid stale-closure bugs
+                                  const currentSv = current.storageVariants || [];
+                                  const existing = currentSv.filter(
                                     sv => !(sv.storage.toLowerCase() === editingSv.storage!.toLowerCase() && sv.simType === editingSv.simType)
                                   );
-                                  return { ...current, storageVariants: [...existing, { ...editingSv, colors: svColors, warranties: svWarranties } as StorageVariant] };
+                                  const updated = [...existing, { ...editingSv, colors: svColors, warranties: svWarranties } as StorageVariant];
+                                  return { ...current, storageVariants: updated };
                                 });
                                 setEditingSv(null);
                                 setSvColors([]);
