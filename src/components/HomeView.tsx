@@ -38,11 +38,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
       }));
     }
     return [
-      { name: "Axon Slate Series", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0" },
-      { name: "Axon Books", icon: Laptop, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853" },
-      { name: "Axon Studio Audio", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e" },
-      { name: "Continuous Power Banks", icon: Plug, image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2" },
-      { name: "Click Keyboards & Gear", icon: Layers, image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3" }
+      { name: "Tablets", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0" },
+      { name: "Laptops", icon: Laptop, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853" },
+      { name: "Audio", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e" },
+      { name: "Power Banks", icon: Plug, image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2" },
+      { name: "Accessories", icon: Layers, image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3" }
     ];
   }, [config?.categoriesList]);
 

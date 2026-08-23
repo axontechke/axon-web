@@ -147,9 +147,9 @@ interface WebConfig {
 }
 
 const defaultCategories = [
-  { name: "Axon Slate Series", desc: "Liquid Infinity screens", icon: "Tablet", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0", navigateTo: "Axon Slate Series" },
-  { name: "Axon Books", desc: "Aerospace alloys performance", icon: "Laptop", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853", navigateTo: "Axon Books" },
-  { name: "Axon Studio Audio", desc: "Adaptive isolation Pure DAC", icon: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", navigateTo: "Axon Studio Audio" },
+  { name: "Tablets", desc: "Liquid Infinity screens", icon: "Tablet", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0", navigateTo: "Tablets" },
+  { name: "Laptops", desc: "Aerospace alloys performance", icon: "Laptop", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853", navigateTo: "Laptops" },
+  { name: "Audio", desc: "Adaptive isolation Pure DAC", icon: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", navigateTo: "Audio" },
   { name: "Continuous Power Banks", desc: "Continuous wireless power", icon: "Plug", image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2", navigateTo: "Continuous Power Banks" },
   { name: "Click Keyboards & Gear", desc: "Modular engineered tools", icon: "Layers", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3", navigateTo: "Click Keyboards & Gear" },
 ];
@@ -212,11 +212,11 @@ const defaultSlides = [
 ];
 
 const defaultCol1Links = [
-  { text: "Axon Slate Series", target: "/catalog" },
-  { text: "Axon Books (Laptops)", target: "/catalog" },
-  { text: "Studio Audio", target: "/catalog" },
-  { text: "Continuous Power Banks", target: "/catalog" },
-  { text: "Click Keyboards & Gear", target: "/catalog" }
+  { text: "Tablets", target: "/catalog" },
+  { text: "Laptops", target: "/catalog" },
+  { text: "Audio", target: "/catalog" },
+  { text: "Power Banks", target: "/catalog" },
+  { text: "Accessories", target: "/catalog" }
 ];
 
 const defaultCol2Links = [
