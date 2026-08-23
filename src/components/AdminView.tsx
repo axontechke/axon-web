@@ -4156,48 +4156,92 @@ export const AdminView: React.FC<AdminViewProps> = ({
           {/* ======================================= */}
           {configSubTab === "categories" && (
             <div className="space-y-6">
+
+              {/* ── Live Preview ── */}
+              <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+                <div className="flex justify-between items-center pb-2 border-b border-outline/10">
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-primary" />
+                      Live Preview
+                    </h3>
+                    <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
+                      Exactly how categories appear on the homepage.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none lg:grid lg:grid-cols-5">
+                  {(() => {
+                    const iconMap: Record<string, any> = { Laptop, Tablet, Headphones, Smartphone, Layers, Plug };
+                    const currentCats = (webConfig.categoriesList || defaultCategories).slice(0, 5);
+                    return currentCats.map((cat: any) => {
+                      const Icon = iconMap[cat.icon] || Layers;
+                      const displayName = cat.name || "Category Name";
+                      const displayDesc = cat.desc || "Category description";
+                      return (
+                        <div key={cat.name} className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-outline/15 bg-surface-container p-3 sm:p-4 hover:border-primary/45 hover:shadow-md transition-all text-left min-w-[125px] h-24 sm:h-36 shrink-0">
+                          <div className="absolute inset-0 z-0">
+                            {cat.image ? (
+                              <img src={cat.image} alt={displayName} className="w-full h-full object-cover opacity-30 dark:opacity-45" referrerPolicy="no-referrer" />
+                            ) : null}
+                            <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/80 to-transparent" />
+                          </div>
+                          <div className="relative z-10 flex items-center justify-between w-full">
+                            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                              <Icon className="w-3.5 h-3.5" />
+                            </div>
+                          </div>
+                          <div className="relative z-10 space-y-0.5">
+                            <h3 className="font-display font-bold text-xs text-on-surface tracking-tight">{displayName}</h3>
+                            <p className="text-[9px] sm:text-[10px] text-on-surface-variant/70 leading-normal truncate max-w-[110px] sm:max-w-[130px]">{displayDesc}</p>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* ── Editor ── */}
               <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b border-outline/10">
                   <div>
                     <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                       <Package className="w-4 h-4 text-primary" />
-                      Dynamic Curated Categories Manager
+                      Dynamic Curated Categories
                     </h3>
                     <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
-                      "Shop All" dynamically detects categories added and deleted here and updates the search filters. Specify category text, icons, and hero covers.
+                      Up to 5 categories. "Shop All" dynamically detects added/removed categories.
                     </p>
                   </div>
-                  <button
-                    onClick={() => {
-                      const currentCats = webConfig.categoriesList || defaultCategories;
-                      const newCat = {
-                        name: "",
-                        desc: "",
-                        icon: "Layers",
-                        image: ""
-                      };
-                      setWebConfig(prev => ({ ...prev,categoriesList: [...currentCats, newCat] }));
-                      showFeedback("New category slot added!");
-                    }}
-                    className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center gap-1 font-bold text-[11px]"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Create Category</span>
-                  </button>
+                  {((webConfig.categoriesList || defaultCategories).length) < 5 && (
+                    <button
+                      onClick={() => {
+                        const currentCats = webConfig.categoriesList || defaultCategories;
+                        const newCat = { name: "", desc: "", icon: "Layers", image: "" };
+                        setWebConfig(prev => ({ ...prev, categoriesList: [...currentCats, newCat] }));
+                        showFeedback("New category slot added!");
+                      }}
+                      className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center gap-1 font-bold text-[11px]"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Category</span>
+                    </button>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none lg:grid lg:grid-cols-5 lg:overflow-visible lg:pb-0">
                   {(() => {
-                    const currentCats = webConfig.categoriesList || defaultCategories;
-                    return currentCats.map((cat, cIdx) => (
-                      <div key={cIdx} className="bg-surface border border-outline/10 p-4 rounded-2xl space-y-3.5 relative">
+                    const currentCats = (webConfig.categoriesList || defaultCategories).slice(0, 5);
+                    return currentCats.map((cat: any, cIdx: number) => (
+                      <div key={cIdx} className="min-w-[280px] snap-center bg-surface border border-outline/10 p-4 rounded-2xl space-y-3 relative lg:min-w-0">
                         <div className="flex justify-between items-center border-b border-outline/5 pb-2">
-                          <span className="font-bold text-xs text-primary uppercase">Category Slot #{cIdx + 1}</span>
+                          <span className="font-bold text-xs text-primary uppercase">#{cIdx + 1}</span>
                           <button
                             onClick={() => {
-                              const updated = currentCats.filter((_, idx) => idx !== cIdx);
-                              setWebConfig(prev => ({ ...prev,categoriesList: updated }));
-                              showFeedback("Category deleted.");
+                              const updated = currentCats.filter((_: any, idx: number) => idx !== cIdx);
+                              setWebConfig(prev => ({ ...prev, categoriesList: updated }));
+                              showFeedback("Category removed.");
                             }}
                             className="p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/15 border border-red-500/10 rounded-lg transition-colors"
                             title="Delete category"
@@ -4206,52 +4250,50 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Category Name</label>
-                            <input
-                              type="text"
-                              value={cat.name || ""}
-                              onChange={(e) => {
-                                const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, name: e.target.value } : c);
-                                setWebConfig(prev => ({ ...prev,categoriesList: updated }));
-                              }}
-                              className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
-                              placeholder="e.g. Laptops"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Render Icon</label>
-                            <select
-                              value={cat.icon || "Layers"}
-                              onChange={(e) => {
-                                const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, icon: e.target.value } : c);
-                                setWebConfig(prev => ({ ...prev,categoriesList: updated }));
-                              }}
-                              className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
-                            >
-                              <option value="Laptop">Laptop (Computer)</option>
-                              <option value="Tablet">Tablet (Slate/Tablet)</option>
-                              <option value="Headphones">Headphones (Audio)</option>
-                              <option value="Smartphone">Smartphone (Phone)</option>
-                              <option value="Layers">Layers (Catalog)</option>
-                              <option value="Plug">Plug (Induction/Power)</option>
-                            </select>
-                          </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Category Name</label>
+                          <input
+                            type="text"
+                            value={cat.name || ""}
+                            onChange={(e) => {
+                              const updated = currentCats.map((c: any, idx: number) => idx === cIdx ? { ...c, name: e.target.value } : c);
+                              setWebConfig(prev => ({ ...prev, categoriesList: updated }));
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
+                            placeholder="e.g. Laptops"
+                          />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Sub-description / Catalog Line</label>
+                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Render Icon</label>
+                          <select
+                            value={cat.icon || "Layers"}
+                            onChange={(e) => {
+                              const updated = currentCats.map((c: any, idx: number) => idx === cIdx ? { ...c, icon: e.target.value } : c);
+                              setWebConfig(prev => ({ ...prev, categoriesList: updated }));
+                            }}
+                            className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
+                          >
+                            <option value="Laptop">Laptop</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Headphones">Headphones</option>
+                            <option value="Smartphone">Smartphone</option>
+                            <option value="Layers">Layers</option>
+                            <option value="Plug">Plug</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Description</label>
                           <input
                             type="text"
                             value={cat.desc || ""}
                             onChange={(e) => {
-                              const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, desc: e.target.value } : c);
-                              setWebConfig(prev => ({ ...prev,categoriesList: updated }));
+                              const updated = currentCats.map((c: any, idx: number) => idx === cIdx ? { ...c, desc: e.target.value } : c);
+                              setWebConfig(prev => ({ ...prev, categoriesList: updated }));
                             }}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
-                            placeholder="e.g. Axon Book Series"
+                            placeholder="e.g. Aerospace alloys performance"
                           />
                         </div>
 
@@ -4261,25 +4303,21 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             type="url"
                             value={cat.image || ""}
                             onChange={(e) => {
-                              const updated = currentCats.map((c, idx) => idx === cIdx ? { ...c, image: e.target.value } : c);
-                              setWebConfig(prev => ({ ...prev,categoriesList: updated }));
+                              const updated = currentCats.map((c: any, idx: number) => idx === cIdx ? { ...c, image: e.target.value } : c);
+                              setWebConfig(prev => ({ ...prev, categoriesList: updated }));
                             }}
                             className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-[10px] text-on-surface font-mono"
                             placeholder="https://example.com/image.jpg"
                           />
+                          {cat.image && (
+                            <div className="mt-1 rounded-lg overflow-hidden border border-outline/10">
+                              <img src={cat.image} alt="preview" className="h-16 w-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                          )}
                         </div>
                       </div>
                     ));
                   })()}
-                </div>
-
-                <div className="pt-4 border-t border-outline/10">
-                  <button
-                    onClick={handleSaveConfig}
-                    className="w-full py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md"
-                  >
-                    Sync & Update Curated Categories (Triggers shop auto-detection)
-                  </button>
                 </div>
               </div>
             </div>
