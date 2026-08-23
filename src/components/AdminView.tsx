@@ -326,6 +326,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarImgStorage, setNewVarImgStorage] = useState("");
   const [newVarImgColor, setNewVarImgColor] = useState("");
   const [newVarImgUrl, setNewVarImgUrl] = useState("");
+  // Track which colors should be added to product-level colors when saving the variant
+  const [svColorProductAssignment, setSvColorProductAssignment] = useState<Record<string, boolean>>({});
   const [newSpecKey, setNewSpecKey] = useState("");
   const [newSpecValue, setNewSpecValue] = useState("");
   // Existing colors from DB for reuse
@@ -707,6 +709,31 @@ export const AdminView: React.FC<AdminViewProps> = ({
       variants: currentVariants,
       storages: updatedStorages.length > 0 ? updatedStorages : undefined,
     });
+  };
+
+  const handleAddVariantImage = (storage: string, color: string) => {
+    if (!newVarImgUrl.trim()) return;
+    const key = `${storage}|${color}`;
+    setVariantImgMap(prev => {
+      const existing = prev[key] || [];
+      if (existing.some((img: any) => img.imageUrl === newVarImgUrl.trim())) {
+        alert("This image URL is already added for this storage+color combination.");
+        return prev;
+      }
+      return {
+        ...prev,
+        [key]: [...existing, { id: `img-${Date.now()}`, imageUrl: newVarImgUrl.trim(), sortOrder: existing.length }]
+      };
+    });
+    setNewVarImgUrl("");
+  };
+
+  const handleRemoveVariantImage = (storage: string, color: string, imageId: string) => {
+    const key = `${storage}|${color}`;
+    setVariantImgMap(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).filter((img: any) => img.id !== imageId)
+    }));
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -2593,10 +2620,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               type="button"
                               onClick={() => {
                                 if (!newSvStorage.trim()) { alert("Enter a storage name first."); return; }
-                                setEditingSv({ storage: newSvStorage.trim(), simType: newSvSimType, priceKsh: 0, colors: [], warranties: [], stock: 0 });
+                                setEditingSv({ storage: newSvStorage.trim(), simType: newSvSimType, priceKsh: 0, colors: [], warrantyIds: [], stock: 0 });
                                 setSvColors([]);
                                 setSvWarrantyIds([]);
+                                setSvColorProductAssignment({});
                                 setEditingSvOriginalKey(null);
+                                setNewVarImgColor("");
+                                setNewVarImgUrl("");
                               }}
                               className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
                             >
@@ -2647,12 +2677,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== (editingSvOriginalKey || newKey)
                                   );
                                   const updated = [...existing, { ...editingSv, colors: svColors, warrantyIds: svWarrantyIds } as StorageVariant];
-                                  return { ...current, storageVariants: updated };
+                                  // Optionally merge colors into product-level colors
+                                  const productColorNames = new Set((current.colors || []).map((c: any) => c.name));
+                                  const newProductColors = svColors
+                                    .filter(c => svColorProductAssignment[c.name])
+                                    .filter(c => !productColorNames.has(c.name));
+                                  return {
+                                    ...current,
+                                    storageVariants: updated,
+                                    colors: newProductColors.length > 0
+                                      ? [...(current.colors || []), ...newProductColors]
+                                      : current.colors
+                                  };
                                 });
                                 setEditingSv(null);
                                 setEditingSvOriginalKey(null);
                                 setSvColors([]);
                                 setSvWarrantyIds([]);
+                                setSvColorProductAssignment({});
                               }}
                               className="text-[10px] font-bold text-green-600 hover:text-green-800 flex items-center gap-1"
                             >
@@ -2718,32 +2760,51 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               {svColors.length === 0 && <span className="text-[9px] text-on-surface-variant/40 italic">No colors added yet.</span>}
                             </div>
                             {globalColors.length > 0 ? (
-                              <div className="flex items-end gap-2">
-                                <div className="flex-1 space-y-1">
-                                  <label className="text-[8px] text-on-surface-variant/70 uppercase block">Add from library</label>
-                                  <select
-                                    id="sv-color-picker"
-                                    value=""
-                                    onChange={e => {
-                                      const name = e.target.value;
-                                      if (!name) return;
-                                      if (svColors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
-                                      const colorEntry = globalColors.find(c => c.name === name);
-                                      setSvColors([...svColors, {
-                                        name,
-                                        code: colorEntry?.code || "",
-                                        image: colorEntry?.image || ""
-                                      }]);
-                                      (document.getElementById("sv-color-picker") as HTMLSelectElement).value = "";
-                                    }}
-                                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
-                                  >
-                                    <option value="">— Select a color —</option>
-                                    {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
-                                  </select>
+                              <div className="space-y-1.5">
+                                <div className="flex items-end gap-2">
+                                  <div className="flex-1 space-y-1">
+                                    <label className="text-[8px] text-on-surface-variant/70 uppercase block">Add from library</label>
+                                    <select
+                                      id="sv-color-picker"
+                                      value=""
+                                      onChange={e => {
+                                        const name = e.target.value;
+                                        if (!name) return;
+                                        if (svColors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
+                                        const colorEntry = globalColors.find(c => c.name === name);
+                                        setSvColors([...svColors, {
+                                          name,
+                                          code: colorEntry?.code || "",
+                                          image: colorEntry?.image || ""
+                                        }]);
+                                        (document.getElementById("sv-color-picker") as HTMLSelectElement).value = "";
+                                      }}
+                                      className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
+                                    >
+                                      <option value="">— Select a color —</option>
+                                      {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
+                                    </select>
+                                  </div>
+                                  <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarrantyIds([]); setSvColorProductAssignment({}); setNewVarImgColor(""); setNewVarImgUrl(""); }}
+                                    className="py-1.5 px-3 text-[9px] font-bold text-red-500 hover:text-red-700 rounded-lg border border-red-500/10">Clear</button>
                                 </div>
-                                <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarrantyIds([]); }}
-                                  className="py-1.5 px-3 text-[9px] font-bold text-red-500 hover:text-red-700 rounded-lg border border-red-500/10">Clear</button>
+                                {/* Optional: assign selected colors to product-level */}
+                                <label className="flex items-center gap-1.5 text-[9px] text-on-surface-variant cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={Object.values(svColorProductAssignment).some(Boolean)}
+                                    onChange={e => {
+                                      const checked = e.target.checked;
+                                      // When toggled on: mark all current svColors for product-level
+                                      // When toggled off: unmark all
+                                      const updated: Record<string, boolean> = {};
+                                      svColors.forEach(c => { updated[c.name] = checked; });
+                                      setSvColorProductAssignment(updated);
+                                    }}
+                                    className="w-3 h-3 rounded accent-primary"
+                                  />
+                                  <span>Also add selected colors to product-level colors</span>
+                                </label>
                               </div>
                             ) : (
                               <p className="text-[9px] text-on-surface-variant/50 italic">No global colors available. Add colors in the Colors tab first.</p>
@@ -2780,6 +2841,75 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   );
                                 })}
                               </div>
+                            )}
+                          </div>
+
+                          {/* Image URLs — assign from product's image library */}
+                          <div className="space-y-1.5">
+                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Assign images to this variant</span>
+                            {(editingProduct.images || []).length === 0 ? (
+                              <p className="text-[9px] text-on-surface-variant/50 italic">Add image URLs to the product's "Additional Image URLs" field first, then assign them here.</p>
+                            ) : (
+                              <>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="space-y-1">
+                                    <label className="text-[8px] text-on-surface-variant/70 uppercase block">Color</label>
+                                    <select
+                                      value={newVarImgColor}
+                                      onChange={e => setNewVarImgColor(e.target.value)}
+                                      className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
+                                    >
+                                      <option value="">— Any color —</option>
+                                      {svColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
+                                    </select>
+                                  </div>
+                                  <div className="space-y-1 col-span-2">
+                                    <label className="text-[8px] text-on-surface-variant/70 uppercase block">Pick image</label>
+                                    <div className="flex gap-1">
+                                      <select
+                                        value={newVarImgUrl}
+                                        onChange={e => setNewVarImgUrl(e.target.value)}
+                                        className="flex-1 px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
+                                      >
+                                        <option value="">— Select URL —</option>
+                                        {(editingProduct.images || []).map((url, i) => <option key={i} value={url}>{url}</option>)}
+                                      </select>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleAddVariantImage(editingSv.storage!, newVarImgColor)}
+                                        disabled={!newVarImgUrl}
+                                        className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-[9px] font-bold rounded-lg disabled:opacity-40 shrink-0"
+                                      >
+                                        Assign
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Show assigned images grouped by color */}
+                                {svColors.map((c) => {
+                                  const key = `${editingSv.storage}|${c.name}`;
+                                  const imgs = variantImgMap[key] || [];
+                                  return imgs.length > 0 ? (
+                                    <div key={key} className="mt-1.5">
+                                      <span className="text-[8px] text-on-surface-variant/60 uppercase block mb-1">{c.name}</span>
+                                      <div className="flex flex-wrap gap-1">
+                                        {imgs.map((img: any) => (
+                                          <div key={img.id} className="relative group">
+                                            <img src={img.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover border border-outline/10" />
+                                            <button
+                                              type="button"
+                                              onClick={() => handleRemoveVariantImage(editingSv.storage!, c.name, img.id)}
+                                              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[8px]"
+                                            >
+                                              <X className="w-2.5 h-2.5" />
+                                            </button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ) : null;
+                                })}
+                              </>
                             )}
                           </div>
                         </div>
@@ -2824,6 +2954,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                         setEditingSvOriginalKey(`${sv.storage}|${sv.simType}`.toLowerCase());
                                         setSvColors([...sv.colors]);
                                         setSvWarrantyIds([...(sv.warrantyIds || [])]);
+                                        // Pre-check all existing colors as "already in product"
+                                        const preCheck: Record<string, boolean> = {};
+                                        sv.colors.forEach((c: any) => { preCheck[c.name] = true; });
+                                        setSvColorProductAssignment(preCheck);
+                                        setNewVarImgColor("");
+                                        setNewVarImgUrl("");
                                       }}
                                       className="text-primary hover:text-primary-hover font-bold text-[10px] px-2 py-1"
                                     >
