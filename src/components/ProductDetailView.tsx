@@ -26,8 +26,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
     : (product.storages ?? []);
 
-  // In StorageVariant mode, build a list of unique (storage, simType) variant keys for the selector
+  // In StorageVariant mode, build a list of unique storage options (no simType suffix)
   type SvOption = { storage: string; simType: "esim" | "physical"; label: string };
+  const storageOnlyOptions: string[] = hasStorageVariants
+    ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
+    : [];
+
+  // Unique (storage, simType) pairs for the selector
   const svOptions: SvOption[] = hasStorageVariants
     ? (() => {
         const seen = new Set<string>();
@@ -36,7 +41,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           const key = `${sv.storage}|${sv.simType}`;
           if (!seen.has(key)) {
             seen.add(key);
-            opts.push({ storage: sv.storage, simType: sv.simType as "esim" | "physical", label: sv.simType === "esim" ? `${sv.storage} eSIM` : `${sv.storage} Physical` });
+            opts.push({ storage: sv.storage, simType: sv.simType as "esim" | "physical", label: sv.storage });
           }
         }
         return opts;
@@ -50,12 +55,21 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   // In StorageVariant mode, track the SIM type choice separately (null = not yet selected / single option)
   const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | null>(() => {
     if (!hasStorageVariants) return null;
-    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (storageOptions[0] || "").toLowerCase());
+    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (storageOnlyOptions[0] || "").toLowerCase());
     return variants.length === 1 ? (variants[0].simType as "esim" | "physical") : null;
   });
 
   // Current SV selector key
   const svKey = selectedSimType ? `${selectedStorage}|${selectedSimType}` : (selectedStorage ?? "");
+
+  // Available SIM types for the currently selected storage
+  const simTypeOptions: ("esim" | "physical")[] = hasStorageVariants && selectedStorage
+    ? [...new Set(
+        product.storageVariants!
+          .filter(sv => sv.storage.toLowerCase() === selectedStorage.toLowerCase())
+          .map(sv => sv.simType as "esim" | "physical")
+      )]
+    : [];
 
   // In StorageVariant mode, find the first matching variant for the given storage+simType combo
   const getStorageVariant = (storage: string | undefined, simType?: string) =>
@@ -544,45 +558,90 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
             {/* Storage + SIM Type selector */}
             {hasStorageVariants ? (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  Model: <strong className="text-on-surface">{svOptions.find(o => o.storage === selectedStorage && o.simType === selectedSimType)?.label ?? selectedStorage}</strong>
-                </span>
-                <div className="flex gap-2 flex-wrap">
-                  {svOptions.map((opt) => {
-                    const key = `${opt.storage}|${opt.simType}`;
-                    const isSelected = key === svKey;
-                    return (
-                      <button
-                        key={key}
-                        onClick={() => {
-                          setSelectedStorage(opt.storage);
-                          setSelectedSimType(opt.simType);
-                          setSelectedColor(undefined);
-                          // Reset warranty for new variant
-                          const sv = product.storageVariants!.find(s =>
-                            s.storage.toLowerCase() === opt.storage.toLowerCase() && s.simType === opt.simType
-                          );
-                          if (sv?.warrantyIds?.length) {
-                            const svWarranties = sv.warrantyIds.map((id: string) => product.warranties?.find(w => w.id === id)).filter(Boolean);
-                            const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
-                            setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
-                          } else {
-                            setSelectedWarranty(undefined);
-                          }
-                        }}
-                        className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                          isSelected
-                            ? "bg-on-surface text-surface border-on-surface"
-                            : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
-                        }`}
-                        id={`storage-btn-${key}`}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
+              <div className="space-y-3">
+                {/* Storage row */}
+                <div className="space-y-1.5">
+                  <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                    Storage: <strong className="text-on-surface">{selectedStorage}</strong>
+                  </span>
+                  <div className="flex gap-2 flex-wrap">
+                    {storageOnlyOptions.map((storage) => {
+                      const isSelected = storage === selectedStorage;
+                      return (
+                        <button
+                          key={storage}
+                          onClick={() => {
+                            setSelectedStorage(storage);
+                            setSelectedColor(undefined);
+                            // Auto-set SIM type: if only one variant for this storage, use it; otherwise reset
+                            const variants = product.storageVariants!.filter(sv =>
+                              sv.storage.toLowerCase() === storage.toLowerCase()
+                            );
+                            if (variants.length === 1) {
+                              setSelectedSimType(variants[0].simType as "esim" | "physical");
+                              const sv = variants[0];
+                              if (sv.warrantyIds?.length) {
+                                const svWarranties = sv.warrantyIds.map((id: string) => product.warranties?.find(w => w.id === id)).filter(Boolean);
+                                const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
+                                setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
+                              } else {
+                                setSelectedWarranty(undefined);
+                              }
+                            } else {
+                              setSelectedSimType(null);
+                              setSelectedWarranty(undefined);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                            isSelected
+                              ? "bg-on-surface text-surface border-on-surface"
+                              : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                          }`}
+                          id={`storage-btn-${storage}`}
+                        >
+                          {storage}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {/* SIM type row — only shown when multiple sim types exist for selected storage */}
+                {simTypeOptions.length > 1 && (
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                      SIM Type: <strong className="text-on-surface">{selectedSimType === "esim" ? "eSIM" : "Physical SIM"}</strong>
+                    </span>
+                    <div className="flex gap-2 flex-wrap">
+                      {simTypeOptions.map((st) => (
+                        <button
+                          key={st}
+                          onClick={() => {
+                            setSelectedSimType(st);
+                            setSelectedColor(undefined);
+                            const sv = product.storageVariants!.find(sv2 =>
+                              sv2.storage.toLowerCase() === selectedStorage?.toLowerCase() && sv2.simType === st
+                            );
+                            if (sv?.warrantyIds?.length) {
+                              const svWarranties = sv.warrantyIds.map((id: string) => product.warranties?.find(w => w.id === id)).filter(Boolean);
+                              const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
+                              setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
+                            } else {
+                              setSelectedWarranty(undefined);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                            selectedSimType === st
+                              ? "bg-on-surface text-surface border-on-surface"
+                              : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                          }`}
+                        >
+                          {st === "esim" ? "eSIM" : "Physical SIM"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : storageOptions.length > 0 ? (
               <div className="space-y-2">
