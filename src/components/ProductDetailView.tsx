@@ -36,12 +36,23 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           const key = `${sv.storage}|${sv.simType}`;
           if (!seen.has(key)) {
             seen.add(key);
-            opts.push({ storage: sv.storage, simType: sv.simType, label: sv.simType === "esim" ? `${sv.storage} eSIM` : `${sv.storage} Physical` });
+            opts.push({ storage: sv.storage, simType: sv.simType as "esim" | "physical", label: sv.simType === "esim" ? `${sv.storage} eSIM` : `${sv.storage} Physical` });
           }
         }
         return opts;
       })()
     : [];
+
+  // ── useState declarations (must come before any derived values that reference them) ──
+  const [selectedStorage, setSelectedStorage] = useState<string | undefined>(
+    storageOptions.length > 0 ? storageOptions[0] : undefined
+  );
+  // In StorageVariant mode, track the SIM type choice separately (null = not yet selected / single option)
+  const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | null>(() => {
+    if (!hasStorageVariants) return null;
+    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (storageOptions[0] || "").toLowerCase());
+    return variants.length === 1 ? (variants[0].simType as "esim" | "physical") : null;
+  });
 
   // Current SV selector key
   const svKey = selectedSimType ? `${selectedStorage}|${selectedSimType}` : (selectedStorage ?? "");
@@ -86,15 +97,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     return undefined;
   };
   const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
-  const [selectedStorage, setSelectedStorage] = useState<string | undefined>(
-    storageOptions.length > 0 ? storageOptions[0] : undefined
-  );
-  // In StorageVariant mode, track the SIM type choice separately (null = not yet selected / single option)
-  const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | null>(() => {
-    if (!hasStorageVariants) return null;
-    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (storageOptions[0] || "").toLowerCase());
-    return variants.length === 1 ? variants[0].simType : null;
-  });
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
     // Default to free warranty (priceKsh === 0) if available
     if (availableWarranties.length > 0) {
@@ -115,6 +117,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     return (product.colors as any[]).find((c: any) => c.name === name) as any;
   };
 
+
   React.useEffect(() => {
     setActiveImage(product.image);
     setSelectedColor(getInitialColor());
@@ -126,8 +129,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     if (hasStorageVariants) {
       const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (opts[0] || "").toLowerCase());
       const sim = variants.length === 1 ? variants[0].simType : null;
-      setSelectedSimType(sim);
-      const warranties = variants.length > 0 ? (variants.find(sv => (!sim || sv.simType === sim)?.warranties) ?? []) : [];
+      setSelectedSimType(sim as "esim" | "physical" | null);
+      const warranties = variants.length > 0
+        ? (variants.find(sv => !sim || sv.simType === sim)?.warranties ?? [])
+        : [];
       if (warranties.length > 0) {
         const free = warranties.find((w: Warranty) => w.priceKsh === 0);
         setSelectedWarranty(free || warranties[0]);
@@ -219,7 +224,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       v => v.storage.toLowerCase() === selectedStorage.toLowerCase() &&
         (!selectedColor ? !v.color : v.color.toLowerCase() === selectedColor.toLowerCase())
     );
-    return variantMatch?.warrantyPriceKsh ?? selectedWarranty.priceKsh ?? 0;
+    return (variantMatch as any)?.warrantyPriceKsh ?? selectedWarranty.priceKsh ?? 0;
   };
   const displayPriceKsh = basePriceKsh + getVariantWarrantyPrice();
 

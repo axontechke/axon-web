@@ -33,6 +33,14 @@ export interface StorageVariant {
   stock: number;
 }
 
+// Legacy per-combo variant (storage + color) with optional price override
+export interface ProductVariant {
+  storage: string;
+  color: string;
+  priceKsh?: number;
+  stock?: number;
+}
+
 // Stored in DB: multiple images per (storage, color) combo
 export interface VariantImageEntry {
   id: string;

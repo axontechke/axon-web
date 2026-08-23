@@ -515,7 +515,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
   const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
     const headers = new Headers(options.headers);
-    if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+    // Always read from localStorage directly to avoid stale closure on first mount
+    const token = authToken || localStorage.getItem("axon_admin_token") || "";
+    if (token) headers.set("Authorization", `Bearer ${token}`);
     const apiKey = localStorage.getItem("axon_admin_api_key");
     if (apiKey) headers.set("x-admin-api-key", apiKey);
     return fetch(url, { ...options, headers });
