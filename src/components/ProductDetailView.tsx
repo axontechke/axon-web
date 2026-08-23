@@ -421,48 +421,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 </div>
               </div>
             )}
-                    // Support both legacy string[] and new ProductColor[] format
-                    const name = typeof colorEntry === 'string' ? colorEntry : (colorEntry as any).name;
-                    const hexCode = typeof colorEntry === 'string'
-                      ? product.colorCodes?.[name]
-                      : (colorEntry as any).code;
-                    let bgStyle: React.CSSProperties | undefined;
-                    let bgClass = "bg-gray-400";
-                    if (hexCode) {
-                      bgStyle = { backgroundColor: hexCode };
-                    } else {
-                      if (name === "Silver") bgClass = "bg-[#EAEAEA]";
-                      else if (name === "Slate" || name === "Charcoal" || name === "Obsidian" || name === "Black") bgClass = "bg-[#1a1a1a]";
-                      else if (name === "Teal") bgClass = "bg-[#008080]";
-                      else if (name === "White" || name === "Snow") bgClass = "bg-[#F5F5F5] border border-outline/20";
-                      else if (name === "Copper") bgClass = "bg-[#b87333]";
-                      else if (name === "Coral") bgClass = "bg-[#FF7F50]";
-                      else if (name === "Gold" || name === "Yellow") bgClass = "bg-[#FFD700]";
-                      else if (name === "Pacific Blue" || name === "Blue") bgClass = "bg-[#007AFF]";
-                      else if (name === "Midnight Green") bgClass = "bg-[#004953]";
-                      else if (name === "Purple" || name === "Violet") bgClass = "bg-[#8B5CF6]";
-                      else if (name === "Green" || name === "Sage") bgClass = "bg-[#4CAF50]";
-                      else if (name === "Red" || name === "Product Red") bgClass = "bg-[#FF3B30]";
-                      else if (name === "Pink" || name === "Rose Gold" || name === "Rose") bgClass = "bg-[#FF2D55]";
-                      else if (name === "Orange") bgClass = "bg-[#FF9500]";
-                    }
-
-                    return (
-                      <button
-                        key={name}
-                        onClick={() => setSelectedColor(name)}
-                        style={bgStyle}
-                        className={`w-8 h-8 rounded-full ${!hexCode ? bgClass : ""} transition-all duration-150 flex items-center justify-center ${
-                          selectedColor === name ? "ring-2 ring-primary ring-offset-2" : "opacity-85 hover:opacity-100 hover:scale-105"
-                        }`}
-                        title={name}
-                        id={`color-btn-${name}`}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* Storage capacity */}
             {product.storages && (
