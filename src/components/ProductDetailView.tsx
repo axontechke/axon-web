@@ -613,9 +613,16 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                         setSelectedStorage(storage);
                         if (hasStorageVariants) {
                           const sv = product.storageVariants?.find(s => s.storage.toLowerCase() === storage.toLowerCase());
-                          if (sv?.warranties?.length) {
-                            const free = sv.warranties.find((w: Warranty) => w.priceKsh === 0);
-                            setSelectedWarranty(free || sv.warranties[0]);
+                          if (sv?.warrantyIds?.length) {
+                            const resolved = (sv.warrantyIds as string[])
+                              .map((id: string) => (product.warranties ?? []).find(w => w.id === id))
+                              .filter(Boolean) as Warranty[];
+                            if (resolved.length > 0) {
+                              const free = resolved.find(w => w.priceKsh === 0);
+                              setSelectedWarranty(free || resolved[0]);
+                            } else {
+                              setSelectedWarranty(undefined);
+                            }
                           } else {
                             setSelectedWarranty(undefined);
                           }
