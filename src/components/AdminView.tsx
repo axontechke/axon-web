@@ -56,7 +56,7 @@ import {
   Pie, 
   Cell 
 } from "recharts";
-import { Product, ProductColor, formatProductPrice, VariantImagesMap } from "../types";
+import { Product, ProductColor, Warranty, StorageVariant, formatProductPrice, VariantImagesMap } from "../types";
 
 interface AdminViewProps {
   onSelectProduct: (product: Product) => void;
@@ -332,6 +332,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newWarrantyDuration, setNewWarrantyDuration] = useState("");
   const [newWarrantyPriceKsh, setNewWarrantyPriceKsh] = useState<number>(0);
 
+  // StorageVariant editor state
+  const [editingSv, setEditingSv] = useState<StorageVariant | null>(null); // currently editing a StorageVariant
+  const [svColors, setSvColors] = useState<ProductColor[]>([]);
+  const [svWarranties, setSvWarranties] = useState<Warranty[]>([]);
+
   // Form states for Promo Manager
   const [newPromoCode, setNewPromoCode] = useState("");
   const [newPromoDiscount, setNewPromoDiscount] = useState(10);
@@ -498,11 +503,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
       storages: ["128GB"],
       images: [],
       variants: [],
+      storageVariants: [],
       specifications: {
         "Processor": "Quantum Core Architecture",
         "Battery": "Sustained all-day operational capacity"
       }
     });
+    setEditingSv(null);
+    setSvColors([]);
+    setSvWarranties([]);
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
@@ -531,7 +540,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
       images: prod.images || [],
       colors: finalColors,
       storages: prod.storages || [],
-      variants: prod.variants || []
+      variants: prod.variants || [],
+      storageVariants: prod.storageVariants || []
     });
     setNewVarStorage("");
     setNewVarColor("");
@@ -543,6 +553,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarImgStorage(prod.storages?.[0] || "");
     setNewVarImgColor(finalColors[0]?.name || "");
     setNewVarImgUrl("");
+    setEditingSv(null);
+    setSvColors([]);
+    setSvWarranties([]);
     // Load existing variant images from DB
     authFetch(`/api/admin/product-variant-images?productId=${prod.id}`)
       .then(res => res.ok ? res.json() : [])
@@ -2816,6 +2829,258 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    {/* ── StorageVariant Editor ─────────────────────────────────────── */}
+                    <div className="border-t border-outline/10 pt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-on-surface uppercase">Storage Variants (per-tier config)</span>
+                        {editingSv ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!editingSv.storage.trim()) { alert("Storage name is required."); return; }
+                              setEditingProduct(prev => {
+                                const current = prev || {};
+                                const existing = (current.storageVariants || []).filter(sv => sv.storage !== editingSv.storage);
+                                return { ...current, storageVariants: [...existing, { ...editingSv, colors: svColors, warranties: svWarranties }] };
+                              });
+                              setEditingSv(null);
+                              setSvColors([]);
+                              setSvWarranties([]);
+                            }}
+                            className="text-[10px] font-bold text-green-600 hover:text-green-800 flex items-center gap-1"
+                          >
+                            <Check className="w-3 h-3" /> Save StorageVariant
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingSv({ storage: "", priceKsh: 0, simType: "physical", colors: [], warranties: [], stock: 0 });
+                              setSvColors([]);
+                              setSvWarranties([]);
+                            }}
+                            className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" /> New StorageVariant
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Inline edit form for the selected StorageVariant */}
+                      {editingSv && (
+                        <div className="bg-surface-container border border-primary/30 rounded-xl p-3 space-y-3">
+                          <div className="grid grid-cols-4 gap-2">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-bold text-on-surface-variant uppercase">Storage *</label>
+                              <input
+                                type="text"
+                                value={editingSv.storage}
+                                onChange={e => setEditingSv({ ...editingSv, storage: e.target.value })}
+                                placeholder="e.g. 256GB"
+                                className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-bold text-on-surface-variant uppercase">Price KSh *</label>
+                              <input
+                                type="number"
+                                value={editingSv.priceKsh}
+                                onChange={e => setEditingSv({ ...editingSv, priceKsh: Number(e.target.value) || 0 })}
+                                className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                                min="0"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-bold text-on-surface-variant uppercase">SIM Type</label>
+                              <select
+                                value={editingSv.simType}
+                                onChange={e => setEditingSv({ ...editingSv, simType: e.target.value as "esim" | "physical" | "both" })}
+                                className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                              >
+                                <option value="physical">Physical SIM</option>
+                                <option value="esim">eSIM</option>
+                                <option value="both">Both</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-bold text-on-surface-variant uppercase">Stock</label>
+                              <input
+                                type="number"
+                                value={editingSv.stock}
+                                onChange={e => setEditingSv({ ...editingSv, stock: Number(e.target.value) || 0 })}
+                                className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                                min="0"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Colors for this StorageVariant */}
+                          <div className="space-y-1.5">
+                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Colors in this storage</span>
+                            <div className="flex flex-wrap gap-1">
+                              {svColors.map((c, i) => (
+                                <span key={i} className="flex items-center gap-1 bg-surface border border-outline/20 rounded-lg px-2 py-0.5 text-[10px]">
+                                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.code || "#ccc" }} />
+                                  <span className="font-semibold text-on-surface">{c.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSvColors(svColors.filter((_, j) => j !== i))}
+                                    className="text-red-400 hover:text-red-600 ml-1"
+                                  >
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <input
+                                type="text"
+                                placeholder="Color name"
+                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
+                                onKeyDown={e => {
+                                  if (e.key === "Enter") {
+                                    const input = e.currentTarget;
+                                    const name = input.value.trim();
+                                    if (!name) return;
+                                    if (svColors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
+                                    setSvColors([...svColors, { name, code: "", image: "" }]);
+                                    input.value = "";
+                                  }
+                                }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Hex code (e.g. #1a1a1a)"
+                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
+                                onKeyDown={e => {
+                                  if (e.key === "Enter") {
+                                    const input = e.currentTarget;
+                                    const code = input.value.trim();
+                                    if (!svColors.length) return;
+                                    setSvColors([...svColors.slice(0, -1), { ...svColors[svColors.length - 1], code }]);
+                                    input.value = "";
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setEditingSv(null)}
+                                className="text-[9px] font-bold text-red-500 hover:text-red-700"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                            <p className="text-[8px] text-on-surface-variant/50 italic">Enter color name → press Enter, then enter hex → press Enter</p>
+                          </div>
+
+                          {/* Warranties for this StorageVariant */}
+                          <div className="space-y-1.5">
+                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Warranties for this storage</span>
+                            <div className="flex flex-wrap gap-1">
+                              {svWarranties.map((w, i) => (
+                                <span key={i} className="flex items-center gap-1 bg-surface border border-outline/20 rounded-lg px-2 py-0.5 text-[10px]">
+                                  <span className="font-semibold text-on-surface">{w.name}</span>
+                                  <span className="text-on-surface-variant/60">({w.duration})</span>
+                                  <span className="text-primary font-bold">{w.priceKsh === 0 ? "Free" : `+KSh ${w.priceKsh.toLocaleString()}`}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSvWarranties(svWarranties.filter((_, j) => j !== i))}
+                                    className="text-red-400 hover:text-red-600 ml-1"
+                                  >
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                              <input
+                                type="text"
+                                placeholder="Plan name"
+                                id="sv-warranty-name"
+                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Duration (e.g. 1 Year)"
+                                id="sv-warranty-duration"
+                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
+                              />
+                              <input
+                                type="number"
+                                placeholder="Price KSh (0=free)"
+                                id="sv-warranty-price"
+                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
+                                min="0"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nameInput = document.getElementById("sv-warranty-name") as HTMLInputElement;
+                                  const durationInput = document.getElementById("sv-warranty-duration") as HTMLInputElement;
+                                  const priceInput = document.getElementById("sv-warranty-price") as HTMLInputElement;
+                                  const name = nameInput?.value.trim();
+                                  const duration = durationInput?.value.trim();
+                                  const priceKsh = Number(priceInput?.value) || 0;
+                                  if (!name) { alert("Warranty name is required."); return; }
+                                  if (svWarranties.some(w => w.name.toLowerCase() === name.toLowerCase())) { alert("Warranty already added."); return; }
+                                  setSvWarranties([...svWarranties, { id: `sv-w-${Date.now()}`, name, duration: duration || "1 Year", priceKsh }]);
+                                  nameInput.value = "";
+                                  durationInput.value = "";
+                                  priceInput.value = "";
+                                }}
+                                className="py-1 bg-secondary hover:bg-secondary-hover text-[10px] font-bold rounded-lg"
+                              >
+                                Add
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* List of saved StorageVariants */}
+                      {(editingProduct?.storageVariants || []).length > 0 && (
+                        <div className="border border-outline/10 rounded-xl overflow-hidden">
+                          <table className="w-full text-left text-[11px] border-collapse">
+                            <thead>
+                              <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
+                                <th className="p-2">Storage</th>
+                                <th className="p-2">Price KSh</th>
+                                <th className="p-2">SIM</th>
+                                <th className="p-2">Colors</th>
+                                <th className="p-2">Warranties</th>
+                                <th className="p-2 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-outline/10">
+                              {(editingProduct?.storageVariants || []).map((sv, i) => (
+                                <tr key={i} className="hover:bg-surface-container-high/30">
+                                  <td className="p-2 font-bold">{sv.storage}</td>
+                                  <td className="p-2 font-mono">KSh {sv.priceKsh.toLocaleString()}</td>
+                                  <td className="p-2 capitalize text-on-surface-variant">{sv.simType}</td>
+                                  <td className="p-2 text-[10px]">{sv.colors.length} color(s)</td>
+                                  <td className="p-2 text-[10px]">{sv.warranties.length} plan(s)</td>
+                                  <td className="p-2 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditingProduct(prev => ({
+                                          ...prev!,
+                                          storageVariants: (prev!.storageVariants || []).filter((_, j) => j !== i)
+                                        }));
+                                      }}
+                                      className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
+                                    >
+                                      Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
 
                     <div className="border-t border-outline/10 pt-4 flex gap-3">
