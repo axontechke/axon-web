@@ -2300,6 +2300,113 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       </div>
                     </div>
 
+                    {/* Rating, Reviews & Badges */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-on-surface-variant block uppercase">Rating (1–5)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={5}
+                          step={0.1}
+                          value={editingProduct.rating ?? ""}
+                          onChange={e => setEditingProduct({ ...editingProduct, rating: e.target.value ? Number(e.target.value) : 0 })}
+                          placeholder="e.g. 4.5"
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-on-surface-variant block uppercase">Reviews Count</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={editingProduct.reviewsCount ?? ""}
+                          onChange={e => setEditingProduct({ ...editingProduct, reviewsCount: e.target.value ? Number(e.target.value) : 0 })}
+                          placeholder="e.g. 24"
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5 pt-4">
+                        <label className="flex items-center gap-2 cursor-pointer text-[11px]">
+                          <input
+                            type="checkbox"
+                            checked={editingProduct.isNew ?? false}
+                            onChange={e => setEditingProduct({ ...editingProduct, isNew: e.target.checked })}
+                            className="w-4 h-4 rounded border-outline/30"
+                          />
+                          <span>New Arrival</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-[11px]">
+                          <input
+                            type="checkbox"
+                            checked={editingProduct.isBestSeller ?? false}
+                            onChange={e => setEditingProduct({ ...editingProduct, isBestSeller: e.target.checked })}
+                            className="w-4 h-4 rounded border-outline/30"
+                          />
+                          <span>Best Seller</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-[11px]">
+                          <input
+                            type="checkbox"
+                            checked={editingProduct.preOrder ?? false}
+                            onChange={e => setEditingProduct({ ...editingProduct, preOrder: e.target.checked })}
+                            className="w-4 h-4 rounded border-outline/30"
+                          />
+                          <span>Pre-order</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Product-level Warranties */}
+                    <div className="border-t border-outline/10 pt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Warranty Plans</h4>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const name = window.prompt("Warranty name (e.g. Official Warranty):");
+                            if (!name) return;
+                            const duration = window.prompt("Duration (e.g. 1 Year, 2 Years):");
+                            if (!duration) return;
+                            const priceStr = window.prompt("Price in KSh (0 = free):");
+                            if (priceStr === null) return;
+                            const priceKsh = Number(priceStr) || 0;
+                            const newW: Warranty = { id: `w-${Date.now()}`, name, duration, priceKsh };
+                            setEditingProduct({
+                              ...editingProduct,
+                              warranties: [...(editingProduct.warranties || []), newW]
+                            });
+                          }}
+                          className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" /> Add Warranty
+                        </button>
+                      </div>
+                      {(editingProduct.warranties || []).length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {editingProduct.warranties!.map((w, i) => (
+                            <span key={w.id} className="flex items-center gap-2 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
+                              <span className="font-semibold text-on-surface">{w.name}</span>
+                              <span className="text-on-surface-variant">({w.duration})</span>
+                              <span className="text-primary font-bold">{w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}</span>
+                              <button
+                                type="button"
+                                onClick={() => setEditingProduct({
+                                  ...editingProduct,
+                                  warranties: editingProduct.warranties!.filter((_, idx) => idx !== i)
+                                })}
+                                className="text-red-400 hover:text-red-600 ml-1"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-on-surface-variant/50 italic">No warranty plans added. Click "Add Warranty" to create one (e.g. "1 Year Official Warranty").</p>
+                      )}
+                    </div>
+
                     <div className="border-t border-outline/10 pt-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold text-on-surface uppercase">Storage Variants (per-storage + per-SIM-type)</span>
