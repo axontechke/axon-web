@@ -801,25 +801,45 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
   return corsResponse(products);
 }
 
-// GET /api/admin/colors — all unique color names and codes from all products
+// GET /api/admin/colors — all global colors
 async function getAllColors(_req: Request, env: Env): Promise<Response> {
-  const { results } = await env.DB.prepare("SELECT id, name, colors, colorCodes FROM products").all() as any;
-  const colorMap: Record<string, { name: string; code: string }> = {};
-  for (const p of results) {
-    try {
-      const colors = JSON.parse(p.colors || "[]");
-      const codes = JSON.parse(p.colorCodes || "{}");
-      for (const c of colors) {
-        if (typeof c === "string") {
-          colorMap[c.toLowerCase()] = { name: c, code: codes[c] || "" };
-        } else if (c && c.name) {
-          colorMap[c.name.toLowerCase()] = { name: c.name, code: c.code || codes[c.name] || "" };
-        }
-      }
-    } catch {}
-  }
-  const uniqueColors = Object.values(colorMap).sort((a, b) => a.name.localeCompare(b.name));
-  return corsResponse(uniqueColors);
+  const { results } = await env.DB.prepare("SELECT * FROM global_colors ORDER BY name ASC").all();
+  return corsResponse(results);
+}
+
+// POST /api/admin/colors — add a new global color
+async function createColor(req: Request, env: Env): Promise<Response> {
+  const { name, code, image } = await jsonBody<{ name?: string; code?: string; image?: string }>(req);
+  if (!name) return jsonError("Color name is required.");
+  const id = generateId("col");
+  await env.DB.prepare(
+    "INSERT INTO global_colors (id, name, code, image) VALUES (?, ?, ?, ?)"
+  ).bind(id, name.trim(), (code || "").trim(), (image || "").trim()).run();
+  return corsResponse({ id, name: name.trim(), code: (code || "").trim(), image: (image || "").trim() }, 201);
+}
+
+// PUT /api/admin/colors/:id — update a global color
+async function updateColor(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const { name, code, image } = await jsonBody<{ name?: string; code?: string; image?: string }>(req);
+  const existing = await env.DB.prepare("SELECT * FROM global_colors WHERE id = ?").bind(params.id).first();
+  if (!existing) return jsonError("Color not found.", 404);
+  const fields: string[] = [];
+  const values: any[] = [];
+  if (name !== undefined) { fields.push("name = ?"); values.push(name.trim()); }
+  if (code !== undefined) { fields.push("code = ?"); values.push(code.trim()); }
+  if (image !== undefined) { fields.push("image = ?"); values.push(image.trim()); }
+  if (fields.length === 0) return jsonError("No fields to update.");
+  values.push(params.id);
+  await env.DB.prepare(`UPDATE global_colors SET ${fields.join(", ")} WHERE id = ?`).bind(...values).run();
+  const updated = await env.DB.prepare("SELECT * FROM global_colors WHERE id = ?").bind(params.id).first();
+  return corsResponse(updated);
+}
+
+// DELETE /api/admin/colors/:id — delete a global color
+async function deleteColor(_req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const result = await env.DB.prepare("DELETE FROM global_colors WHERE id = ?").bind(params.id).run();
+  if (result.meta?.changes === 0) return jsonError("Color not found.", 404);
+  return corsResponse({ success: true, id: params.id });
 }
 
 // GET /api/orders
@@ -1785,6 +1805,9 @@ const routes: Route[] = [
   route("PUT", "/api/admin/config", updateConfig),
   route("PUT", "/api/admin/contact", updateContact),
   route("GET", "/api/admin/colors", getAllColors),
+  route("POST", "/api/admin/colors", createColor),
+  route("PUT", "/api/admin/colors/:id", updateColor),
+  route("DELETE", "/api/admin/colors/:id", deleteColor),
   route("GET", "/api/admin/support-requests", getSupportRequests),
   route("PUT", "/api/admin/support-requests/:id", updateSupportRequest),
   route("POST", "/api/admin/delivery-methods", createDeliveryMethod),
