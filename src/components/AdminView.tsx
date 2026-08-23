@@ -3075,14 +3075,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     <button
                                       type="button"
                                       onClick={() => {
-                                        setEditingProduct(prev => ({
-                                          ...prev!,
-                                          storageVariants: (prev!.storageVariants || []).filter((_, j) => j !== i)
-                                        }));
+                                        setEditingSv({ ...sv });
+                                        setSvColors([...sv.colors]);
+                                        setSvWarranties([...sv.warranties]);
                                       }}
-                                      className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
+                                      className="text-primary hover:text-primary-hover font-bold text-[10px] px-2 py-1"
                                     >
-                                      Remove
+                                      Edit
                                     </button>
                                   </td>
                                 </tr>
