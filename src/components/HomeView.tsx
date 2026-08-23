@@ -637,7 +637,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6" id="trending-bento-section">
         <div className="space-y-1">
           <h2 className="font-display font-black text-2xl text-on-surface tracking-tight">New Arrivals</h2>
-          <p className="text-xs text-on-surface-variant/70">What others in the Axon community are actively configuring.</p>
+          <p className="text-xs text-on-surface-variant/70">What others in our community are actively configuring.</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-12 gap-4 md:gap-6">
@@ -728,7 +728,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6" id="spotlight-section">
         <div className="text-center space-y-1.5">
           <h2 className="font-display font-black text-2xl text-on-surface tracking-tight">
-            {config?.spotlightTitle || "The Ecosystem Spotlight"}
+            {config?.spotlightTitle || "The Catalog Spotlight"}
           </h2>
           <p className="text-[11px] text-on-surface-variant/70 max-w-md mx-auto">
             {config?.spotlightDescription || "Each product designed with absolute form-factor alignment and state-of-the-art durability."}

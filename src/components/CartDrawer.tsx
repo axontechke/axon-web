@@ -9,7 +9,7 @@ interface CartDrawerProps {
   onUpdateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedStorage?: string, warrantyId?: string) => void;
   onRemoveItem: (productId: string, selectedColor?: string, selectedStorage?: string, warrantyId?: string) => void;
   onCheckout: () => void;
-  onExploreEcosystem: () => void;
+  onExploreCatalog: () => void;
   couponCode: string;
   setCouponCode: (code: string) => void;
   discountPercentage: number;
@@ -23,7 +23,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateQuantity,
   onRemoveItem,
   onCheckout,
-  onExploreEcosystem,
+  onExploreCatalog,
   couponCode,
   setCouponCode,
   discountPercentage,
@@ -132,7 +132,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </p>
                 </div>
                 <button
-                  onClick={onExploreEcosystem}
+                  onClick={onExploreCatalog}
                   className="px-6 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer glass-btn-ios-primary"
                   id="cart-explore-btn"
                 >

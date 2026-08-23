@@ -656,7 +656,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
                   {/* Rating Selector */}
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-on-surface-variant block">Ecosystem Rating</span>
+                    <span className="text-[11px] font-bold text-on-surface-variant block">Customer Rating</span>
                     <div className="flex gap-1.5">
                       {[1, 2, 3, 4, 5].map((val) => (
                         <button

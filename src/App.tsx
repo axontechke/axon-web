@@ -326,7 +326,7 @@ function AppContent() {
         onUpdateQuantity={handleUpdateCartQuantity}
         onRemoveItem={handleRemoveCartItem}
         onCheckout={handleCheckoutNav}
-        onExploreEcosystem={() => {
+        onExploreCatalog={() => {
           setIsCartOpen(false);
           navigate(ROUTES.catalog);
         }}

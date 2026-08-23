@@ -124,6 +124,7 @@ interface WebConfig {
   faviconUrl?: string;
   footerLogoUrl?: string;
   brandAccentColor?: string;
+  metaPixelId?: string;
   heroMediaOverrideEnabled?: boolean;
   heroMediaOverrideType?: string;
   heroMediaOverrideUrl?: string;
@@ -160,12 +161,12 @@ const defaultCategories = [
 
 const defaultSlides = [
   {
-    id: "ecosystem",
+    id: "catalog",
     tag: "NEW ARRIVAL",
     tagIcon: "Cpu",
-    title: "The Axon Ecosystem",
-    description: "Seamlessly connected devices that work together. Phones, tablets, laptops, and accessories in one unified ecosystem.",
-    primaryBtnText: "Explore Ecosystem",
+    title: "The Axon Catalog",
+    description: "Seamlessly connected devices that work together. Phones, tablets, laptops, and accessories in one unified catalog.",
+    primaryBtnText: "Explore Catalog",
     primaryActionTarget: "category",
     primaryActionValue: "All",
     secondaryBtnText: "Shop Laptops",
@@ -173,7 +174,7 @@ const defaultSlides = [
     secondaryActionValue: "Laptops",
     mediaType: "image",
     mediaUrl: "",
-    mediaAlt: "Axon Ecosystem devices",
+    mediaAlt: "Axon Catalog devices",
     overlayTitle: "Connected",
     overlayDesc: "Multi-device sync built-in"
   },
@@ -228,7 +229,7 @@ const defaultCol2Links = [
   { text: "Delivery & Shipping", target: "delivery" },
   { text: "Refund & Return Policy", target: "refund" },
   { text: "Cookie Settings", target: "cookies" },
-  { text: "Ecosystem Security", target: "privacy" }
+  { text: "Catalog Security", target: "privacy" }
 ];
 
 export const AdminView: React.FC<AdminViewProps> = ({ 
@@ -824,7 +825,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         throw new Error(`Config sync failed: ${res.status} ${errorText}`);
       }
 
-      showFeedback("Ecosystem configuration synced successfully.");
+      showFeedback("Catalog configuration synced successfully.");
       loadAllAdminData();
     } catch (err) {
       console.error("[CONFIG SAVE ERROR]", err);
@@ -1419,7 +1420,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600"><TrendingUp className="w-4 h-4" /></div>
               </div>
               <h3 className="font-display font-black text-2xl text-on-surface">KSh {analytics.avgOrderValue.toLocaleString()}</h3>
-              <p className="text-[9px] text-on-surface-variant/60">High ecosystem cross-talk buying ratio</p>
+              <p className="text-[9px] text-on-surface-variant/60">High catalog cross-talk buying ratio</p>
             </div>
 
             <div className="bg-surface-container-low border border-outline/10 p-5 rounded-3xl space-y-2.5">
@@ -1439,7 +1440,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
                   <h3 className="font-display font-bold text-base text-on-surface">Gross Revenue Performance Velocity</h3>
-                  <p className="text-xs text-on-surface-variant/70">Visualizing 7-day high-fidelity checkout transactions & ecosystem volume</p>
+                  <p className="text-xs text-on-surface-variant/70">Visualizing 7-day high-fidelity checkout transactions & catalog volume</p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-[10px] font-bold uppercase tracking-wider">
                   Live Feed Active
@@ -1485,7 +1486,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               {/* Category Share Pie Chart */}
               <div className="lg:col-span-7 bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4 text-left flex flex-col justify-between">
                 <div>
-                  <h3 className="font-display font-bold text-sm text-on-surface">Ecosystem Category Revenue Share</h3>
+                  <h3 className="font-display font-bold text-sm text-on-surface">Catalog Category Revenue Share</h3>
                   <p className="text-[11px] text-on-surface-variant/70">Continuous structural allocation across device indexes</p>
                 </div>
                 
@@ -3064,7 +3065,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 configSubTab === "spotlight" ? "bg-primary text-white" : "bg-surface-container hover:bg-surface-container-high text-on-surface"
               }`}
             >
-              Ecosystem Spotlight
+              Catalog Spotlight
             </button>
             <button
               onClick={() => setConfigSubTab("protocol")}
@@ -3223,6 +3224,19 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       </div>
                       <p className="text-[9px] text-on-surface-variant/60">Used for buttons, links, and highlight elements.</p>
                     </div>
+
+                    {/* Meta Pixel ID */}
+                    <div className="min-w-[280px] snap-center space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">Meta Pixel ID</label>
+                      <input
+                        type="text"
+                        value={webConfig.metaPixelId || ""}
+                        onChange={(e) => setWebConfig(prev => ({ ...prev, metaPixelId: e.target.value }))}
+                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none font-mono"
+                        placeholder="1234567890123456"
+                      />
+                      <p className="text-[9px] text-on-surface-variant/60">Facebook/Meta Pixel ID for conversion tracking. Get it from Meta Events Manager.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3238,7 +3252,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   {/* Announcement Configuration */}
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] text-on-surface-variant uppercase block">Ecosystem Promo Announcement Banner</label>
+                      <label className="text-[11px] text-on-surface-variant uppercase block">Catalog Promo Announcement Banner</label>
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input
                           type="checkbox"
@@ -3255,7 +3269,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       value={webConfig.announcement}
                       onChange={(e) => setWebConfig(prev => ({ ...prev,announcement: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                      placeholder="Ecosystem debut banner marquee text..."
+                      placeholder="Catalog debut banner marquee text..."
                     />
                   </div>
 
@@ -3301,7 +3315,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] text-on-surface-variant uppercase block">Terms of Use / Ecosystem Charter</label>
+                      <label className="text-[10px] text-on-surface-variant uppercase block">Terms of Use / Catalog Charter</label>
                       <textarea
                         value={webConfig.termsOfUse || ""}
                         onChange={(e) => setWebConfig(prev => ({ ...prev,termsOfUse: e.target.value }))}
@@ -3754,7 +3768,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 setWebConfig(prev => ({ ...prev,heroSlides: updated }));
                               }}
                               className="w-full px-3 py-2 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
-                              placeholder="THE AXON ECOSYSTEM DEBUT"
+                              placeholder="THE AXON CATALOG DEBUT"
                             />
                           </div>
 
@@ -3775,7 +3789,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <option value="Tablet">Tablet (Slate/Tablet)</option>
                               <option value="Headphones">Headphones (Audio)</option>
                               <option value="Smartphone">Smartphone (Phone)</option>
-                              <option value="Layers">Layers (Ecosystem)</option>
+                              <option value="Layers">Layers (Catalog)</option>
                               <option value="Plug">Plug (Induction/Power)</option>
                             </select>
                           </div>
@@ -4221,14 +4235,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <option value="Tablet">Tablet (Slate/Tablet)</option>
                               <option value="Headphones">Headphones (Audio)</option>
                               <option value="Smartphone">Smartphone (Phone)</option>
-                              <option value="Layers">Layers (Ecosystem)</option>
+                              <option value="Layers">Layers (Catalog)</option>
                               <option value="Plug">Plug (Induction/Power)</option>
                             </select>
                           </div>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Sub-description / Ecosystem Line</label>
+                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Sub-description / Catalog Line</label>
                           <input
                             type="text"
                             value={cat.desc || ""}
@@ -4464,14 +4478,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
           )}
 
           {/* ======================================= */}
-          {/* CONFIG SUB-TAB: ECOSYSTEM SPOTLIGHT     */}
+          {/* CONFIG SUB-TAB: CATALOG SPOTLIGHT     */}
           {/* ======================================= */}
           {configSubTab === "spotlight" && (
             <div className="space-y-6">
               <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                   <Megaphone className="w-4 h-4 text-primary" />
-                  Ecosystem Spotlight Section Customizer
+                  Catalog Spotlight Section Customizer
                 </h3>
                 <p className="text-[10px] text-on-surface-variant/70">
                   Customize the title, description, and list of highly-rated products showcased in the grid section.
@@ -4482,10 +4496,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <label className="text-[10px] text-on-surface-variant uppercase block">Spotlight Title</label>
                     <input
                       type="text"
-                      value={webConfig.spotlightTitle || "The Ecosystem Spotlight"}
+                      value={webConfig.spotlightTitle || "The Catalog Spotlight"}
                       onChange={(e) => setWebConfig(prev => ({ ...prev,spotlightTitle: e.target.value }))}
                       className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
-                      placeholder="The Ecosystem Spotlight"
+                      placeholder="The Catalog Spotlight"
                     />
                   </div>
 
@@ -4598,7 +4612,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <option value="Tablet">Tablet (Slate)</option>
                             <option value="Headphones">Headphones (Audio)</option>
                             <option value="Smartphone">Smartphone (Phone)</option>
-                            <option value="Layers">Layers (Ecosystem)</option>
+                            <option value="Layers">Layers (Catalog)</option>
                             <option value="Plug">Plug (Power)</option>
                             <option value="Star">Star (Rating)</option>
                           </select>
@@ -4635,7 +4649,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <option value="Tablet">Tablet (Slate)</option>
                             <option value="Headphones">Headphones (Audio)</option>
                             <option value="Smartphone">Smartphone (Phone)</option>
-                            <option value="Layers">Layers (Ecosystem)</option>
+                            <option value="Layers">Layers (Catalog)</option>
                             <option value="Plug">Plug (Power)</option>
                             <option value="Star">Star (Rating)</option>
                           </select>
@@ -4731,7 +4745,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-on-surface-variant uppercase block">Footer Brand Description</label>
                       <textarea
-                        value={webConfig.footerDescription || "Crafting precise premium hardware and accessories harmonized into a seamless high-performance lifestyle ecosystem."}
+                        value={webConfig.footerDescription || "Crafting precise premium hardware and accessories harmonized into a seamless high-performance lifestyle catalog."}
                         onChange={(e) => setWebConfig(prev => ({ ...prev,footerDescription: e.target.value }))}
                         className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface h-20"
                         placeholder="Footer branding text..."
@@ -4758,10 +4772,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[10px] text-on-surface-variant uppercase block">Newsletter Title</label>
                         <input
                           type="text"
-                          value={webConfig.footerNewsletterTitle || "Ecosystem Brief"}
+                          value={webConfig.footerNewsletterTitle || "Catalog Brief"}
                           onChange={(e) => setWebConfig(prev => ({ ...prev,footerNewsletterTitle: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
-                          placeholder="Ecosystem Brief"
+                          placeholder="Catalog Brief"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -4783,10 +4797,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[10px] text-on-surface-variant uppercase block font-bold">Column #1 Title</label>
                         <input
                           type="text"
-                          value={webConfig.footerCol1Title || "Ecosystem"}
+                          value={webConfig.footerCol1Title || "Catalog"}
                           onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol1Title: e.target.value }))}
                           className="px-2.5 py-1 bg-surface-container border border-outline/15 rounded-xl text-xs font-semibold text-on-surface"
-                          placeholder="Ecosystem"
+                          placeholder="Catalog"
                         />
                       </div>
                       <button
@@ -5264,7 +5278,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               <div>
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                   <ClipboardList className="w-4 h-4 text-primary animate-pulse" />
-                  Ecosystem Support Transmissions
+                  Catalog Support Transmissions
                 </h3>
                 <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
                   Manage inquiries submitted by AXON TECH customers regarding calibrations and shipping logistics.
@@ -6204,7 +6218,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               <div>
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                   <Bell className="w-4 h-4 text-primary animate-pulse" />
-                  Ecosystem Price Monitor Registry
+                  Catalog Price Monitor Registry
                 </h3>
                 <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
                   Track active price monitors and simulated price drop alerts dispatched to users.
@@ -6362,7 +6376,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <div className="border-b border-outline/10 pb-2">
                   <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#ffdbce]" />
-                    Ecosystem Intelligence Center
+                    Catalog Intelligence Center
                   </h3>
                   <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
                     Generate secure analytical business reports using Gemini by aggregating live store databases.

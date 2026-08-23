@@ -112,13 +112,13 @@ export const ContactView: React.FC = () => {
             </h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-              {/* Ecosystem Registry */}
+              {/* Email Contacts */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
                   <Mail className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Ecosystem Registry</h4>
+                  <h4 className="font-bold text-[10px] text-on-surface-variant uppercase tracking-wider">Email Contacts</h4>
                   <a href={`mailto:${contactEmail}`} className="text-xs text-on-surface font-semibold hover:text-primary transition-colors block mt-0.5">
                     {contactEmail}
                   </a>

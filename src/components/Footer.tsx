@@ -190,7 +190,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
                   className="text-primary hover:text-[#ffdbce] font-semibold transition-colors text-left flex items-center gap-1.5"
                   id="footer-nav-blog"
                 >
-                  <span>●</span> Axon Metrology Blog
+                  <span>●</span> Blog
                 </button>
               </li>
             )}

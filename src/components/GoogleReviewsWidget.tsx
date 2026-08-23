@@ -145,7 +145,7 @@ export const GoogleReviewsWidget: React.FC<GoogleReviewsWidgetProps> = ({
               Customer Reviews
             </h3>
             <p className="text-[10px] text-on-surface-variant/70">
-              {reviews.length} verified review{reviews.length !== 1 ? "s" : ""} from our ecosystem
+              {reviews.length} verified review{reviews.length !== 1 ? "s" : ""} from our customers
             </p>
           </div>
           {showForm && !showSubmitForm && (

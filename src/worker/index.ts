@@ -373,6 +373,7 @@ const INITIAL_CONFIG: Record<string, any> = {
   faviconUrl: "",
   footerLogoUrl: "",
   brandAccentColor: "#3B82F6",
+  metaPixelId: "",
   categoryThumbnails: {
     "Laptops": "",
     "Tablets": "",
