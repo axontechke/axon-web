@@ -70,6 +70,8 @@ export const API_ROUTES = {
       delete: (id: string) => `${API_BASE}/admin/products/${id}`,
     },
 
+    colors: `${API_BASE}/admin/colors`,
+
     scrapeUrl: `${API_BASE}/admin/scrape-url`,
     syncRealtimeProducts: `${API_BASE}/admin/sync-realtime-products`,
 

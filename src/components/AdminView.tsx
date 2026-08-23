@@ -325,6 +325,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarImgUrl, setNewVarImgUrl] = useState("");
   const [newSpecKey, setNewSpecKey] = useState("");
   const [newSpecValue, setNewSpecValue] = useState("");
+  // Existing colors from DB for reuse
+  const [existingColors, setExistingColors] = useState<{name: string; code: string}[]>([]);
+  // Warranty management
+  const [newWarrantyName, setNewWarrantyName] = useState("");
+  const [newWarrantyDuration, setNewWarrantyDuration] = useState("");
+  const [newWarrantyPriceKsh, setNewWarrantyPriceKsh] = useState<number>(0);
 
   // Form states for Promo Manager
   const [newPromoCode, setNewPromoCode] = useState("");
@@ -550,6 +556,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
         setVariantImgMap(grouped);
       })
       .catch(() => setVariantImgMap({}));
+    // Load existing colors from DB
+    authFetch("/api/admin/colors")
+      .then(res => res.ok ? res.json() : [])
+      .then((colors: {name: string; code: string}[]) => setExistingColors(colors))
+      .catch(() => setExistingColors([]));
     setIsProductFormOpen(true);
   };
 
@@ -2230,10 +2241,25 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <input
                               type="text"
                               value={newColorName}
-                              onChange={(e) => setNewColorName(e.target.value)}
+                              onChange={(e) => {
+                                setNewColorName(e.target.value);
+                                // Auto-fill code if matching existing color found
+                                const match = existingColors.find(c => c.name.toLowerCase() === e.target.value.toLowerCase());
+                                if (match) setNewColorCode(match.code);
+                              }}
+                              onBlur={() => {
+                                const match = existingColors.find(c => c.name.toLowerCase() === newColorName.toLowerCase());
+                                if (match) setNewColorCode(match.code);
+                              }}
                               placeholder="e.g. Midnight Black"
+                              list="existing-colors-list"
                               className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
                             />
+                            <datalist id="existing-colors-list">
+                              {existingColors.map((c, i) => (
+                                <option key={i} value={c.name} />
+                              ))}
+                            </datalist>
                           </div>
                           <div className="space-y-1">
                             <label className="text-[9px] text-on-surface-variant/70 block">Hex Code</label>
@@ -2457,6 +2483,125 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <span>Instock in Warehouse</span>
                         </label>
                       </div>
+
+                      {/* SIM Type */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-on-surface-variant uppercase block">SIM Type</label>
+                        <select
+                          value={editingProduct.simType || "physical"}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, simType: e.target.value as "esim" | "physical" | "both" })}
+                          className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                        >
+                          <option value="physical">Physical SIM</option>
+                          <option value="esim">eSIM</option>
+                          <option value="both">Physical + eSIM</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Warranty Plans Manager */}
+                    <div className="border-t border-outline/10 pt-4 space-y-3">
+                      <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Warranty / Protection Plans</h4>
+
+                      {/* Existing warranties */}
+                      {(editingProduct?.warranties || []).length > 0 ? (
+                        <div className="border border-outline/10 rounded-xl overflow-hidden">
+                          <table className="w-full text-left text-[11px] border-collapse">
+                            <thead>
+                              <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
+                                <th className="p-2">Plan Name</th>
+                                <th className="p-2">Duration</th>
+                                <th className="p-2">Price</th>
+                                <th className="p-2 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-outline/10">
+                              {(editingProduct.warranties || []).map((w, idx) => (
+                                <tr key={idx} className="hover:bg-surface-container-high/30">
+                                  <td className="p-2 font-semibold">{w.name}</td>
+                                  <td className="p-2 text-on-surface-variant">{w.duration}</td>
+                                  <td className="p-2 font-mono">{w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}</td>
+                                  <td className="p-2 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingProduct({
+                                        ...editingProduct,
+                                        warranties: (editingProduct.warranties || []).filter((_, i) => i !== idx)
+                                      })}
+                                      className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
+                                    >Remove</button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
+                          No warranty plans added yet.
+                        </div>
+                      )}
+
+                      {/* Add warranty */}
+                      <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
+                        <span className="text-[10px] font-bold text-on-surface uppercase block">Add Warranty Plan</span>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Plan Name</label>
+                            <input
+                              type="text"
+                              value={newWarrantyName}
+                              onChange={(e) => setNewWarrantyName(e.target.value)}
+                              placeholder="e.g. Extended Care"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Duration</label>
+                            <input
+                              type="text"
+                              value={newWarrantyDuration}
+                              onChange={(e) => setNewWarrantyDuration(e.target.value)}
+                              placeholder="e.g. 1 Year"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Price (KSh)</label>
+                            <input
+                              type="number"
+                              value={newWarrantyPriceKsh}
+                              onChange={(e) => setNewWarrantyPriceKsh(Number(e.target.value))}
+                              placeholder="0 = free"
+                              min="0"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newWarrantyName.trim()) return;
+                            const newW = {
+                              id: `w-${Date.now()}`,
+                              name: newWarrantyName.trim(),
+                              duration: newWarrantyDuration.trim(),
+                              priceKsh: newWarrantyPriceKsh,
+                            };
+                            setEditingProduct({
+                              ...editingProduct,
+                              warranties: [...(editingProduct.warranties || []), newW]
+                            });
+                            setNewWarrantyName("");
+                            setNewWarrantyDuration("");
+                            setNewWarrantyPriceKsh(0);
+                          }}
+                          disabled={!newWarrantyName.trim()}
+                          className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg"
+                        >
+                          + Add Warranty Plan
+                        </button>
+                      </div>
                     </div>
 
                     {/* Storage & Variants Manager */}
@@ -2617,8 +2762,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                       value={newVarColor}
                                       onChange={(e) => setNewVarColor(e.target.value)}
                                       placeholder="e.g. Midnight Black"
+                                      list="existing-colors-var-list"
                                       className="w-full px-2 py-1 bg-surface-container border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[10px]"
                                     />
+                                    <datalist id="existing-colors-var-list">
+                                      {existingColors.map((c, i) => (
+                                        <option key={i} value={c.name} />
+                                      ))}
+                                    </datalist>
                                   </div>
                                   <div className="space-y-0.5">
                                     <label className="text-[8px] text-on-surface-variant/70 block">Price KSh (opt.)</label>

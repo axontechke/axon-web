@@ -772,6 +772,7 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     colorCodes: JSON.parse(p.colorCodes || "{}"),
     specifications: JSON.parse(p.specifications || "{}"),
     variants: (() => { try { const v = JSON.parse(p.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
+    simType: p.simType || undefined,
   }));
 
   // Fetch all variant images
@@ -797,6 +798,27 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     (prod as any).variantImages = byVariantKey;
   }
   return corsResponse(products);
+}
+
+// GET /api/admin/colors — all unique color names and codes from all products
+async function getAllColors(_req: Request, env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare("SELECT id, name, colors, colorCodes FROM products").all() as any;
+  const colorMap: Record<string, { name: string; code: string }> = {};
+  for (const p of results) {
+    try {
+      const colors = JSON.parse(p.colors || "[]");
+      const codes = JSON.parse(p.colorCodes || "{}");
+      for (const c of colors) {
+        if (typeof c === "string") {
+          colorMap[c.toLowerCase()] = { name: c, code: codes[c] || "" };
+        } else if (c && c.name) {
+          colorMap[c.name.toLowerCase()] = { name: c.name, code: c.code || codes[c.name] || "" };
+        }
+      }
+    } catch {}
+  }
+  const uniqueColors = Object.values(colorMap).sort((a, b) => a.name.localeCompare(b.name));
+  return corsResponse(uniqueColors);
 }
 
 // GET /api/orders
@@ -1117,6 +1139,7 @@ async function getAdminProduct(_req: Request, env: Env, _ctx: ExecutionContext, 
     colorCodes: JSON.parse(row.colorCodes || "{}"),
     specifications: JSON.parse(row.specifications || "{}"),
     variants: (() => { try { const v = JSON.parse(row.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
+    simType: row.simType || undefined,
   };
 
   // Attach variant images
@@ -1648,6 +1671,7 @@ async function updateProductVariants(req: Request, env: Env, _ctx: ExecutionCont
     colors: JSON.parse((updated as any).colors || "[]"),
     storages: JSON.parse((updated as any).storages || "[]"),
     variants: (() => { try { const v = JSON.parse((updated as any).variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
+    simType: (updated as any).simType || undefined,
   } : null);
 }
 
@@ -1754,6 +1778,7 @@ const routes: Route[] = [
   route("DELETE", "/api/admin/orders/:id", deleteOrder),
   route("PUT", "/api/admin/config", updateConfig),
   route("PUT", "/api/admin/contact", updateContact),
+  route("GET", "/api/admin/colors", getAllColors),
   route("GET", "/api/admin/support-requests", getSupportRequests),
   route("PUT", "/api/admin/support-requests/:id", updateSupportRequest),
   route("POST", "/api/admin/delivery-methods", createDeliveryMethod),

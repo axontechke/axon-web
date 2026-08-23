@@ -75,6 +75,7 @@ export interface Product {
   specifications?: Record<string, string>;
   reviews?: Review[];
   warranties?: Warranty[]; // available warranty plans; first one is the default/free
+  simType?: "esim" | "physical" | "both"; // SIM type support
 }
 
 export interface CartItem {
