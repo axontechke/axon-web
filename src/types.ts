@@ -28,6 +28,7 @@ export interface ProductVariant {
   color: string;
   stock: number;
   priceKsh?: number; // optional override price for this combination
+  warrantyPriceKsh?: number; // warranty price for this variant (if different from default warranty plan)
 }
 
 // Stored in DB: multiple images per (storage, color) combo

@@ -28,9 +28,14 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
   const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
   const [selectedStorage, setSelectedStorage] = useState(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
-  const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(
-    product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined
-  );
+  const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
+    // Default to free warranty (priceKsh === 0) if available
+    if (product.warranties && product.warranties.length > 0) {
+      const freeWarranty = product.warranties.find(w => w.priceKsh === 0);
+      return freeWarranty || product.warranties[0];
+    }
+    return undefined;
+  });
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
   const [activeImage, setActiveImage] = useState(product.image);
@@ -111,8 +116,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
   const basePriceKsh = dynamicPriceKsh ?? product.priceKsh ?? 0;
-  const warrantyPriceKsh = selectedWarranty?.priceKsh ?? 0;
-  const displayPriceKsh = basePriceKsh + warrantyPriceKsh;
+  const getVariantWarrantyPrice = () => {
+    if (!selectedStorage) return selectedWarranty?.priceKsh ?? 0;
+    const variantMatch = product.variants?.find(
+      v => v.storage.toLowerCase() === selectedStorage.toLowerCase() &&
+        (!selectedColor ? !v.color : v.color.toLowerCase() === selectedColor.toLowerCase())
+    );
+    return variantMatch?.warrantyPriceKsh ?? selectedWarranty?.priceKsh ?? 0;
+  };
+  const displayPriceKsh = basePriceKsh + getVariantWarrantyPrice();
 
   // All in-stock (variants always in stock for now)
   const isSelectedVariantInStock = hasVariants ? true : product.inStock;
