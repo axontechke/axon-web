@@ -317,9 +317,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarColor, setNewVarColor] = useState("");
   const [newVarStock, setNewVarStock] = useState<number>(10);
   const [newVarPriceKsh, setNewVarPriceKsh] = useState<number>(0);
-  const [newColorName, setNewColorName] = useState("");
-  const [newColorCode, setNewColorCode] = useState("");
-  const [newColorImageUrl, setNewColorImageUrl] = useState("");
   // Variant image management: keyed by "storage|color"
   const [variantImgMap, setVariantImgMap] = useState<Record<string, any[]>>({});
   const [newVarImgStorage, setNewVarImgStorage] = useState("");
@@ -525,9 +522,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarStorage("");
     setNewVarColor("");
     setNewVarStock(10);
-    setNewColorName("");
-    setNewColorCode("");
-    setNewColorImageUrl("");
     setIsProductFormOpen(true);
   };
 
@@ -557,9 +551,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setNewVarColor("");
     setNewVarStock(10);
     setNewVarPriceKsh(0);
-    setNewColorName("");
-    setNewColorCode("");
-    setNewColorImageUrl("");
     setNewVarImgStorage(prod.storages?.[0] || "");
     setNewVarImgColor(finalColors[0]?.name || "");
     setNewVarImgUrl("");
@@ -2198,148 +2189,65 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Unified Color Manager */}
+                    {/* Product Colors — picked from global library */}
                     <div className="border-t border-outline/10 pt-4 space-y-3">
-                      <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Colors</h4>
+                      <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Colors for this Product</h4>
                       <p className="text-[10px] text-on-surface-variant/70 -mt-1">
-                        Add each color once with its name, hex code, and product photo. Reusable across all storage variants.
+                        Select colors from the global library to assign to this product.
                       </p>
 
-                      {/* Existing colors list */}
+                      {/* Existing colors */}
                       {editingProduct.colors && editingProduct.colors.length > 0 ? (
-                        <div className="border border-outline/10 rounded-xl overflow-hidden bg-surface-container-low max-h-48 overflow-y-auto">
-                          <table className="w-full text-left text-[11px] border-collapse">
-                            <thead>
-                              <tr className="bg-surface border-b border-outline/10 text-on-surface-variant/80 font-bold">
-                                <th className="p-2">Swatch</th>
-                                <th className="p-2">Name</th>
-                                <th className="p-2">Hex</th>
-                                <th className="p-2">Image</th>
-                                <th className="p-2 text-right">Action</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-outline/10 font-medium">
-                              {editingProduct.colors.map((color, idx) => (
-                                <tr key={idx} className="hover:bg-surface-container-high/30">
-                                  <td className="p-2">
-                                    <div
-                                      className="w-6 h-6 rounded-full border border-outline/20 shrink-0"
-                                      style={{ backgroundColor: color.code || "#ccc" }}
-                                    />
-                                  </td>
-                                  <td className="p-2 font-semibold">{color.name}</td>
-                                  <td className="p-2 font-mono text-[10px] text-on-surface-variant">{color.code || "—"}</td>
-                                  <td className="p-2">
-                                    {color.image ? (
-                                      <div className="flex items-center gap-2">
-                                        <img src={color.image} alt={color.name} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-outline/10" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                        <span className="text-[10px] text-on-surface-variant/60 truncate max-w-[100px] font-mono">{color.image}</span>
-                                      </div>
-                                    ) : (
-                                      <span className="text-on-surface-variant/40 text-[10px] italic">No image</span>
-                                    )}
-                                  </td>
-                                  <td className="p-2 text-right">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setEditingProduct({
-                                          ...editingProduct,
-                                          colors: editingProduct.colors.filter((_, i) => i !== idx)
-                                        });
-                                      }}
-                                      className="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1"
-                                    >
-                                      Remove
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                        <div className="flex flex-wrap gap-2">
+                          {editingProduct.colors.map((color, idx) => (
+                            <span key={idx} className="flex items-center gap-1.5 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
+                              <span className="w-3 h-3 rounded-full border border-outline/20 shrink-0" style={{ backgroundColor: color.code || "#ccc" }} />
+                              <span className="font-semibold text-on-surface">{color.name}</span>
+                              <button type="button" onClick={() => setEditingProduct({ ...editingProduct, colors: editingProduct.colors.filter((_, i) => i !== idx) })}
+                                className="text-red-400 hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
+                            </span>
+                          ))}
                         </div>
                       ) : (
                         <div className="p-3 text-center bg-surface-container-low border border-dashed border-outline/20 rounded-xl text-on-surface-variant/60 text-[10px]">
-                          No colors added yet. Add one below.
+                          No colors assigned yet. Add from the library below.
                         </div>
                       )}
 
-                      {/* Add new color */}
-                      <div className="bg-surface-container border border-outline/10 p-3 rounded-xl space-y-2">
-                        <span className="text-[10px] font-bold text-on-surface uppercase block">Add Color</span>
-                        <div className="grid grid-cols-4 gap-2 items-end">
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-on-surface-variant/70 block">Color Name</label>
-                            <input
-                              type="text"
-                              value={newColorName}
-                              onChange={(e) => {
-                                setNewColorName(e.target.value);
-                                // Auto-fill code and image if matching existing color found
-                                const match = existingColors.find(c => c.name.toLowerCase() === e.target.value.toLowerCase());
-                                if (match) { setNewColorCode(match.code); setNewColorImageUrl(match.image || ""); }
-                              }}
-                              onBlur={() => {
-                                const match = existingColors.find(c => c.name.toLowerCase() === newColorName.toLowerCase());
-                                if (match) { setNewColorCode(match.code); setNewColorImageUrl(match.image || ""); }
-                              }}
-                              placeholder="e.g. Midnight Black"
-                              list="existing-colors-list"
-                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
-                            />
-                            <datalist id="existing-colors-list">
-                              {existingColors.map((c, i) => (
-                                <option key={i} value={c.name} />
-                              ))}
-                            </datalist>
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-on-surface-variant/70 block">Hex Code</label>
-                            <input
-                              type="text"
-                              value={newColorCode}
-                              onChange={(e) => setNewColorCode(e.target.value)}
-                              placeholder="#1a1a1a"
-                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px] font-mono"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-on-surface-variant/70 block">Product Photo URL</label>
-                            <input
-                              type="text"
-                              value={newColorImageUrl}
-                              onChange={(e) => setNewColorImageUrl(e.target.value)}
-                              placeholder="https://..."
-                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-on-surface-variant/70 block">&nbsp;</label>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (!newColorName.trim()) return;
-                                const newColor: ProductColor = {
-                                  name: newColorName.trim(),
-                                  code: newColorCode.trim(),
-                                  image: newColorImageUrl.trim(),
-                                };
+                      {/* Add from global library */}
+                      {globalColors.length > 0 && (
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1 space-y-1">
+                            <label className="text-[9px] text-on-surface-variant/70 block">Add from library</label>
+                            <select
+                              id="product-color-picker"
+                              value=""
+                              onChange={e => {
+                                const name = e.target.value;
+                                if (!name) return;
+                                if (editingProduct.colors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
+                                const colorEntry = globalColors.find(c => c.name === name);
                                 setEditingProduct({
                                   ...editingProduct,
-                                  colors: [...editingProduct.colors, newColor]
+                                  colors: [...editingProduct.colors, {
+                                    name,
+                                    code: colorEntry?.code || "",
+                                    image: colorEntry?.image || ""
+                                  }]
                                 });
-                                setNewColorName("");
-                                setNewColorCode("");
-                                setNewColorImageUrl("");
+                                (document.getElementById("product-color-picker") as HTMLSelectElement).value = "";
                               }}
-                              disabled={!newColorName.trim()}
-                              className="w-full py-1.5 bg-secondary hover:bg-secondary-hover text-on-secondary disabled:opacity-45 text-[10px] font-bold rounded-lg flex items-center justify-center gap-1"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[11px] text-on-surface focus:outline-none focus:border-primary"
                             >
-                              <Plus className="w-3.5 h-3.5" /> Add
-                            </button>
+                              <option value="">— Select a color —</option>
+                              {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
+                            </select>
                           </div>
                         </div>
-                      </div>
+                      )}
+                      {globalColors.length === 0 && (
+                        <p className="text-[9px] text-on-surface-variant/50 italic">No global colors available. Add colors in the Colors tab first.</p>
+                      )}
                     </div>
 
                     <div className="space-y-1">
@@ -2523,19 +2431,18 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                       const name = e.target.value;
                                       if (!name) return;
                                       if (svColors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
-                                      const existingEntry = (editingProduct.colors || []).find(c => c.name === name);
                                       const colorEntry = globalColors.find(c => c.name === name);
                                       setSvColors([...svColors, {
                                         name,
-                                        code: existingEntry?.code || colorEntry?.code || "",
-                                        image: existingEntry?.image || colorEntry?.image || ""
+                                        code: colorEntry?.code || "",
+                                        image: colorEntry?.image || ""
                                       }]);
                                       (document.getElementById("sv-color-picker") as HTMLSelectElement).value = "";
                                     }}
                                     className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
                                   >
                                     <option value="">— Select a color —</option>
-                                    {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name} {c.code ? `(${c.code})` : ""}</option>)}
+                                    {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
                                   </select>
                                 </div>
                                 <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarranties([]); }}
