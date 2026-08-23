@@ -2484,37 +2484,46 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <div className="flex flex-wrap gap-2">
                           {editingProduct.warranties!.map((w, i) => (
                             <span key={w.id} className="flex items-center gap-1.5 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
-                              <span className="font-semibold text-on-surface">{w.name}</span>
-                              <span className="text-on-surface-variant">({w.duration})</span>
                               {editingWarrantyIdx === i ? (
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <input
+                                    type="text"
+                                    autoFocus
+                                    defaultValue={w.name}
+                                    className="px-1.5 py-0.5 bg-surface border border-primary rounded text-[10px] text-on-surface focus:outline-none w-28"
+                                    onKeyDown={e => { if (e.key === "Escape") setEditingWarrantyIdx(null); }}
+                                    onChange={e => {
+                                      const updated = [...(editingProduct.warranties || [])];
+                                      updated[i] = { ...updated[i], name: e.target.value };
+                                      setEditingProduct({ ...editingProduct, warranties: updated });
+                                    }}
+                                  />
+                                  <input
+                                    type="text"
+                                    defaultValue={w.duration}
+                                    className="px-1.5 py-0.5 bg-surface border border-primary rounded text-[10px] text-on-surface focus:outline-none w-20"
+                                    onKeyDown={e => { if (e.key === "Escape") setEditingWarrantyIdx(null); }}
+                                    onChange={e => {
+                                      const updated = [...(editingProduct.warranties || [])];
+                                      updated[i] = { ...updated[i], duration: e.target.value };
+                                      setEditingProduct({ ...editingProduct, warranties: updated });
+                                    }}
+                                  />
                                   <input
                                     type="number"
-                                    autoFocus
                                     defaultValue={w.priceKsh}
                                     min="0"
                                     className="w-20 px-1.5 py-0.5 bg-surface border border-primary rounded text-[10px] text-on-surface focus:outline-none"
-                                    onKeyDown={e => {
-                                      if (e.key === "Enter") {
-                                        const val = Number((e.target as HTMLInputElement).value);
-                                        const updated = [...(editingProduct.warranties || [])];
-                                        updated[i] = { ...updated[i], priceKsh: val };
-                                        setEditingProduct({ ...editingProduct, warranties: updated });
-                                        setEditingWarrantyIdx(null);
-                                      }
-                                      if (e.key === "Escape") setEditingWarrantyIdx(null);
+                                    onKeyDown={e => { if (e.key === "Escape") setEditingWarrantyIdx(null); }}
+                                    onChange={e => {
+                                      const updated = [...(editingProduct.warranties || [])];
+                                      updated[i] = { ...updated[i], priceKsh: Number(e.target.value) || 0 };
+                                      setEditingProduct({ ...editingProduct, warranties: updated });
                                     }}
                                   />
                                   <button
                                     type="button"
-                                    onClick={() => {
-                                      const input = document.querySelector(`[data-warranty-idx="${i}"]`) as HTMLInputElement;
-                                      const val = Number(input?.value || w.priceKsh);
-                                      const updated = [...(editingProduct.warranties || [])];
-                                      updated[i] = { ...updated[i], priceKsh: val };
-                                      setEditingProduct({ ...editingProduct, warranties: updated });
-                                      setEditingWarrantyIdx(null);
-                                    }}
+                                    onClick={() => setEditingWarrantyIdx(null)}
                                     className="text-green-600 hover:text-green-800"
                                   >
                                     <Check className="w-3 h-3" />
@@ -2529,11 +2538,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 </div>
                               ) : (
                                 <>
+                                  <span className="font-semibold text-on-surface">{w.name}</span>
+                                  <span className="text-on-surface-variant">({w.duration})</span>
                                   <button
                                     type="button"
                                     onClick={() => setEditingWarrantyIdx(i)}
                                     className="text-primary hover:text-primary-hover font-bold"
-                                    title="Edit price"
+                                    title="Edit warranty"
                                   >
                                     {w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}
                                   </button>
@@ -2549,11 +2560,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   </button>
                                 </>
                               )}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                              </button>
                             </span>
                           ))}
                         </div>
