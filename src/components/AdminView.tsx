@@ -34,7 +34,13 @@ import {
   Sparkles,
   FileText,
   Star,
-  ImageIcon
+  ImageIcon,
+  Laptop,
+  Tablet,
+  Headphones,
+  Smartphone,
+  Layers,
+  Plug
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
