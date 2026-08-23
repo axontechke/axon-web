@@ -326,6 +326,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newVarImgStorage, setNewVarImgStorage] = useState("");
   const [newVarImgColor, setNewVarImgColor] = useState("");
   const [newVarImgUrl, setNewVarImgUrl] = useState("");
+  const [newProductImageUrl, setNewProductImageUrl] = useState("");
   // Track which colors should be added to product-level colors when saving the variant
   const [svColorProductAssignment, setSvColorProductAssignment] = useState<Record<string, boolean>>({});
   const [newSpecKey, setNewSpecKey] = useState("");
@@ -749,6 +750,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
     } catch {
       alert("Failed to delete image");
     }
+  };
+
+  const handleAddProductImageUrl = () => {
+    const url = newProductImageUrl.trim();
+    if (!url) return;
+    if ((editingProduct.images || []).includes(url)) { alert("Image URL already exists."); return; }
+    setEditingProduct({ ...editingProduct, images: [...(editingProduct.images || []), url] });
+    setNewProductImageUrl("");
   };
 
   const handleAssignColorImage = async (storage: string, color: string, url: string) => {
@@ -2245,17 +2254,54 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-on-surface-variant block uppercase">Additional Image URLs (One URL per line)</label>
-                      <textarea
-                        value={editingProduct.images?.join("\n") || ""}
-                        onChange={(e) => {
-                          const lines = e.target.value.split("\n").map(l => l.trim()).filter(Boolean);
-                          setEditingProduct({ ...editingProduct, images: lines });
-                        }}
-                        placeholder="https://example.com/image1.jpg"
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface focus:outline-none h-20"
-                      />
+                    {/* Image Library — all URLs for this product */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] text-on-surface-variant block uppercase">Image Library</label>
+                        <span className="text-[9px] text-on-surface-variant/50">{editingProduct.images?.length || 0} image(s)</span>
+                      </div>
+
+                      {/* Existing images list */}
+                      {(editingProduct.images || []).length === 0 ? (
+                        <p className="text-[10px] text-on-surface-variant/50 italic">No images added yet.</p>
+                      ) : (
+                        <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                          {(editingProduct.images || []).map((url, idx) => (
+                            <div key={idx} className="flex items-center gap-2 bg-surface border border-outline/10 rounded-lg px-2 py-1.5">
+                              <img src={url} alt="" className="w-8 h-8 rounded-lg object-cover border border-outline/5 shrink-0" referrerPolicy="no-referrer" />
+                              <span className="text-[10px] text-on-surface-variant truncate flex-1" title={url}>{url}</span>
+                              <button
+                                type="button"
+                                onClick={() => setEditingProduct({ ...editingProduct, images: editingProduct.images.filter((_, i) => i !== idx) })}
+                                className="text-red-400 hover:text-red-600 shrink-0"
+                                title="Remove image"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add new URL */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newProductImageUrl}
+                          onChange={e => setNewProductImageUrl(e.target.value)}
+                          placeholder="https://example.com/image.jpg"
+                          className="flex-1 px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[11px] text-on-surface focus:outline-none focus:border-primary"
+                          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleAddProductImageUrl(); } }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddProductImageUrl}
+                          disabled={!newProductImageUrl.trim()}
+                          className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-[10px] font-bold rounded-lg disabled:opacity-40 shrink-0"
+                        >
+                          Add
+                        </button>
+                      </div>
                     </div>
 
                     {/* Technical Specifications Manager */}
