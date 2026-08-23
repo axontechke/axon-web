@@ -2437,26 +2437,46 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <div className="border-t border-outline/10 pt-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-[10px] font-black uppercase text-primary tracking-wider">Warranty Plans</h4>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const name = window.prompt("Warranty name (e.g. Official Warranty):");
-                            if (!name) return;
-                            const duration = window.prompt("Duration (e.g. 1 Year, 2 Years):");
-                            if (!duration) return;
-                            const priceStr = window.prompt("Price in KSh (0 = free):");
-                            if (priceStr === null) return;
-                            const priceKsh = Number(priceStr) || 0;
-                            const newW: Warranty = { id: `w-${Date.now()}`, name, duration, priceKsh };
-                            setEditingProduct({
-                              ...editingProduct,
-                              warranties: [...(editingProduct.warranties || []), newW]
-                            });
-                          }}
-                          className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
-                        >
-                          <Plus className="w-3 h-3" /> Add Warranty
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            id="warranty-name-input"
+                            placeholder="Plan name"
+                            className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px] w-32"
+                          />
+                          <input
+                            type="text"
+                            id="warranty-duration-input"
+                            placeholder="Duration (e.g. 1 Year)"
+                            className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px] w-28"
+                          />
+                          <input
+                            type="number"
+                            id="warranty-price-input"
+                            placeholder="Price (0=free)"
+                            min="0"
+                            className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px] w-24"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nameInput = document.getElementById("warranty-name-input") as HTMLInputElement;
+                              const durationInput = document.getElementById("warranty-duration-input") as HTMLInputElement;
+                              const priceInput = document.getElementById("warranty-price-input") as HTMLInputElement;
+                              const name = nameInput?.value.trim();
+                              const duration = durationInput?.value.trim();
+                              const priceKsh = Number(priceInput?.value) || 0;
+                              if (!name) { alert("Warranty name is required."); return; }
+                              if ((editingProduct.warranties || []).some(w => w.name.toLowerCase() === name.toLowerCase())) { alert("Warranty already added."); return; }
+                              const newW: Warranty = { id: `w-${Date.now()}`, name, duration: duration || "1 Year", priceKsh };
+                              setEditingProduct({ ...editingProduct, warranties: [...(editingProduct.warranties || []), newW] });
+                              nameInput.value = ""; durationInput.value = ""; priceInput.value = "";
+                            }}
+                            className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" /> Add
+                          </button>
+                        </div>
                       </div>
                       {(editingProduct.warranties || []).length > 0 ? (
                         <div className="flex flex-wrap gap-2">
@@ -2479,7 +2499,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           ))}
                         </div>
                       ) : (
-                        <p className="text-[10px] text-on-surface-variant/50 italic">No warranty plans added. Click "Add Warranty" to create one (e.g. "1 Year Official Warranty").</p>
+                        <p className="text-[10px] text-on-surface-variant/50 italic">No warranty plans added yet. Fill in the fields above and click Add.</p>
                       )}
                     </div>
 
