@@ -3116,9 +3116,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     Branding &amp; Logo
                   </h3>
 
-                  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 lg:grid lg:grid-cols-5 lg:overflow-visible lg:pb-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     {/* Navbar Logo */}
-                    <div className="min-w-[280px] snap-center space-y-1.5">
+                    <div className="space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Navbar Logo URL</label>
                       <input
                         type="url"
@@ -3140,8 +3140,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     {/* OG Image */}
-                    <div className="min-w-[280px] snap-center space-y-1.5">
-                      <label className="text-[11px] text-on-surface-variant uppercase block">OG Image URL (social sharing)</label>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] text-on-surface-variant uppercase block">OG Image URL</label>
                       <input
                         type="url"
                         value={webConfig.ogImage || ""}
@@ -3162,7 +3162,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     {/* Favicon */}
-                    <div className="min-w-[280px] snap-center space-y-1.5">
+                    <div className="space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Favicon URL</label>
                       <input
                         type="url"
@@ -3184,7 +3184,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     {/* Footer Logo */}
-                    <div className="min-w-[280px] snap-center space-y-1.5">
+                    <div className="space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Footer Logo URL</label>
                       <input
                         type="url"
@@ -3206,14 +3206,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     {/* Brand Accent Color */}
-                    <div className="min-w-[280px] snap-center space-y-1.5">
+                    <div className="space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Brand Accent Color</label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
                           value={webConfig.brandAccentColor || "#3B82F6"}
                           onChange={(e) => setWebConfig(prev => ({ ...prev, brandAccentColor: e.target.value }))}
-                          className="w-12 h-10 rounded-xl border border-outline/15 cursor-pointer"
+                          className="w-12 h-10 rounded-xl border border-outline/15 cursor-pointer shrink-0"
                         />
                         <input
                           type="text"
@@ -3227,7 +3227,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
 
                     {/* Meta Pixel ID */}
-                    <div className="min-w-[280px] snap-center space-y-1.5">
+                    <div className="space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Meta Pixel ID</label>
                       <input
                         type="text"
@@ -4235,7 +4235,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   {(() => {
                     const currentCats = (webConfig.categoriesList || defaultCategories).slice(0, 5);
                     return currentCats.map((cat: any, cIdx: number) => (
-                      <div key={cIdx} className="min-w-[280px] snap-center bg-surface border border-outline/10 p-4 rounded-2xl space-y-3 relative lg:min-w-0">
+                      <div key={cIdx} className="bg-surface border border-outline/10 p-4 rounded-2xl space-y-3 relative">
                         <div className="flex justify-between items-center border-b border-outline/5 pb-2">
                           <span className="font-bold text-xs text-primary uppercase">#{cIdx + 1}</span>
                           <button
