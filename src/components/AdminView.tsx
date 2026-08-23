@@ -720,7 +720,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
       const url = isNew ? "/api/admin/products" : `/api/admin/products/${editingProduct.id}`;
       const method = isNew ? "POST" : "PUT";
 
-      // DEBUG: log storageVariants being sent
+      // DEBUG: log storageVariants and warranties being sent
+      console.log("[DEBUG] Saving product warranties:", JSON.stringify(editingProduct.warranties));
       console.log("[DEBUG] Saving product storageVariants:", JSON.stringify(editingProduct.storageVariants));
       const res = await authFetch(url, {
         method,
