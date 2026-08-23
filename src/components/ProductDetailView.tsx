@@ -93,12 +93,20 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   // Compute dynamic price from ProductVariant[]
   const getVariantPriceKsh = (storage: string | undefined, color: string | undefined): number | null => {
-    if (!hasVariants || !storage || !color) return null;
-    const match = product.variants?.find(
-      v => v.storage.toLowerCase() === storage.toLowerCase() &&
-           v.color.toLowerCase() === color.toLowerCase()
+    if (!hasVariants || !storage) return null;
+    // Exact storage+color match
+    if (color) {
+      const match = product.variants?.find(
+        v => v.storage.toLowerCase() === storage.toLowerCase() &&
+             v.color.toLowerCase() === color.toLowerCase()
+      );
+      if (match?.priceKsh != null) return match.priceKsh;
+    }
+    // Fall back to base storage variant (empty color)
+    const baseMatch = product.variants?.find(
+      v => v.storage.toLowerCase() === storage.toLowerCase() && !v.color
     );
-    return match?.priceKsh ?? null;
+    return baseMatch?.priceKsh ?? null;
   };
 
   const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
