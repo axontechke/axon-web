@@ -122,6 +122,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
     else if (target === "refund") openDocument("refund");
     else if (target === "delivery") openDocument("delivery");
     else if (target === "dns") openDocument("dns");
+    else if (onNavigate) {
+      if (target === "/") onNavigate("Home");
+      else if (target === "/catalog") onNavigate("Catalog");
+      else if (target === "/contact") onNavigate("Contact");
+      else if (target === "/track-order") onNavigate("Track");
+      else if (target === "/blog") onNavigate("Blog");
+    }
   };
 
   return (

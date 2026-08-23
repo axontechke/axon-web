@@ -38,11 +38,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
       }));
     }
     return [
-      { name: "Laptops", icon: Laptop, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853" },
-      { name: "Tablets", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0" },
-      { name: "Phones", icon: Smartphone, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
-      { name: "Audio", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e" },
-      { name: "Accessories", icon: Plug, image: "https://images.unsplash.com/photo-1583394838336-acd977736f90" }
+      { name: "Axon Slate Series", icon: Tablet, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0" },
+      { name: "Axon Books", icon: Laptop, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853" },
+      { name: "Axon Studio Audio", icon: Headphones, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e" },
+      { name: "Continuous Power Banks", icon: Plug, image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2" },
+      { name: "Click Keyboards & Gear", icon: Layers, image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3" }
     ];
   }, [config?.categoriesList]);
 
@@ -619,12 +619,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     {cat.name}
                   </h3>
                   <p className="text-[9px] sm:text-[10px] text-on-surface-variant/70 leading-normal truncate max-w-[110px] sm:max-w-[130px]">
-                    {cat.name === "Laptops" ? "Aerospace alloys performance" :
-                     cat.name === "Tablets" ? "Liquid Infinity screens" :
-                     cat.name === "Audio" ? "Adaptive isolation Pure DAC" :
-                     cat.name === "Phones" ? "Solid titanium cinemetics" :
-                     cat.name === "Accessories" ? "Modular engineered tools" :
-                     "Continuous wireless power"}
+                    {cat.name === "Axon Slate Series" ? "Liquid Infinity screens" :
+                     cat.name === "Axon Books" ? "Aerospace alloys performance" :
+                     cat.name === "Axon Studio Audio" ? "Adaptive isolation Pure DAC" :
+                     cat.name === "Continuous Power Banks" ? "Continuous wireless power" :
+                     cat.name === "Click Keyboards & Gear" ? "Modular engineered tools" :
+                     cat.desc || ""}
                   </p>
                 </div>
               </button>

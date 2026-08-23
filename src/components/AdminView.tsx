@@ -147,16 +147,11 @@ interface WebConfig {
 }
 
 const defaultCategories = [
-  { name: "Laptops", desc: "", icon: "Laptop", image: "" },
-  { name: "Tablets", desc: "", icon: "Tablet", image: "" },
-  { name: "Audio", desc: "", icon: "Headphones", image: "" },
-  { name: "Phones", desc: "", icon: "Smartphone", image: "" },
-  { name: "Accessories", desc: "", icon: "Layers", image: "" },
-  { name: "Power", desc: "", icon: "Plug", image: "" },
-  { name: "Smart Home", desc: "", icon: "Home", image: "" },
-  { name: "Gaming", desc: "", icon: "Gamepad", image: "" },
-  { name: "Wearables", desc: "", icon: "Watch", image: "" },
-  { name: "Displays", desc: "", icon: "Monitor", image: "" }
+  { name: "Axon Slate Series", desc: "Liquid Infinity screens", icon: "Tablet", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0", navigateTo: "Axon Slate Series" },
+  { name: "Axon Books", desc: "Aerospace alloys performance", icon: "Laptop", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853", navigateTo: "Axon Books" },
+  { name: "Axon Studio Audio", desc: "Adaptive isolation Pure DAC", icon: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", navigateTo: "Axon Studio Audio" },
+  { name: "Continuous Power Banks", desc: "Continuous wireless power", icon: "Plug", image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2", navigateTo: "Continuous Power Banks" },
+  { name: "Click Keyboards & Gear", desc: "Modular engineered tools", icon: "Layers", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3", navigateTo: "Click Keyboards & Gear" },
 ];
 
 const defaultSlides = [
@@ -217,11 +212,11 @@ const defaultSlides = [
 ];
 
 const defaultCol1Links = [
-  { text: "Axon Slate Series", target: "terms" },
-  { text: "Axon Books (Laptops)", target: "terms" },
-  { text: "Axon Studio Audio", target: "terms" },
-  { text: "Continuous Power Banks", target: "terms" },
-  { text: "Click Keyboards & Gear", target: "terms" }
+  { text: "Axon Slate Series", target: "/catalog" },
+  { text: "Axon Books (Laptops)", target: "/catalog" },
+  { text: "Axon Studio Audio", target: "/catalog" },
+  { text: "Continuous Power Banks", target: "/catalog" },
+  { text: "Click Keyboards & Gear", target: "/catalog" }
 ];
 
 const defaultCol2Links = [
@@ -4836,7 +4831,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerCol1Title || "Catalog"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol1Title: e.target.value }))}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev, footerCol1Title: e.target.value }))}
                           className="px-2.5 py-1 bg-surface-container border border-outline/15 rounded-xl text-xs font-semibold text-on-surface"
                           placeholder="Catalog"
                         />
@@ -4844,59 +4839,68 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <button
                         onClick={() => {
                           const currentLinks = webConfig.footerCol1Links || defaultCol1Links;
-                          const newLink = { text: "Custom link text", target: "terms" };
-                          setWebConfig(prev => ({ ...prev,footerCol1Links: [...currentLinks, newLink] }));
+                          const newLink = { text: "New Link", target: "/" };
+                          setWebConfig(prev => ({ ...prev, footerCol1Links: [...currentLinks, newLink] }));
                         }}
                         className="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[9px] font-bold transition-colors"
                       >
-                        + Add link row
+                        + Add link
                       </button>
                     </div>
 
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {(() => {
-                        const links = webConfig.footerCol1Links || defaultCol1Links;
-                        return links.map((link: any, idx: number) => (
-                          <div key={idx} className="flex gap-3 items-center bg-surface-container p-2 rounded-lg">
-                            <span className="font-mono text-[9px] text-on-surface-variant">Row #{idx + 1}</span>
+                      {(webConfig.footerCol1Links || defaultCol1Links).map((link: any, idx: number) => (
+                        <div key={idx} className="flex flex-col gap-2 bg-surface-container p-2 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[9px] text-on-surface-variant shrink-0">#{idx + 1}</span>
                             <input
                               type="text"
                               value={link.text || ""}
                               onChange={(e) => {
-                                const copy = [...links];
+                                const copy = [...(webConfig.footerCol1Links || defaultCol1Links)];
                                 copy[idx] = { ...copy[idx], text: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy }));
+                                setWebConfig(prev => ({ ...prev, footerCol1Links: copy }));
                               }}
-                              className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface w-full"
-                              placeholder="Link Title text"
+                              className="flex-1 px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
+                              placeholder="Link text"
                             />
-                            <select
-                              value={link.target || "terms"}
-                              onChange={(e) => {
-                                const copy = [...links];
-                                copy[idx] = { ...copy[idx], target: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy }));
-                              }}
-                              className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
-                            >
-                              <option value="terms">Terms Modal</option>
-                              <option value="privacy">Privacy Modal</option>
-                              <option value="cookies">Cookies Modal</option>
-                              <option value="refund">Refund Modal</option>
-                              <option value="delivery">Delivery Modal</option>
-                            </select>
                             <button
                               onClick={() => {
-                                const copy = links.filter((_: any, lIdx: number) => lIdx !== idx);
-                                setWebConfig(prev => ({ ...prev,footerCol1Links: copy }));
+                                const copy = [...(webConfig.footerCol1Links || defaultCol1Links)].filter((_: any, lIdx: number) => lIdx !== idx);
+                                setWebConfig(prev => ({ ...prev, footerCol1Links: copy }));
                               }}
-                              className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                              className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                        ));
-                      })()}
+                          <select
+                            value={link.target || "/"}
+                            onChange={(e) => {
+                              const copy = [...(webConfig.footerCol1Links || defaultCol1Links)];
+                              copy[idx] = { ...copy[idx], target: e.target.value };
+                              setWebConfig(prev => ({ ...prev, footerCol1Links: copy }));
+                            }}
+                            className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-[10px] font-semibold text-on-surface w-full"
+                          >
+                            <optgroup label="Pages">
+                              <option value="/">Home</option>
+                              <option value="/catalog">Catalog</option>
+                              <option value="/contact">Contact</option>
+                              <option value="/track-order">Track Order</option>
+                              <option value="/blog">Blog</option>
+                            </optgroup>
+                            <optgroup label="Documents">
+                              <option value="privacy">Privacy Policy</option>
+                              <option value="terms">Terms of Service</option>
+                              <option value="cookies">Cookie Policy</option>
+                              <option value="refund">Refund Policy</option>
+                              <option value="delivery">Delivery Policy</option>
+                              <option value="dns">Do Not Sell (CCPA)</option>
+                            </optgroup>
+                          </select>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -4908,7 +4912,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <input
                           type="text"
                           value={webConfig.footerCol2Title || "Support & Care"}
-                          onChange={(e) => setWebConfig(prev => ({ ...prev,footerCol2Title: e.target.value }))}
+                          onChange={(e) => setWebConfig(prev => ({ ...prev, footerCol2Title: e.target.value }))}
                           className="px-2.5 py-1 bg-surface-container border border-outline/15 rounded-xl text-xs font-semibold text-on-surface"
                           placeholder="Support & Care"
                         />
@@ -4916,59 +4920,68 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       <button
                         onClick={() => {
                           const currentLinks = webConfig.footerCol2Links || defaultCol2Links;
-                          const newLink = { text: "Custom support link", target: "terms" };
-                          setWebConfig(prev => ({ ...prev,footerCol2Links: [...currentLinks, newLink] }));
+                          const newLink = { text: "New Link", target: "/" };
+                          setWebConfig(prev => ({ ...prev, footerCol2Links: [...currentLinks, newLink] }));
                         }}
                         className="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[9px] font-bold transition-colors"
                       >
-                        + Add link row
+                        + Add link
                       </button>
                     </div>
 
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {(() => {
-                        const links = webConfig.footerCol2Links || defaultCol2Links;
-                        return links.map((link: any, idx: number) => (
-                          <div key={idx} className="flex gap-3 items-center bg-surface-container p-2 rounded-lg">
-                            <span className="font-mono text-[9px] text-on-surface-variant">Row #{idx + 1}</span>
+                      {(webConfig.footerCol2Links || defaultCol2Links).map((link: any, idx: number) => (
+                        <div key={idx} className="flex flex-col gap-2 bg-surface-container p-2 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[9px] text-on-surface-variant shrink-0">#{idx + 1}</span>
                             <input
                               type="text"
                               value={link.text || ""}
                               onChange={(e) => {
-                                const copy = [...links];
+                                const copy = [...(webConfig.footerCol2Links || defaultCol2Links)];
                                 copy[idx] = { ...copy[idx], text: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy }));
+                                setWebConfig(prev => ({ ...prev, footerCol2Links: copy }));
                               }}
-                              className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface w-full"
-                              placeholder="Link Title text"
+                              className="flex-1 px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
+                              placeholder="Link text"
                             />
-                            <select
-                              value={link.target || "terms"}
-                              onChange={(e) => {
-                                const copy = [...links];
-                                copy[idx] = { ...copy[idx], target: e.target.value };
-                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy }));
-                              }}
-                              className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
-                            >
-                              <option value="terms">Terms Modal</option>
-                              <option value="privacy">Privacy Modal</option>
-                              <option value="cookies">Cookies Modal</option>
-                              <option value="refund">Refund Modal</option>
-                              <option value="delivery">Delivery Modal</option>
-                            </select>
                             <button
                               onClick={() => {
-                                const copy = links.filter((_: any, lIdx: number) => lIdx !== idx);
-                                setWebConfig(prev => ({ ...prev,footerCol2Links: copy }));
+                                const copy = [...(webConfig.footerCol2Links || defaultCol2Links)].filter((_: any, lIdx: number) => lIdx !== idx);
+                                setWebConfig(prev => ({ ...prev, footerCol2Links: copy }));
                               }}
-                              className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                              className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                        ));
-                      })()}
+                          <select
+                            value={link.target || "/"}
+                            onChange={(e) => {
+                              const copy = [...(webConfig.footerCol2Links || defaultCol2Links)];
+                              copy[idx] = { ...copy[idx], target: e.target.value };
+                              setWebConfig(prev => ({ ...prev, footerCol2Links: copy }));
+                            }}
+                            className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-[10px] font-semibold text-on-surface w-full"
+                          >
+                            <optgroup label="Pages">
+                              <option value="/">Home</option>
+                              <option value="/catalog">Catalog</option>
+                              <option value="/contact">Contact</option>
+                              <option value="/track-order">Track Order</option>
+                              <option value="/blog">Blog</option>
+                            </optgroup>
+                            <optgroup label="Documents">
+                              <option value="privacy">Privacy Policy</option>
+                              <option value="terms">Terms of Service</option>
+                              <option value="cookies">Cookie Policy</option>
+                              <option value="refund">Refund Policy</option>
+                              <option value="delivery">Delivery Policy</option>
+                              <option value="dns">Do Not Sell (CCPA)</option>
+                            </optgroup>
+                          </select>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -5007,16 +5020,25 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             onChange={(e) => {
                               const copy = [...webConfig.footerBottomLinks];
                               copy[idx] = { ...copy[idx], target: e.target.value };
-                              setWebConfig(prev => ({ ...prev,footerBottomLinks: copy }));
+                              setWebConfig(prev => ({ ...prev, footerBottomLinks: copy }));
                             }}
-                            className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-xs font-semibold text-on-surface"
+                            className="px-2 py-1 bg-surface border border-outline/10 rounded-lg text-[10px] font-semibold text-on-surface"
                           >
-                            <option value="terms">Terms</option>
-                            <option value="privacy">Privacy</option>
-                            <option value="cookies">Cookies</option>
-                            <option value="refund">Refund</option>
-                            <option value="delivery">Delivery</option>
-                            <option value="dns">Do Not Sell (CCPA)</option>
+                            <optgroup label="Pages">
+                              <option value="/">Home</option>
+                              <option value="/catalog">Catalog</option>
+                              <option value="/contact">Contact</option>
+                              <option value="/track-order">Track Order</option>
+                              <option value="/blog">Blog</option>
+                            </optgroup>
+                            <optgroup label="Documents">
+                              <option value="privacy">Privacy Policy</option>
+                              <option value="terms">Terms of Service</option>
+                              <option value="cookies">Cookie Policy</option>
+                              <option value="refund">Refund Policy</option>
+                              <option value="delivery">Delivery Policy</option>
+                              <option value="dns">Do Not Sell (CCPA)</option>
+                            </optgroup>
                           </select>
                           <button
                             onClick={() => {
