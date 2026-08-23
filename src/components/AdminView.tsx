@@ -334,6 +334,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
   // StorageVariant editor state
   const [editingSv, setEditingSv] = useState<Partial<StorageVariant> | null>(null); // currently editing a StorageVariant
+  const [editingWarrantyIdx, setEditingWarrantyIdx] = useState<number | null>(null); // warranty being edited inline
   const [editingSvOriginalKey, setEditingSvOriginalKey] = useState<string | null>(null);
   const [svColors, setSvColors] = useState<ProductColor[]>([]);
   const [svWarrantyIds, setSvWarrantyIds] = useState<string[]>([]);
@@ -2482,19 +2483,76 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       {(editingProduct.warranties || []).length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {editingProduct.warranties!.map((w, i) => (
-                            <span key={w.id} className="flex items-center gap-2 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
+                            <span key={w.id} className="flex items-center gap-1.5 bg-surface border border-outline/20 rounded-lg px-3 py-1.5 text-[11px]">
                               <span className="font-semibold text-on-surface">{w.name}</span>
                               <span className="text-on-surface-variant">({w.duration})</span>
-                              <span className="text-primary font-bold">{w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}</span>
-                              <button
-                                type="button"
-                                onClick={() => setEditingProduct({
-                                  ...editingProduct,
-                                  warranties: editingProduct.warranties!.filter((_, idx) => idx !== i)
-                                })}
-                                className="text-red-400 hover:text-red-600 ml-1"
-                              >
-                                <X className="w-3 h-3" />
+                              {editingWarrantyIdx === i ? (
+                                <div className="flex items-center gap-1">
+                                  <input
+                                    type="number"
+                                    autoFocus
+                                    defaultValue={w.priceKsh}
+                                    min="0"
+                                    className="w-20 px-1.5 py-0.5 bg-surface border border-primary rounded text-[10px] text-on-surface focus:outline-none"
+                                    onKeyDown={e => {
+                                      if (e.key === "Enter") {
+                                        const val = Number((e.target as HTMLInputElement).value);
+                                        const updated = [...(editingProduct.warranties || [])];
+                                        updated[i] = { ...updated[i], priceKsh: val };
+                                        setEditingProduct({ ...editingProduct, warranties: updated });
+                                        setEditingWarrantyIdx(null);
+                                      }
+                                      if (e.key === "Escape") setEditingWarrantyIdx(null);
+                                    }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const input = document.querySelector(`[data-warranty-idx="${i}"]`) as HTMLInputElement;
+                                      const val = Number(input?.value || w.priceKsh);
+                                      const updated = [...(editingProduct.warranties || [])];
+                                      updated[i] = { ...updated[i], priceKsh: val };
+                                      setEditingProduct({ ...editingProduct, warranties: updated });
+                                      setEditingWarrantyIdx(null);
+                                    }}
+                                    className="text-green-600 hover:text-green-800"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingWarrantyIdx(null)}
+                                    className="text-red-400 hover:text-red-600"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingWarrantyIdx(i)}
+                                    className="text-primary hover:text-primary-hover font-bold"
+                                    title="Edit price"
+                                  >
+                                    {w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingProduct({
+                                      ...editingProduct,
+                                      warranties: editingProduct.warranties!.filter((_, idx) => idx !== i)
+                                    })}
+                                    className="text-red-400 hover:text-red-600 ml-1"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
                               </button>
                             </span>
                           ))}

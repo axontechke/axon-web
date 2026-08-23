@@ -84,7 +84,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     { id: "default-1yr", name: "1 Year Official Warranty", duration: "1 Year", priceKsh: 0 },
   ];
   const availableWarranties = hasStorageVariants && selectedStorageVariant
-    ? (resolvedWarranties.length > 0 ? resolvedWarranties : DEFAULT_WARRANTIES)
+    ? (resolvedWarranties.length > 0 ? resolvedWarranties : (product.warranties && product.warranties.length > 0 ? product.warranties : DEFAULT_WARRANTIES))
     : (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
   // When multiple SIM types exist for the selected storage, show the selector
   const storageSimTypes = hasStorageVariants && selectedStorage
@@ -145,7 +145,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         const free = resolved.find((w: Warranty) => w.priceKsh === 0);
         setSelectedWarranty(free || resolved[0]);
       } else {
-        setSelectedWarranty(undefined);
+        const fallback = (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
+        const free = fallback.find((w: Warranty) => w.priceKsh === 0);
+        setSelectedWarranty(free || fallback[0]);
       }
     } else {
       setSelectedSimType(null);
