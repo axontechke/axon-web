@@ -1121,13 +1121,13 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
   const data = await jsonBody(req);
   const id = data.id || generateId("product");
   await env.DB.prepare(
-    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, colorCodes, variants, storageVariants, simType, warranties)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, colorCodes, variants, storageVariants, simType, warranties, images)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(id, data.name || "", data.price || 0, data.priceKsh || 0, data.description || "", data.category || "",
     data.brand || "", data.image || "", JSON.stringify(data.colors || []), JSON.stringify(data.storages || []),
     data.rating || 0, data.reviewsCount || 0, data.inStock ? 1 : 0, data.isNew ? 1 : 0, data.isBestSeller ? 1 : 0,
     JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {}), JSON.stringify(data.colorCodes || {}), JSON.stringify(data.variants || []),
-    JSON.stringify(data.storageVariants || []), data.simType || null, JSON.stringify(data.warranties || [])).run();
+    JSON.stringify(data.storageVariants || []), data.simType || null, JSON.stringify(data.warranties || []), JSON.stringify(data.images || [])).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -1196,6 +1196,7 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   if (data.storageVariants !== undefined) { fields.push("storageVariants = ?"); values.push(JSON.stringify(data.storageVariants)); }
   if (data.simType !== undefined) { fields.push("simType = ?"); values.push(data.simType); }
   if (data.warranties !== undefined) { fields.push("warranties = ?"); values.push(JSON.stringify(data.warranties)); }
+  if (data.images !== undefined) { fields.push("images = ?"); values.push(JSON.stringify(data.images)); }
 
   if (fields.length === 0) return jsonError("No fields to update");
 
