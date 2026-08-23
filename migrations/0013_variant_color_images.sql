@@ -1,0 +1,23 @@
+-- Migration 0013: Variant Color Image Assignment + Admin UX Summary
+--
+-- Variant images are stored in the product_variant_images table:
+--   id, productId, storage, color, imageUrl, sortOrder, createdAt
+--   Keyed by (storage + color) — e.g. "256GB|Obsidian"
+--
+-- The product-level "Additional Image URLs" field (products.images[]) is the
+-- source library. Admins assign URLs from that library to specific storage+color
+-- combos via the dropdown in the variant editor. The VariantImagesMap on the product
+-- object maps "storage|color" -> VariantImageEntry[] and is loaded/saved via:
+--   GET  /api/admin/product-variant-images?productId=xxx
+--   POST /api/admin/product-variant-images
+--   PUT  /api/admin/product-variant-images/:id
+--   DELETE /api/admin/product-variant-images/:id
+--   POST /api/admin/product-variant-images/bulk-delete
+--
+-- StorageVariant schema (stored in products.storageVariants JSON):
+--   { storage, priceKsh, simType, colors: ProductColor[], warrantyIds: string[], stock }
+--   colors[] = [{ name, code, image }]
+--   warrantyIds[] = string[] (references products.warranties[].id)
+--
+-- Product-level warranties (products.warranties JSON):
+--   [{ id, name, duration, priceKsh }]
