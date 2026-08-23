@@ -40,7 +40,8 @@ import {
   Headphones,
   Smartphone,
   Layers,
-  Plug
+  Plug,
+  Palette
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
@@ -248,7 +249,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("axon_admin_token") || "");
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"analytics" | "products" | "orders" | "config" | "support" | "delivery" | "whatsapp" | "blog" | "priceTrackers" | "aiReports" | "reviews">("analytics");
+  const [activeTab, setActiveTab] = useState<"analytics" | "products" | "orders" | "config" | "support" | "delivery" | "whatsapp" | "blog" | "priceTrackers" | "aiReports" | "reviews" | "colors">("analytics");
 
   // AI Reports state
   const [selectedReportType, setSelectedReportType] = useState<"sales" | "catalog" | "support" | "system">("sales");
@@ -327,7 +328,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [newSpecKey, setNewSpecKey] = useState("");
   const [newSpecValue, setNewSpecValue] = useState("");
   // Existing colors from DB for reuse
-  const [existingColors, setExistingColors] = useState<{name: string; code: string}[]>([]);
+  const [existingColors, setExistingColors] = useState<{name: string; code: string; image: string}[]>([]);
   // Legacy warranty state (unused — warranties now set per StorageVariant)
   const [_warrantyName, _setWarrantyName] = useState("");
 
@@ -347,6 +348,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   // Blog Management state
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [adminReviews, setAdminReviews] = useState<any[]>([]);
+  const [globalColors, setGlobalColors] = useState<any[]>([]);
   const [generatingBlog, setGeneratingBlog] = useState(false);
   const [topicPrompt, setTopicPrompt] = useState("");
   const [geographicHub, setGeographicHub] = useState("Nairobi, Kenya");
@@ -373,6 +375,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
         .then(res => res.json())
         .then(data => setAdminReviews(data))
         .catch(err => console.error("Error loading reviews:", err));
+    }
+    if (isAuthenticated && activeTab === "colors") {
+      authFetch("/api/admin/colors")
+        .then(res => res.json())
+        .then(data => setGlobalColors(data))
+        .catch(err => console.error("Error loading colors:", err));
     }
   }, [isAuthenticated, activeTab]);
 
@@ -574,7 +582,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     // Load existing colors from DB
     authFetch("/api/admin/colors")
       .then(res => res.ok ? res.json() : [])
-      .then((colors: {name: string; code: string}[]) => setExistingColors(colors))
+      .then((colors: {name: string; code: string; image: string}[]) => setExistingColors(colors))
       .catch(() => setExistingColors([]));
     setIsProductFormOpen(true);
   };
@@ -1375,6 +1383,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
         >
           <Star className="w-4 h-4" />
           Reviews ({adminReviews.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("colors")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer ${
+            activeTab === "colors" ? "glass-btn-ios-active" : "glass-btn-ios"
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          Colors ({globalColors.length})
         </button>
         <button
           onClick={() => setActiveTab("priceTrackers")}
@@ -2258,13 +2275,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               value={newColorName}
                               onChange={(e) => {
                                 setNewColorName(e.target.value);
-                                // Auto-fill code if matching existing color found
+                                // Auto-fill code and image if matching existing color found
                                 const match = existingColors.find(c => c.name.toLowerCase() === e.target.value.toLowerCase());
-                                if (match) setNewColorCode(match.code);
+                                if (match) { setNewColorCode(match.code); setNewColorImageUrl(match.image || ""); }
                               }}
                               onBlur={() => {
                                 const match = existingColors.find(c => c.name.toLowerCase() === newColorName.toLowerCase());
-                                if (match) setNewColorCode(match.code);
+                                if (match) { setNewColorCode(match.code); setNewColorImageUrl(match.image || ""); }
                               }}
                               placeholder="e.g. Midnight Black"
                               list="existing-colors-list"
@@ -2482,9 +2499,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             </div>
                           </div>
 
-                          {/* Colors */}
+                          {/* Colors — select from global library */}
                           <div className="space-y-1.5">
-                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Colors</span>
+                            <span className="text-[9px] font-bold text-on-surface-variant uppercase">Colors in this variant</span>
                             <div className="flex flex-wrap gap-1">
                               {svColors.map((c, i) => (
                                 <span key={i} className="flex items-center gap-1 bg-surface border border-outline/20 rounded-lg px-2 py-0.5 text-[10px]">
@@ -2493,41 +2510,40 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                   <button type="button" onClick={() => setSvColors(svColors.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 ml-1"><X className="w-2.5 h-2.5" /></button>
                                 </span>
                               ))}
+                              {svColors.length === 0 && <span className="text-[9px] text-on-surface-variant/40 italic">No colors added yet.</span>}
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
-                              <input
-                                type="text"
-                                id="sv-color-name"
-                                placeholder="Color name → Enter"
-                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
-                                onKeyDown={e => {
-                                  if (e.key === "Enter") {
-                                    const name = (e.currentTarget as HTMLInputElement).value.trim();
-                                    if (!name) return;
-                                    if (svColors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
-                                    setSvColors([...svColors, { name, code: "", image: "" }]);
-                                    (e.currentTarget as HTMLInputElement).value = "";
-                                  }
-                                }}
-                              />
-                              <input
-                                type="text"
-                                id="sv-color-code"
-                                placeholder="Hex (e.g. #1a1a1a) → Enter"
-                                className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
-                                onKeyDown={e => {
-                                  if (e.key === "Enter") {
-                                    const code = (e.currentTarget as HTMLInputElement).value.trim();
-                                    if (!svColors.length) return;
-                                    setSvColors([...svColors.slice(0, -1), { ...svColors[svColors.length - 1], code }]);
-                                    (e.currentTarget as HTMLInputElement).value = "";
-                                  }
-                                }}
-                              />
-                              <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarranties([]); }}
-                                className="text-[9px] font-bold text-red-500 hover:text-red-700">Clear</button>
-                            </div>
-                            <p className="text-[8px] text-on-surface-variant/50 italic">Enter color name → Enter, then hex → Enter</p>
+                            {globalColors.length > 0 ? (
+                              <div className="flex items-end gap-2">
+                                <div className="flex-1 space-y-1">
+                                  <label className="text-[8px] text-on-surface-variant/70 uppercase block">Add from library</label>
+                                  <select
+                                    id="sv-color-picker"
+                                    value=""
+                                    onChange={e => {
+                                      const name = e.target.value;
+                                      if (!name) return;
+                                      if (svColors.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Color already added."); return; }
+                                      const existingEntry = (editingProduct.colors || []).find(c => c.name === name);
+                                      const colorEntry = globalColors.find(c => c.name === name);
+                                      setSvColors([...svColors, {
+                                        name,
+                                        code: existingEntry?.code || colorEntry?.code || "",
+                                        image: existingEntry?.image || colorEntry?.image || ""
+                                      }]);
+                                      (document.getElementById("sv-color-picker") as HTMLSelectElement).value = "";
+                                    }}
+                                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
+                                  >
+                                    <option value="">— Select a color —</option>
+                                    {globalColors.map((c, i) => <option key={i} value={c.name}>{c.name} {c.code ? `(${c.code})` : ""}</option>)}
+                                  </select>
+                                </div>
+                                <button type="button" onClick={() => { setEditingSv(null); setSvColors([]); setSvWarranties([]); }}
+                                  className="py-1.5 px-3 text-[9px] font-bold text-red-500 hover:text-red-700 rounded-lg border border-red-500/10">Clear</button>
+                              </div>
+                            ) : (
+                              <p className="text-[9px] text-on-surface-variant/50 italic">No global colors available. Add colors in the Colors tab first.</p>
+                            )}
                           </div>
 
                           {/* Warranties */}
@@ -6259,6 +6275,152 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* TAB: GLOBAL COLORS LIBRARY                             */}
+      {/* ======================================================= */}
+      {activeTab === "colors" && (
+        <div className="space-y-6 animate-in fade-in duration-200 text-xs text-left" id="admin-colors-view">
+          <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-outline/10">
+              <div>
+                <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-purple-500" />
+                  Global Color Library
+                </h3>
+                <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
+                  Add, edit or remove colors used across all products. Click any color to edit its hex code or image URL.
+                </p>
+              </div>
+            </div>
+
+            {/* Add new color form */}
+            <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+              <span className="text-[10px] font-black text-primary uppercase">Add New Color</span>
+              <div className="grid grid-cols-6 gap-2 items-end">
+                <div className="space-y-1">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Color Name</label>
+                  <input
+                    type="text"
+                    id="gc-name"
+                    placeholder="e.g. Midnight Black"
+                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Hex Code</label>
+                  <input
+                    type="text"
+                    id="gc-code"
+                    placeholder="#1a1a1a"
+                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px] font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Swatch / Image URL</label>
+                  <input
+                    type="text"
+                    id="gc-image"
+                    placeholder="https://..."
+                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Preview</label>
+                  <div id="gc-preview" className="w-full h-9 rounded-lg border border-outline/15 bg-surface flex items-center justify-center text-[9px] text-on-surface-variant/50">—</div>
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <label className="text-[9px] opacity-0 block">Add</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const name = (document.getElementById("gc-name") as HTMLInputElement)?.value.trim();
+                      const code = (document.getElementById("gc-code") as HTMLInputElement)?.value.trim();
+                      const image = (document.getElementById("gc-image") as HTMLInputElement)?.value.trim();
+                      if (!name) { alert("Color name is required."); return; }
+                      if (globalColors.some((c: any) => c.name.toLowerCase() === name.toLowerCase())) { alert("This color already exists."); return; }
+                      authFetch("/api/admin/colors", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, code, image })
+                      }).then(res => res.json()).then((saved: any) => {
+                        setGlobalColors(prev => [...prev, saved]);
+                        (document.getElementById("gc-name") as HTMLInputElement).value = "";
+                        (document.getElementById("gc-code") as HTMLInputElement).value = "";
+                        (document.getElementById("gc-image") as HTMLInputElement).value = "";
+                        const preview = document.getElementById("gc-preview");
+                        if (preview) preview.textContent = "—";
+                      }).catch(err => console.error(err));
+                    }}
+                    className="w-full py-1.5 bg-primary hover:bg-primary-hover text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Color
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Colors grid */}
+            {globalColors.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant/50 text-[11px]">
+                No colors yet. Add your first color above.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {globalColors.map((color: any) => (
+                  <div key={color.id} className="bg-surface border border-outline/10 rounded-xl p-3 space-y-2 hover:border-primary/30 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <div
+                        className="w-10 h-10 rounded-lg border border-outline/20 shrink-0"
+                        style={{ backgroundColor: color.code || "#cccccc" }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-[11px] text-on-surface truncate">{color.name}</div>
+                        <div className="font-mono text-[9px] text-on-surface-variant/60">{color.code || "—"}</div>
+                      </div>
+                    </div>
+                    {color.image && (
+                      <img src={color.image} alt={color.name} className="w-full h-16 object-cover rounded-lg border border-outline/10"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    )}
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newCode = prompt("Edit Hex Code:", color.code || "");
+                          if (newCode === null) return;
+                          authFetch(`/api/admin/colors/${color.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ code: newCode })
+                          }).then(res => res.json()).then((updated: any) => {
+                            setGlobalColors(prev => prev.map((c: any) => c.id === color.id ? updated : c));
+                          }).catch(err => console.error(err));
+                        }}
+                        className="flex-1 py-1 bg-surface-container hover:bg-surface-container-high text-[9px] font-bold rounded-lg border border-outline/10 text-on-surface"
+                      >
+                        <Edit3 className="w-3 h-3 inline mr-0.5" /> Hex
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!confirm(`Delete color "${color.name}"?`)) return;
+                          authFetch(`/api/admin/colors/${color.id}`, { method: "DELETE" }).then(res => res.json()).then(() => {
+                            setGlobalColors(prev => prev.filter((c: any) => c.id !== color.id));
+                          }).catch(err => console.error(err));
+                        }}
+                        className="flex-1 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[9px] font-bold rounded-lg border border-red-500/10"
+                      >
+                        <Trash2 className="w-3 h-3 inline mr-0.5" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
