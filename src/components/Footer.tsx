@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { 
-  ArrowRight, 
-  Mail, 
-  Shield, 
-  CheckCircle, 
-  X, 
-  FileText, 
-  Lock, 
-  EyeOff, 
-  RefreshCw, 
-  Truck, 
+import {
+  ArrowRight,
+  Mail,
+  Shield,
+  CheckCircle,
+  X,
+  FileText,
+  Lock,
+  EyeOff,
+  RefreshCw,
+  Truck,
   Info,
-  Check
+  Check,
+  MapPin,
+  Phone
 } from "lucide-react";
 import API_ROUTES from "../config/api-routes";
 
@@ -151,22 +153,38 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
             {footerDesc}
           </p>
           <div className="space-y-1.5 py-2.5 border-t border-white/5 text-xs text-[#e2d5cf]/60">
-            {address && <p className="flex items-center gap-2">📍 {address}</p>}
-            {formattedPhone && <p className="flex items-center gap-2">📞 {formattedPhone}</p>}
-            {salesEmail && <p className="flex items-center gap-2">✉️ {salesEmail}</p>}
+            {address && (
+              <p className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-[#ffdbce] shrink-0" />
+                <span>{address}</span>
+              </p>
+            )}
+            {formattedPhone && (
+              <a href={`tel:${formattedPhone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-[#ffdbce] transition-colors">
+                <Phone className="w-3.5 h-3.5 text-[#ffdbce] shrink-0" />
+                <span>{formattedPhone}</span>
+              </a>
+            )}
+            {salesEmail && (
+              <a href={`mailto:${salesEmail}`} className="flex items-center gap-2 hover:text-[#ffdbce] transition-colors">
+                <Mail className="w-3.5 h-3.5 text-[#ffdbce] shrink-0" />
+                <span>{salesEmail}</span>
+              </a>
+            )}
           </div>
           {socials.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
               {socials.map((social: any) => (
-                <a 
+                <a
                   key={social.name}
-                  href={social.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 hover:scale-110 transition-all border border-white/10"
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 hover:scale-105 transition-all border border-white/10 text-[10px] text-[#e2d5cf]/80 hover:text-white"
                   title={social.name}
                 >
-                  <img src={social.icon} alt={social.name} className="w-4 h-4 object-contain" referrerPolicy="no-referrer" />
+                  <img src={social.icon} alt={social.name} className="w-3.5 h-3.5 object-contain shrink-0" referrerPolicy="no-referrer" />
+                  <span>{social.name}</span>
                 </a>
               ))}
             </div>
