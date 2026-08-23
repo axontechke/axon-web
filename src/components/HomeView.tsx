@@ -836,21 +836,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Plug,
               Star
             };
-            const Badge1Icon = iconMap[config?.protocolBadge1Icon] || Zap;
-            const Badge2Icon = iconMap[config?.protocolBadge2Icon] || ShieldCheck;
-
-            return (
-              <>
-                <div className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap shrink-0">
-                  <Badge1Icon className="w-3 h-3 sm:w-4 sm:h-4 text-primary shrink-0" />
-                  <span>{config?.protocolBadge1Text || "Fast Delivery"}</span>
+            const defaultBadges = [
+              { text: "Fast Delivery", icon: "Zap", url: "" },
+              { text: "Secure Checkout", icon: "ShieldCheck", url: "" }
+            ];
+            const badges = (config?.protocolBadges?.length ? config.protocolBadges : defaultBadges) as {text: string; icon: string; url: string}[];
+            return badges.map((badge, idx) => {
+              const Icon = iconMap[badge.icon] || Zap;
+              const badgeEl = (
+                <div key={idx} className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap shrink-0">
+                  <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-primary shrink-0" />
+                  <span>{badge.text}</span>
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-surface-container-lowest rounded-2xl border border-outline/10 text-[10px] sm:text-xs font-semibold text-on-surface whitespace-nowrap shrink-0">
-                  <Badge2Icon className="w-3 h-3 sm:w-4 sm:h-4 text-primary shrink-0" />
-                  <span>{config?.protocolBadge2Text || "Secure Checkout"}</span>
-                </div>
-              </>
-            );
+              );
+              return badge.url ? (
+                <a key={idx} href={badge.url} target="_blank" rel="noopener noreferrer" className="no-underline">
+                  {badgeEl}
+                </a>
+              ) : badgeEl;
+            });
           })()}
         </div>
       </section>

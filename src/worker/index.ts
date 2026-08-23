@@ -374,6 +374,12 @@ const INITIAL_CONFIG: Record<string, any> = {
   footerLogoUrl: "",
   brandAccentColor: "#3B82F6",
   metaPixelId: "",
+  protocolTitle: "Why Shop With Us",
+  protocolDescription: "We deliver across Kenya, offer genuine products with warranty, and our team is just a WhatsApp message away for support.",
+  protocolBadges: [
+    { text: "Fast Delivery", icon: "Zap", url: "" },
+    { text: "Secure Checkout", icon: "ShieldCheck", url: "" }
+  ],
   categoryThumbnails: {
     "Laptops": "",
     "Tablets": "",

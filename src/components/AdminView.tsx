@@ -110,10 +110,7 @@ interface WebConfig {
   spotlightProducts?: string[];
   protocolTitle?: string;
   protocolDescription?: string;
-  protocolBadge1Text?: string;
-  protocolBadge1Icon?: string;
-  protocolBadge2Text?: string;
-  protocolBadge2Icon?: string;
+  protocolBadges?: { text: string; icon: string; url: string }[];
   footerDescription?: string;
   footerWarrantyText?: string;
   footerCol1Title?: string;
@@ -4632,79 +4629,90 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     />
                   </div>
 
-                  {/* Badge 1 configuration */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-outline/5 pt-3">
-                    <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
-                      <span className="font-bold text-xs uppercase text-primary">Branding Badge #1</span>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-on-surface-variant block uppercase">Badge Icon</label>
-                          <select
-                            value={webConfig.protocolBadge1Icon || "Zap"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge1Icon: e.target.value }))}
-                            className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
-                          >
-                            <option value="Zap">Zap (Lightning)</option>
-                            <option value="ShieldCheck">ShieldCheck (Security)</option>
-                            <option value="Cpu">Cpu (Silicon)</option>
-                            <option value="Laptop">Laptop (Computer)</option>
-                            <option value="Tablet">Tablet (Slate)</option>
-                            <option value="Headphones">Headphones (Audio)</option>
-                            <option value="Smartphone">Smartphone (Phone)</option>
-                            <option value="Layers">Layers (Catalog)</option>
-                            <option value="Plug">Plug (Power)</option>
-                            <option value="Star">Star (Rating)</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-on-surface-variant block uppercase">Badge Label Text</label>
-                          <input
-                            type="text"
-                            value={webConfig.protocolBadge1Text || "Fast Delivery"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge1Text: e.target.value }))}
-                            className="w-full px-3 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
-                            placeholder="0.02ms Sync Latency"
-                          />
-                        </div>
-                      </div>
+                  {/* Badge configuration — up to 4 */}
+                  <div className="border-t border-outline/5 pt-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="font-bold text-[10px] uppercase text-on-surface-variant">Shop With Us Badges (max 4)</span>
+                      {((webConfig.protocolBadges?.length ?? 2) < 4) && (
+                        <button
+                          onClick={() => {
+                            const current = webConfig.protocolBadges || [
+                              { text: "Fast Delivery", icon: "Zap", url: "" },
+                              { text: "Secure Checkout", icon: "ShieldCheck", url: "" }
+                            ];
+                            setWebConfig(prev => ({ ...prev, protocolBadges: [...current, { text: "", icon: "Zap", url: "" }] }));
+                          }}
+                          className="px-2 py-1 bg-primary/10 text-primary hover:bg-primary/15 rounded-lg text-[9px] font-bold transition-colors"
+                        >
+                          + Add Badge
+                        </button>
+                      )}
                     </div>
-
-                    {/* Badge 2 configuration */}
-                    <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
-                      <span className="font-bold text-xs uppercase text-primary">Branding Badge #2</span>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-on-surface-variant block uppercase">Badge Icon</label>
-                          <select
-                            value={webConfig.protocolBadge2Icon || "ShieldCheck"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge2Icon: e.target.value }))}
-                            className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
-                          >
-                            <option value="Zap">Zap (Lightning)</option>
-                            <option value="ShieldCheck">ShieldCheck (Security)</option>
-                            <option value="Cpu">Cpu (Silicon)</option>
-                            <option value="Laptop">Laptop (Computer)</option>
-                            <option value="Tablet">Tablet (Slate)</option>
-                            <option value="Headphones">Headphones (Audio)</option>
-                            <option value="Smartphone">Smartphone (Phone)</option>
-                            <option value="Layers">Layers (Catalog)</option>
-                            <option value="Plug">Plug (Power)</option>
-                            <option value="Star">Star (Rating)</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-on-surface-variant block uppercase">Badge Label Text</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {(webConfig.protocolBadges || [
+                        { text: "Fast Delivery", icon: "Zap", url: "" },
+                        { text: "Secure Checkout", icon: "ShieldCheck", url: "" }
+                      ]).map((badge: any, idx: number) => (
+                        <div key={idx} className="bg-surface border border-outline/10 p-3 rounded-xl space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-[10px] uppercase text-primary">Badge #{idx + 1}</span>
+                            <button
+                              onClick={() => {
+                                const copy = [...(webConfig.protocolBadges || [])];
+                                copy.splice(idx, 1);
+                                setWebConfig(prev => ({ ...prev, protocolBadges: copy }));
+                              }}
+                              className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <select
+                              value={badge.icon || "Zap"}
+                              onChange={(e) => {
+                                const copy = [...(webConfig.protocolBadges || [])];
+                                copy[idx] = { ...copy[idx], icon: e.target.value };
+                                setWebConfig(prev => ({ ...prev, protocolBadges: copy }));
+                              }}
+                              className="px-2 py-1.5 bg-surface-container border border-outline/15 rounded-lg text-[10px] text-on-surface font-semibold"
+                            >
+                              <option value="Zap">Zap</option>
+                              <option value="ShieldCheck">Shield</option>
+                              <option value="Cpu">Cpu</option>
+                              <option value="Laptop">Laptop</option>
+                              <option value="Tablet">Tablet</option>
+                              <option value="Headphones">Audio</option>
+                              <option value="Smartphone">Phone</option>
+                              <option value="Layers">Layers</option>
+                              <option value="Plug">Plug</option>
+                              <option value="Star">Star</option>
+                            </select>
+                            <input
+                              type="text"
+                              value={badge.text || ""}
+                              onChange={(e) => {
+                                const copy = [...(webConfig.protocolBadges || [])];
+                                copy[idx] = { ...copy[idx], text: e.target.value };
+                                setWebConfig(prev => ({ ...prev, protocolBadges: copy }));
+                              }}
+                              className="col-span-2 px-2 py-1.5 bg-surface-container border border-outline/15 rounded-lg text-[10px] text-on-surface"
+                              placeholder="Badge label"
+                            />
+                          </div>
                           <input
-                            type="text"
-                            value={webConfig.protocolBadge2Text || "Secure Checkout"}
-                            onChange={(e) => setWebConfig(prev => ({ ...prev,protocolBadge2Text: e.target.value }))}
-                            className="w-full px-3 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface"
-                            placeholder="Secure Checkout"
+                            type="url"
+                            value={badge.url || ""}
+                            onChange={(e) => {
+                              const copy = [...(webConfig.protocolBadges || [])];
+                              copy[idx] = { ...copy[idx], url: e.target.value };
+                              setWebConfig(prev => ({ ...prev, protocolBadges: copy }));
+                            }}
+                            className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-lg text-[10px] text-on-surface font-mono"
+                            placeholder="https://link.com (optional)"
                           />
                         </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
