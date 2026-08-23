@@ -23,12 +23,14 @@ export interface ProductColor {
   image: string;      // e.g. "https://..." (swatch/product photo URL)
 }
 
-export interface ProductVariant {
-  storage: string;
-  color: string;
+// A complete SKU at storage level — holds colors, warranties, simType and price for that storage
+export interface StorageVariant {
+  storage: string;              // e.g. "256GB", "512GB", "1TB"
+  priceKsh: number;             // price for this storage SKU
+  simType: "esim" | "physical" | "both";
+  colors: ProductColor[];        // colors available for this storage (each with name, code, image, and optional priceKsh override)
+  warranties: Warranty[];        // warranty plans available for this storage SKU
   stock: number;
-  priceKsh?: number; // optional override price for this combination
-  warrantyPriceKsh?: number; // warranty price for this variant (if different from default warranty plan)
 }
 
 // Stored in DB: multiple images per (storage, color) combo
@@ -65,8 +67,10 @@ export interface Product {
   colorCodes?: Record<string, string>; // legacy: { "Midnight Black": "#1a1a1a" } — migrated to colors[].code
   storages?: string[];
   colorImages?: Record<string, string>; // legacy: { "Royal Blue": "https://..." } — migrated to colors[].image
-  variants?: ProductVariant[];       // per-combo variants with stock & price
+  variants?: ProductVariant[];       // per-combo variants with stock & price (legacy)
   variantImages?: VariantImagesMap;   // { "128GB|Obsidian": [...images], "base": [...] }
+  // New structured SKU storage variants — each storage has its own colors, warranties, simType, price
+  storageVariants?: StorageVariant[];
   rating: number;
   reviewsCount: number;
   inStock: boolean;

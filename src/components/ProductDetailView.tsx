@@ -17,9 +17,36 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   onAddToCart,
   onSelectProduct,
 }) => {
+  // ── StorageVariant mode ──────────────────────────────────────────────
+  // When storageVariants is populated, each storage tier has its own colors, warranties, simType, and price.
+  const hasStorageVariants = Array.isArray(product.storageVariants) && product.storageVariants.length > 0;
+
+  // Derive the effective list of storage options
+  const storageOptions: string[] = hasStorageVariants
+    ? product.storageVariants!.map(sv => sv.storage)
+    : (product.storages ?? []);
+
+  // Find the currently selected StorageVariant (null in legacy mode)
+  const getStorageVariant = (storage: string | undefined) =>
+    hasStorageVariants && storage
+      ? product.storageVariants!.find(sv => sv.storage.toLowerCase() === storage.toLowerCase())
+      : null;
+
+  // Derive colors, warranties, and simType from the selected StorageVariant or fall back to product-level
+  const selectedStorageVariant = getStorageVariant(selectedStorage);
+  const availableColors = hasStorageVariants && selectedStorageVariant
+    ? selectedStorageVariant.colors
+    : product.colors ?? [];
+  const availableWarranties = hasStorageVariants && selectedStorageVariant
+    ? selectedStorageVariant.warranties
+    : product.warranties ?? [];
+  const availableSimType = hasStorageVariants && selectedStorageVariant
+    ? selectedStorageVariant.simType
+    : product.simType;
+
   // selectedColor stores the color NAME string, not the whole ProductColor object
   const getInitialColor = () => {
-    const colors = product.colors;
+    const colors = availableColors;
     if (colors && colors.length > 0) {
       const first = colors[0];
       return typeof first === 'string' ? first : (first as any).name;
@@ -27,12 +54,14 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     return undefined;
   };
   const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
-  const [selectedStorage, setSelectedStorage] = useState(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
+  const [selectedStorage, setSelectedStorage] = useState<string | undefined>(
+    storageOptions.length > 0 ? storageOptions[0] : undefined
+  );
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
     // Default to free warranty (priceKsh === 0) if available
-    if (product.warranties && product.warranties.length > 0) {
-      const freeWarranty = product.warranties.find(w => w.priceKsh === 0);
-      return freeWarranty || product.warranties[0];
+    if (availableWarranties.length > 0) {
+      const freeWarranty = availableWarranties.find(w => w.priceKsh === 0);
+      return freeWarranty || availableWarranties[0];
     }
     return undefined;
   });
@@ -51,8 +80,19 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   React.useEffect(() => {
     setActiveImage(product.image);
     setSelectedColor(getInitialColor());
-    setSelectedStorage(product.storages && product.storages.length > 0 ? product.storages[0] : undefined);
-    setSelectedWarranty(product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
+    const opts = hasStorageVariants
+      ? product.storageVariants!.map(sv => sv.storage)
+      : (product.storages ?? []);
+    setSelectedStorage(opts.length > 0 ? opts[0] : undefined);
+    const warranties = hasStorageVariants && getStorageVariant(opts[0])
+      ? (getStorageVariant(opts[0])?.warranties ?? [])
+      : (product.warranties ?? []);
+    if (warranties.length > 0) {
+      const free = warranties.find((w: Warranty) => w.priceKsh === 0);
+      setSelectedWarranty(free || warranties[0]);
+    } else {
+      setSelectedWarranty(undefined);
+    }
     setQuantity(1);
   }, [product.id, product.image]);
 
@@ -93,13 +133,16 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     }
   }, [selectedColor, selectedStorage, product.image]);
 
-  // Check if product has variant-based pricing (ProductVariant[] structure)
-  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
+  // Check if product has legacy variant-based pricing (ProductVariant[] structure)
+  const hasLegacyVariants = Array.isArray(product.variants) && product.variants.length > 0;
 
-  // Compute dynamic price from ProductVariant[]
+  // Compute dynamic price — prefer StorageVariant price, fall back to legacy variants, then product.priceKsh
   const getVariantPriceKsh = (storage: string | undefined, color: string | undefined): number | null => {
-    if (!hasVariants || !storage) return null;
-    // Exact storage+color match
+    // StorageVariant takes precedence
+    const sv = getStorageVariant(storage);
+    if (sv?.priceKsh != null) return sv.priceKsh;
+    // Legacy per-combo variants
+    if (!hasLegacyVariants || !storage) return null;
     if (color) {
       const match = product.variants?.find(
         v => v.storage.toLowerCase() === storage.toLowerCase() &&
@@ -107,7 +150,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       );
       if (match?.priceKsh != null) return match.priceKsh;
     }
-    // Fall back to base storage variant (empty color)
     const baseMatch = product.variants?.find(
       v => v.storage.toLowerCase() === storage.toLowerCase() && !v.color
     );
@@ -116,18 +158,22 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   const dynamicPriceKsh = getVariantPriceKsh(selectedStorage, selectedColor);
   const basePriceKsh = dynamicPriceKsh ?? product.priceKsh ?? 0;
-  const getVariantWarrantyPrice = () => {
-    if (!selectedStorage) return selectedWarranty?.priceKsh ?? 0;
+  const getVariantWarrantyPrice = (): number => {
+    if (!selectedWarranty) return 0;
+    // In storageVariant mode, warranty price comes from the selected warranty itself
+    if (hasStorageVariants) return selectedWarranty.priceKsh;
+    // Legacy: check variant override first
+    if (!selectedStorage) return selectedWarranty.priceKsh ?? 0;
     const variantMatch = product.variants?.find(
       v => v.storage.toLowerCase() === selectedStorage.toLowerCase() &&
         (!selectedColor ? !v.color : v.color.toLowerCase() === selectedColor.toLowerCase())
     );
-    return variantMatch?.warrantyPriceKsh ?? selectedWarranty?.priceKsh ?? 0;
+    return variantMatch?.warrantyPriceKsh ?? selectedWarranty.priceKsh ?? 0;
   };
   const displayPriceKsh = basePriceKsh + getVariantWarrantyPrice();
 
   // All in-stock (variants always in stock for now)
-  const isSelectedVariantInStock = hasVariants ? true : product.inStock;
+  const isSelectedVariantInStock = hasLegacyVariants ? true : product.inStock;
   const selectedVariantStock = undefined;
 
   // Hover to zoom states
@@ -386,13 +432,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           {/* Configurable Attributes (Variants) */}
           <div className="space-y-5 pt-2">
             {/* Colors — only show colors that have images for selected storage */}
-            {product.colors && product.colors.length > 0 && (
+            {availableColors && availableColors.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   Colorway: <strong className="text-on-surface">{selectedColor}</strong>
                 </span>
                 <div className="flex gap-3">
-                  {product.colors.map((colorEntry) => {
+                  {availableColors.map((colorEntry) => {
                     // Support both legacy string[] and new ProductColor[] format
                     const name = typeof colorEntry === 'string' ? colorEntry : (colorEntry as any).name;
                     const hexCode = typeof colorEntry === 'string'
@@ -445,13 +491,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             )}
 
             {/* Storage capacity */}
-            {product.storages && (
+            {storageOptions.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   Storage Capacity: <strong className="text-on-surface">{selectedStorage}</strong>
                 </span>
                 <div className="flex gap-2">
-                  {product.storages.map((storage) => (
+                  {storageOptions.map((storage) => (
                     <button
                       key={storage}
                       onClick={() => {
@@ -459,13 +505,23 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                         if (selectedColor) {
                           const variantKey = `${storage}|${selectedColor}`;
                           const hasImg = !!(product.variantImages as VariantImagesMap)?.[variantKey]?.length;
-                          const hasColorImg = !!product.colors.find(c => {
+                          const hasColorImg = !!availableColors.find(c => {
                             const n = typeof c === 'string' ? c : (c as any).name;
                             return n === selectedColor && ((typeof c === 'object' ? (c as any).image : product.colorImages?.[n]));
                           });
                           if (!hasImg && !hasColorImg) setSelectedColor(undefined);
                         }
                         setSelectedStorage(storage);
+                        // Reset warranty when storage changes (new storage may have different warranty options)
+                        if (hasStorageVariants) {
+                          const sv = product.storageVariants?.find(s => s.storage.toLowerCase() === storage.toLowerCase());
+                          if (sv?.warranties?.length) {
+                            const free = sv.warranties.find((w: Warranty) => w.priceKsh === 0);
+                            setSelectedWarranty(free || sv.warranties[0]);
+                          } else {
+                            setSelectedWarranty(undefined);
+                          }
+                        }
                       }}
                       className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
                         selectedStorage === storage
@@ -482,17 +538,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             )}
 
             {/* SIM Type */}
-            {product.simType && (
+            {availableSimType && (
               <div className="space-y-2">
                 <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   SIM Type
                 </span>
                 <div className="flex gap-2">
-                  {product.simType === "both" ? (
+                  {availableSimType === "both" ? (
                     <>
                       <span className="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-outline/20 text-on-surface">Physical SIM + eSIM</span>
                     </>
-                  ) : product.simType === "esim" ? (
+                  ) : availableSimType === "esim" ? (
                     <span className="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-outline/20 text-on-surface">eSIM</span>
                   ) : (
                     <span className="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-outline/20 text-on-surface">Physical SIM</span>
@@ -502,13 +558,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             )}
 
             {/* Warranty Selection */}
-            {product.warranties && product.warranties.length > 0 && (
+            {availableWarranties && availableWarranties.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   Protection Plan
                 </span>
                 <div className="flex flex-col gap-2">
-                  {product.warranties.map((warranty) => {
+                  {availableWarranties.map((warranty: Warranty) => {
                     const isSelected = selectedWarranty?.id === warranty.id;
                     const isFree = warranty.priceKsh === 0;
                     return (
