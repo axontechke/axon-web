@@ -2744,6 +2744,25 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     >
                                       Edit
                                     </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (!confirm(`Delete "${sv.storage} ${sv.simType}" variant? This cannot be undone.`)) return;
+                                        setEditingProduct(prev => {
+                                          const current = prev || {} as any;
+                                          return {
+                                            ...current,
+                                            storageVariants: (current.storageVariants || []).filter(
+                                              (v: any) => `${v.storage}|${v.simType}`.toLowerCase() !== `${sv.storage}|${sv.simType}`.toLowerCase()
+                                            )
+                                          };
+                                        });
+                                      }}
+                                      className="text-red-400 hover:text-red-600 font-bold text-[10px] px-1 py-1"
+                                      title="Delete variant"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
                                   </td>
                                 </tr>
                               ))}
