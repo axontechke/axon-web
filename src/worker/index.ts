@@ -739,6 +739,7 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     isNew: !!p.isNew,
     isBestSeller: !!p.isBestSeller,
     colors: JSON.parse(p.colors || "[]"),
+    images: JSON.parse(p.images || "[]"),
     storages: JSON.parse(p.storages || "[]"),
     colorImages: JSON.parse(p.colorImages || "{}"),
     colorCodes: JSON.parse(p.colorCodes || "{}"),
@@ -770,21 +771,16 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
   const { results: variantImages } = await env.DB.prepare(
     "SELECT * FROM product_variant_images ORDER BY productId, storage, color, sortOrder"
   ).all();
-  const variantImageMap: Record<string, any[]> = {};
-  for (const vi of variantImages) {
-    const v = vi as any;
-    const key = `${v.productId}|${v.storage}|${v.color}`;
-    if (!variantImageMap[key]) variantImageMap[key] = [];
-    variantImageMap[key].push({ id: v.id, imageUrl: v.imageUrl, sortOrder: v.sortOrder });
-  }
 
   // Attach variant images keyed by "storage|color" onto each product
   for (const prod of products) {
     const byVariantKey: Record<string, any[]> = {};
-    for (const [key, imgs] of Object.entries(variantImageMap)) {
-      const [, storage, color] = key.split("|");
-      const mapKey = storage && color ? `${storage}|${color}` : "base";
-      byVariantKey[mapKey] = imgs as any[];
+    for (const vi of variantImages) {
+      const v = vi as any;
+      if (v.productId !== prod.id) continue;
+      const mapKey = v.storage && v.color ? `${v.storage}|${v.color}` : "base";
+      if (!byVariantKey[mapKey]) byVariantKey[mapKey] = [];
+      byVariantKey[mapKey].push({ id: v.id, imageUrl: v.imageUrl, sortOrder: v.sortOrder });
     }
     (prod as any).variantImages = byVariantKey;
   }
@@ -1146,6 +1142,7 @@ async function getAdminProduct(_req: Request, env: Env, _ctx: ExecutionContext, 
     isNew: !!row.isNew,
     isBestSeller: !!row.isBestSeller,
     colors: JSON.parse(row.colors || "[]"),
+    images: JSON.parse(row.images || "[]"),
     storages: JSON.parse(row.storages || "[]"),
     colorImages: JSON.parse(row.colorImages || "{}"),
     colorCodes: JSON.parse(row.colorCodes || "{}"),
@@ -1651,7 +1648,8 @@ async function createProductVariantImage(req: Request, env: Env): Promise<Respon
   await env.DB.prepare(
     `INSERT INTO product_variant_images (id, productId, storage, color, imageUrl, sortOrder) VALUES (?, ?, ?, ?, ?, ?)`
   ).bind(id, productId, storage || "", color || "", imageUrl, sortOrder || 0).run();
-  return corsResponse({ id, productId, storage: storage || "", color: color || "", imageUrl, sortOrder: sortOrder || 0 }, 201);
+  const saved = await env.DB.prepare("SELECT * FROM product_variant_images WHERE id = ?").bind(id).first();
+  return corsResponse(saved, 201);
 }
 
 // PUT /api/admin/product-variant-images/:id

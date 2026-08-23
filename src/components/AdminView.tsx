@@ -711,29 +711,70 @@ export const AdminView: React.FC<AdminViewProps> = ({
     });
   };
 
-  const handleAddVariantImage = (storage: string, color: string) => {
-    if (!newVarImgUrl.trim()) return;
+  const handleAddVariantImage = async (storage: string, color: string) => {
+    if (!newVarImgUrl.trim() || !editingProduct?.id) return;
     const key = `${storage}|${color}`;
-    setVariantImgMap(prev => {
-      const existing = prev[key] || [];
-      if (existing.some((img: any) => img.imageUrl === newVarImgUrl.trim())) {
-        alert("This image URL is already added for this storage+color combination.");
-        return prev;
-      }
-      return {
+    try {
+      const res = await authFetch("/api/admin/product-variant-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: editingProduct.id,
+          storage,
+          color,
+          imageUrl: newVarImgUrl.trim(),
+          sortOrder: (variantImgMap[key] || []).length
+        })
+      });
+      if (!res.ok) { alert("Failed to save image"); return; }
+      const saved = await res.json();
+      setVariantImgMap(prev => ({
         ...prev,
-        [key]: [...existing, { id: `img-${Date.now()}`, imageUrl: newVarImgUrl.trim(), sortOrder: existing.length }]
-      };
-    });
-    setNewVarImgUrl("");
+        [key]: [...(prev[key] || []), saved]
+      }));
+      setNewVarImgUrl("");
+    } catch {
+      alert("Failed to save image");
+    }
   };
 
-  const handleRemoveVariantImage = (storage: string, color: string, imageId: string) => {
+  const handleRemoveVariantImage = async (storage: string, color: string, imageId: string) => {
     const key = `${storage}|${color}`;
-    setVariantImgMap(prev => ({
-      ...prev,
-      [key]: (prev[key] || []).filter((img: any) => img.id !== imageId)
-    }));
+    try {
+      await authFetch(`/api/admin/product-variant-images/${imageId}`, { method: "DELETE" });
+      setVariantImgMap(prev => ({
+        ...prev,
+        [key]: (prev[key] || []).filter((img: any) => img.id !== imageId)
+      }));
+    } catch {
+      alert("Failed to delete image");
+    }
+  };
+
+  const handleAssignColorImage = async (storage: string, color: string, url: string) => {
+    if (!editingProduct?.id) return;
+    const key = `${storage}|${color}`;
+    try {
+      const res = await authFetch("/api/admin/product-variant-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: editingProduct.id,
+          storage,
+          color,
+          imageUrl: url,
+          sortOrder: (variantImgMap[key] || []).length
+        })
+      });
+      if (!res.ok) { alert("Failed to assign image"); return; }
+      const saved = await res.json();
+      setVariantImgMap(prev => ({
+        ...prev,
+        [key]: [...(prev[key] || []), saved]
+      }));
+    } catch {
+      alert("Failed to assign image");
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -2783,7 +2824,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                     {imgs.length > 0 ? (
                                       <div className="flex gap-0.5 flex-wrap">
                                         {imgs.map((img: any) => (
-                                          <img key={img.id} src={img.imageUrl} alt="" className="w-8 h-8 rounded-lg object-cover border border-outline/10" />
+                                          <div key={img.id} className="relative group">
+                                            <img src={img.imageUrl} alt="" className="w-8 h-8 rounded-lg object-cover border border-outline/10" />
+                                            <button
+                                              type="button"
+                                              onClick={() => handleRemoveVariantImage(editingSv.storage!, c.name, img.id)}
+                                              className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[7px]"
+                                            >
+                                              <X className="w-2.5 h-2.5" />
+                                            </button>
+                                          </div>
                                         ))}
                                       </div>
                                     ) : (
@@ -2797,10 +2847,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                           const url = e.target.value;
                                           if (!url) return;
                                           if (imgs.some((img: any) => img.imageUrl === url)) { alert("Image already assigned."); return; }
-                                          setVariantImgMap(prev => ({
-                                            ...prev,
-                                            [key]: [...(prev[key] || []), { id: `img-${Date.now()}`, imageUrl: url, sortOrder: imgs.length }]
-                                          }));
+                                          handleAssignColorImage(editingSv.storage!, c.name, url);
                                         }}
                                         className="w-full px-1 py-1 bg-surface-container-low border border-outline/15 rounded-lg text-[9px] text-on-surface focus:outline-none focus:border-primary"
                                       >
