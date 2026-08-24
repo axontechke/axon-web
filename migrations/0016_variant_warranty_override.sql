@@ -1,0 +1,17 @@
+-- Migration 0016: Per-variant warranty price override
+--
+-- SCHEMA CHANGE: none (data format only)
+--
+-- storageVariants[].warranties field format changed:
+--   OLD: warrantyIds: string[]          — just warranty IDs
+--   NEW: warranties: { id: string, priceKsh: number }[] — ID + optional per-variant price override
+--
+-- When priceKsh is not set (0 or absent), the product-level warranty price is used.
+-- When priceKsh is set, that price overrides the product-level warranty price for that variant.
+--
+-- Also in this release:
+-- - Storage + SIM type split into two selector rows on client product detail
+-- - Storage variant reordering via up/down arrows in admin variants table
+-- - Image Library section: add/remove URLs; assigning to color auto-adds to images[]
+-- - All colors always shown on product detail (removed image-availability filter)
+-- - Slideshow 3-second auto-cycle
