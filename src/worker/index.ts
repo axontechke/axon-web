@@ -762,7 +762,21 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
         return []; 
       } catch { return []; } 
     })(),
-    storageVariants: (() => { try { const sv = JSON.parse(p.storageVariants || "[]"); return Array.isArray(sv) ? sv : []; } catch { return []; } })(),
+    storageVariants: (() => {
+      try {
+        const sv = JSON.parse(p.storageVariants || "[]");
+        if (!Array.isArray(sv)) return [];
+        // Normalize warrantyIds[] → warranties[{id, priceKsh}]
+        return sv.map((v: any) => {
+          if (Array.isArray(v.warranties)) return v; // already new format
+          const warrantyIds: string[] = v.warrantyIds || [];
+          return {
+            ...v,
+            warranties: warrantyIds.map((id: string) => ({ id, priceKsh: 0 }))
+          };
+        });
+      } catch { return []; }
+    })(),
     warranties: (() => { try { const w = JSON.parse(p.warranties || "[]"); return Array.isArray(w) ? w : []; } catch { return []; } })(),
     simType: p.simType || undefined,
   }));
@@ -1148,7 +1162,20 @@ async function getAdminProduct(_req: Request, env: Env, _ctx: ExecutionContext, 
     colorCodes: JSON.parse(row.colorCodes || "{}"),
     specifications: JSON.parse(row.specifications || "{}"),
     variants: (() => { try { const v = JSON.parse(row.variants || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } })(),
-    storageVariants: (() => { try { const sv = JSON.parse(row.storageVariants || "[]"); return Array.isArray(sv) ? sv : []; } catch { return []; } })(),
+    storageVariants: (() => {
+      try {
+        const sv = JSON.parse(row.storageVariants || "[]");
+        if (!Array.isArray(sv)) return [];
+        return sv.map((v: any) => {
+          if (Array.isArray(v.warranties)) return v;
+          const warrantyIds: string[] = v.warrantyIds || [];
+          return {
+            ...v,
+            warranties: warrantyIds.map((id: string) => ({ id, priceKsh: 0 }))
+          };
+        });
+      } catch { return []; }
+    })(),
     warranties: (() => { try { const w = JSON.parse(row.warranties || "[]"); return Array.isArray(w) ? w : []; } catch { return []; } })(),
     simType: row.simType || undefined,
   };

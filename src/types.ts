@@ -24,12 +24,18 @@ export interface ProductColor {
 }
 
 // A complete SKU at storage level — holds colors, warranty IDs, simType and price for that storage
+// Per-variant warranty assignment with optional price override
+export interface VariantWarrantyAssignment {
+  id: string;       // references Warranty.id in product.warranties
+  priceKsh: number; // price for this variant; falls back to Warranty.priceKsh if not set
+}
+
 export interface StorageVariant {
   storage: string;              // e.g. "256GB", "512GB", "1TB"
   priceKsh: number;             // price for this storage SKU
   simType: "esim" | "physical" | "both";
   colors: ProductColor[];        // colors available for this storage (each with name, code, image, and optional priceKsh override)
-  warrantyIds: string[];         // IDs of warranty plans from product.warranties assigned to this variant
+  warranties: VariantWarrantyAssignment[]; // warranty assignments with optional per-variant price override
   stock: number;
 }
 

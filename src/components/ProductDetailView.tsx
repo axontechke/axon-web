@@ -90,10 +90,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const availableColors = hasStorageVariants && selectedStorageVariant
     ? selectedStorageVariant.colors
     : product.colors ?? [];
-  // Resolve warranty objects from the product-level pool using warrantyIds
-  const resolvedWarranties: Warranty[] = (selectedStorageVariant?.warrantyIds ?? [])
-    .map((id: string) => (product.warranties ?? []).find(w => w.id === id))
-    .filter(Boolean) as Warranty[];
+  // Resolve warranty objects from the product-level pool using warranties[] (which may have per-variant price overrides)
+  const resolvedWarranties: Warranty[] = (selectedStorageVariant?.warranties ?? [])
+    .map((va: any) => {
+      const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+      return {
+        ...base,
+        id: va.id,
+        priceKsh: va.priceKsh ?? base?.priceKsh ?? 0,
+      } as Warranty;
+    })
+    .filter((w: Warranty) => w.id);
   const DEFAULT_WARRANTIES: Warranty[] = [
     { id: "default-1yr", name: "1 Year Official Warranty", duration: "1 Year", priceKsh: 0 },
   ];
@@ -182,9 +189,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       const sim = variants.length === 1 ? variants[0].simType : null;
       setSelectedSimType(sim as "esim" | "physical" | null);
       const matchedSv = variants.find(sv => !sim || sv.simType === sim);
-      const resolved = (matchedSv?.warrantyIds ?? [])
-        .map((id: string) => (product.warranties ?? []).find(w => w.id === id))
-        .filter(Boolean) as Warranty[];
+      const resolved = (matchedSv?.warranties ?? [])
+        .map((va: any) => {
+          const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+          return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+        })
+        .filter((w: Warranty) => w.id);
       if (resolved.length > 0) {
         const free = resolved.find((w: Warranty) => w.priceKsh === 0);
         setSelectedWarranty(free || resolved[0]);
@@ -580,8 +590,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             if (variants.length === 1) {
                               setSelectedSimType(variants[0].simType as "esim" | "physical");
                               const sv = variants[0];
-                              if (sv.warrantyIds?.length) {
-                                const svWarranties = sv.warrantyIds.map((id: string) => product.warranties?.find(w => w.id === id)).filter(Boolean);
+                              if (sv.warranties?.length) {
+                                const svWarranties = sv.warranties.map((va: any) => {
+                                  const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                  return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                                }).filter((w: Warranty) => w.id);
                                 const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
                                 setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
                               } else {
@@ -622,8 +635,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             const sv = product.storageVariants!.find(sv2 =>
                               sv2.storage.toLowerCase() === selectedStorage?.toLowerCase() && sv2.simType === st
                             );
-                            if (sv?.warrantyIds?.length) {
-                              const svWarranties = sv.warrantyIds.map((id: string) => product.warranties?.find(w => w.id === id)).filter(Boolean);
+                            if (sv?.warranties?.length) {
+                              const svWarranties = sv.warranties.map((va: any) => {
+                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                              }).filter((w: Warranty) => w.id);
                               const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
                               setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
                             } else {
@@ -665,10 +681,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                         setSelectedStorage(storage);
                         if (hasStorageVariants) {
                           const sv = product.storageVariants?.find(s => s.storage.toLowerCase() === storage.toLowerCase());
-                          if (sv?.warrantyIds?.length) {
-                            const resolved = (sv.warrantyIds as string[])
-                              .map((id: string) => (product.warranties ?? []).find(w => w.id === id))
-                              .filter(Boolean) as Warranty[];
+                          if (sv?.warranties?.length) {
+                            const resolved = sv.warranties.map((va: any) => {
+                              const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                              return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                            }).filter((w: Warranty) => w.id);
                             if (resolved.length > 0) {
                               const free = resolved.find(w => w.priceKsh === 0);
                               setSelectedWarranty(free || resolved[0]);
