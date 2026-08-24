@@ -766,7 +766,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           </div>
                         </div>
                         <span className={`font-bold ${isFree ? "text-green-600" : "text-primary"}`}>
-                          {isFree ? "Free" : `${CURRENCY_SYMBOL} ${warranty.priceKsh.toLocaleString()}`}
+                          {isFree ? "Free" : "Included"}
                         </span>
                       </button>
                     );
