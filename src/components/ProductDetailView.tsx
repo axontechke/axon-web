@@ -422,124 +422,54 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       </div>
 
       {/* Main product stage */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-left">
-        {/* Left Column: Premium Framing Image */}
-        <div className="lg:col-span-6 space-y-4">
-          <div
-            className="relative aspect-square rounded-[32px] bg-surface-container-low flex items-center justify-center p-8 overflow-hidden cursor-zoom-in"
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            id="product-zoom-container"
-          >
-            {product.isNew && (
-              <span className="absolute top-4 left-4 z-10 px-3 py-1 rounded bg-primary text-white text-[9px] font-bold uppercase tracking-wider">
-                New Generation
-              </span>
-            )}
-            
-            <img
-              src={availableImages[slideIndex] || product.image}
-              alt={product.name}
-              referrerPolicy="no-referrer"
-              className="w-full max-w-[420px] h-auto object-contain select-none pointer-events-none transition-transform duration-200 ease-out"
-              style={{
-                ...zoomStyle,
-                transform: isZoomed ? "scale(2.2)" : "scale(1)",
-              }}
-              id="detail-main-img"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start text-left">
 
-            {/* Premium Zoom Helper Badge */}
-            <div className="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-xs px-2.5 py-1 rounded-full border border-outline/10 flex items-center gap-1.5 pointer-events-none text-[9px] font-bold text-on-surface-variant transition-opacity duration-200">
-              <ZoomIn className="w-3 h-3 text-primary animate-pulse" />
-              <span>{isZoomed ? "Zoomed" : "Hover to zoom"}</span>
-            </div>
-          </div>
+        {/* ── Mobile: info FIRST, then image ── */}
+        {/* ── Desktop: image left, info right ── */}
 
-          {/* Multiple Images Gallery — shows all images for selected color+storage combo */}
-          {(() => {
-            if (availableImages.length <= 1) return null;
-            return (
-              <div className="flex flex-wrap gap-2 justify-center pt-2">
-                {availableImages.map((imgUrl, idx) => (
-                  <button
-                    key={`${imgUrl}-${idx}`}
-                    onClick={() => setSlideIndex(idx)}
-                    className={`w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low border p-1 transition-all ${
-                      slideIndex === idx
-                        ? "ring-2 ring-primary border-transparent animate-in zoom-in-75 duration-200"
-                        : "border-outline/15 hover:border-outline/30"
-                    }`}
-                  >
-                    <img src={imgUrl} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                  </button>
-                ))}
-              </div>
-            );
-          })()}
-          
-          <div className="flex items-center gap-3 justify-center text-xs text-on-surface-variant/60 bg-surface-container-low p-3.5 rounded-2xl border border-outline/5">
-            <ShieldCheck className="w-4 h-4 text-primary" />
-            <span>Authorized manufacturer warranty and original packaging included.</span>
-          </div>
-        </div>
-
-        {/* Right Column: Information & Configuration (Sticky on Desktop) */}
-        <div className="lg:col-span-6 space-y-6 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
-          <div className="space-y-2">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">{product.category}</span>
-            <h1 className="font-display font-black text-3xl md:text-4xl text-on-surface leading-tight" id="detail-product-name">
+        {/* Right Column: Information — top on mobile, right on desktop */}
+        <div className="order-1 lg:order-2 lg:col-span-6 space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{product.category}</span>
+            <h1 className="font-display font-black text-2xl md:text-3xl lg:text-4xl text-on-surface leading-tight" id="detail-product-name">
               {product.name}
             </h1>
 
             {/* Ratings Summary */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <div className="flex text-amber-500">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${i < Math.floor(Number(averageRating)) ? "fill-amber-500" : "text-gray-300"}`}
+                    className={`w-3.5 h-3.5 ${i < Math.floor(Number(averageRating)) ? "fill-amber-500" : "text-gray-300"}`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-bold text-on-surface">{averageRating}</span>
-              <span className="text-xs text-on-surface-variant/70">({reviewsCount} verification reviews)</span>
+              <span className="text-[11px] font-bold text-on-surface">{averageRating}</span>
+              <span className="text-[10px] text-on-surface-variant/70">({reviewsCount} reviews)</span>
             </div>
           </div>
 
           {/* Pricing */}
-          <div className="py-2 border-y border-outline/10 flex items-center justify-between">
-            <span className="text-2xl font-black text-primary font-display">
+          <div className="py-1.5 border-y border-outline/10">
+            <span className="text-xl md:text-2xl font-black text-primary font-display">
               {product.priceRange || (displayPriceKsh > 0 ? `${CURRENCY_SYMBOL} ${displayPriceKsh.toLocaleString()}` : formatProductPrice(product))}
             </span>
           </div>
 
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            {product.description}
-          </p>
-
-          {/* Configurable Attributes (Variants) */}
-          <div className="space-y-5 pt-2">
-            {/* Colors — only show colors that have images for selected storage */}
+          {/* Colors */}
+          <div className="space-y-3">
             {availableColors && availableColors.length > 0 && (
               <div className="space-y-2">
-                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
                   Colorway: <strong className="text-on-surface">{selectedColor}</strong>
                 </span>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   {availableColors.map((colorEntry) => {
-                    // Support both legacy string[] and new ProductColor[] format
                     const name = typeof colorEntry === 'string' ? colorEntry : (colorEntry as any).name;
                     const hexCode = typeof colorEntry === 'string'
                       ? product.colorCodes?.[name]
                       : (colorEntry as any).code;
-                    // Check if this color has an image for the selected storage
-                    const variantKey = selectedStorage ? `${selectedStorage}|${name}` : `|${name}`;
-                    const hasImageForStorage = !!(product.variantImages as VariantImagesMap)?.[variantKey]?.length;
-                    const hasColorImage = !!(typeof colorEntry === 'object' ? (colorEntry as any).image : product.colorImages?.[name]);
-                    const hasBaseImage = !!product.image;
-                    const isAvailable = hasImageForStorage || hasColorImage || hasBaseImage;
                     let bgStyle: React.CSSProperties | undefined;
                     let bgClass = "bg-gray-400";
                     if (hexCode) {
@@ -560,13 +490,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       else if (name === "Pink" || name === "Rose Gold" || name === "Rose") bgClass = "bg-[#FF2D55]";
                       else if (name === "Orange") bgClass = "bg-[#FF9500]";
                     }
-
                     return (
                       <button
                         key={name}
                         onClick={() => setSelectedColor(name)}
                         style={bgStyle}
-                        className={`w-8 h-8 rounded-full ${!hexCode ? bgClass : ""} transition-all duration-150 flex items-center justify-center ${
+                        className={`w-7 h-7 rounded-full ${!hexCode ? bgClass : ""} transition-all duration-150 flex items-center justify-center ${
                           selectedColor === name ? "ring-2 ring-primary ring-offset-2" : "opacity-85 hover:opacity-100 hover:scale-105"
                         }`}
                         title={name}
@@ -580,64 +509,61 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
             {/* Storage + SIM Type selector */}
             {hasStorageVariants ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Storage row */}
-                <div className="space-y-1.5">
-                  <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                    Storage: <strong className="text-on-surface">{selectedStorage}</strong>
-                  </span>
-                  <div className="flex gap-2 flex-wrap">
-                    {storageOnlyOptions.map((storage) => {
-                      const isSelected = storage === selectedStorage;
-                      return (
-                        <button
-                          key={storage}
-                          onClick={() => {
-                            setSelectedStorage(storage);
-                            setSelectedColor(undefined);
-                            // Auto-set SIM type: if only one variant for this storage, use it; otherwise reset
-                            const variants = product.storageVariants!.filter(sv =>
-                              sv.storage.toLowerCase() === storage.toLowerCase()
-                            );
-                            if (variants.length === 1) {
-                              setSelectedSimType(variants[0].simType as "esim" | "physical");
-                              const sv = variants[0];
-                              if (sv.warranties?.length) {
-                                const svWarranties = sv.warranties.map((va: any) => {
-                                  const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
-                                  return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
-                                }).filter((w: Warranty) => w.id);
-                                const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
-                                setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
-                              } else {
-                                setSelectedWarranty(undefined);
-                              }
+                <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                  Storage: <strong className="text-on-surface">{selectedStorage}</strong>
+                </span>
+                <div className="flex gap-1.5 flex-wrap">
+                  {storageOnlyOptions.map((storage) => {
+                    const isSelected = storage === selectedStorage;
+                    return (
+                      <button
+                        key={storage}
+                        onClick={() => {
+                          setSelectedStorage(storage);
+                          setSelectedColor(undefined);
+                          const variants = product.storageVariants!.filter(sv =>
+                            sv.storage.toLowerCase() === storage.toLowerCase()
+                          );
+                          if (variants.length === 1) {
+                            setSelectedSimType(variants[0].simType as "esim" | "physical");
+                            const sv = variants[0];
+                            if (sv.warranties?.length) {
+                              const svWarranties = sv.warranties.map((va: any) => {
+                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                              }).filter((w: Warranty) => w.id);
+                              const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
+                              setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
                             } else {
-                              setSelectedSimType(null);
                               setSelectedWarranty(undefined);
                             }
-                          }}
-                          className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                            isSelected
-                              ? "bg-on-surface text-surface border-on-surface"
-                              : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
-                          }`}
-                          id={`storage-btn-${storage}`}
-                        >
-                          {storage}
-                        </button>
-                      );
-                    })}
-                  </div>
+                          } else {
+                            setSelectedSimType(null);
+                            setSelectedWarranty(undefined);
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                          isSelected
+                            ? "bg-on-surface text-surface border-on-surface"
+                            : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                        }`}
+                        id={`storage-btn-${storage}`}
+                      >
+                        {storage}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* SIM type row — only shown when multiple sim types exist for selected storage */}
+                {/* SIM type row — only when multiple sim types exist */}
                 {simTypeOptions.length > 1 && (
                   <div className="space-y-1.5">
-                    <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                      SIM Type: <strong className="text-on-surface">{selectedSimType === "esim" ? "eSIM" : "Physical SIM"}</strong>
+                    <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                      SIM: <strong className="text-on-surface">{selectedSimType === "esim" ? "eSIM" : "Physical SIM"}</strong>
                     </span>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap">
                       {simTypeOptions.map((st) => (
                         <button
                           key={st}
@@ -658,7 +584,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                               setSelectedWarranty(undefined);
                             }
                           }}
-                          className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
                             selectedSimType === st
                               ? "bg-on-surface text-surface border-on-surface"
                               : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
@@ -672,11 +598,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 )}
               </div>
             ) : storageOptions.length > 0 ? (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  Storage Capacity: <strong className="text-on-surface">{selectedStorage}</strong>
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                  Storage: <strong className="text-on-surface">{selectedStorage}</strong>
                 </span>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 flex-wrap">
                   {storageOptions.map((storage) => (
                     <button
                       key={storage}
@@ -695,7 +621,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           const variants = product.storageVariants!.filter(sv =>
                             sv.storage.toLowerCase() === storage.toLowerCase()
                           );
-                          // Keep current simType only if it's valid for this storage; otherwise auto-select
                           const currentValid = selectedSimType && variants.some(sv => sv.simType === selectedSimType);
                           if (currentValid) {
                             const sv = variants.find(sv => sv.simType === selectedSimType)!;
@@ -736,7 +661,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           }
                         }
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
                         selectedStorage === storage
                           ? "bg-on-surface text-surface border-on-surface"
                           : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
@@ -750,146 +675,126 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </div>
             ) : null}
 
-            {/* SIM Type */}
-            {availableSimType && (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  SIM Type
-                </span>
-                <div className="flex gap-2">
-                  {availableSimType === "both" ? (
-                    <>
-                      <span className="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-outline/20 text-on-surface">Physical SIM + eSIM</span>
-                    </>
-                  ) : availableSimType === "esim" ? (
-                    <span className="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-outline/20 text-on-surface">eSIM</span>
-                  ) : (
-                    <span className="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-outline/20 text-on-surface">Physical SIM</span>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Warranty Selection */}
-            {availableWarranties && availableWarranties.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  Protection Plan
-                </span>
-                <div className="flex flex-col gap-2">
-                  {availableWarranties.map((warranty: Warranty) => {
-                    const isSelected = selectedWarranty?.id === warranty.id;
-                    return (
-                      <button
-                        key={warranty.id}
-                        onClick={() => setSelectedWarranty(warranty)}
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs border transition-all ${
-                          isSelected
-                            ? "bg-primary/5 border-primary text-on-surface"
-                            : "bg-surface border-outline/20 text-on-surface-variant hover:border-outline/40"
-                        }`}
-                        id={`warranty-btn-${warranty.id}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            isSelected ? "border-primary bg-primary" : "border-outline/40"
-                          }`}>
-                            {isSelected && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                            )}
-                          </div>
-                          <div className="text-left">
-                            <span className="font-semibold text-on-surface">{warranty.name}</span>
-                            <span className="ml-2 text-[10px] text-on-surface-variant/70">{warranty.duration}</span>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* Quantity Selector and CTA */}
-            <div className="pt-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+            <div className="pt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
               <div className="flex items-center bg-surface-container-low border border-outline/20 rounded-full w-fit">
-                <button
-                  onClick={handleDecreaseQty}
-                  className="p-2.5 px-4 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-40"
-                  disabled={quantity <= 1}
-                  aria-label="Decrease detail qty"
-                >
+                <button onClick={handleDecreaseQty} className="p-2 px-3.5 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-40" disabled={quantity <= 1} aria-label="Decrease qty">
                   <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="font-bold text-sm px-3 text-on-surface min-w-[24px] text-center">{quantity}</span>
-                <button
-                  onClick={handleIncreaseQty}
-                  className="p-2.5 px-4 text-on-surface-variant hover:text-primary transition-colors"
-                  aria-label="Increase detail qty"
-                >
+                <span className="font-bold text-xs px-3 text-on-surface min-w-[20px] text-center">{quantity}</span>
+                <button onClick={handleIncreaseQty} className="p-2 px-3.5 text-on-surface-variant hover:text-primary transition-colors" aria-label="Increase qty">
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
-
               <button
                 onClick={handleAddToCartClick}
                 disabled={!product.inStock}
-                className="flex-1 py-3.5 px-6 rounded-full text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed glass-btn-ios-primary"
+                className="flex-1 py-3 px-6 rounded-full text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed glass-btn-ios-primary"
                 id="add-to-cart-detail-btn"
               >
                 {product.inStock ? "Add to Cart" : "Temporarily Sold Out"}
               </button>
             </div>
 
-            {/* Price Tracker Monitor Card */}
-            <div className="mt-8 p-5 rounded-2xl bg-surface-container-low border border-outline/10 space-y-3.5">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-primary/10 rounded-xl text-primary shrink-0">
-                  <Bell className="w-4 h-4" />
+            {/* Price Tracker */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-outline/10 space-y-2.5">
+              <div className="flex items-start gap-2.5">
+                <div className="p-1.5 bg-primary/10 rounded-lg text-primary shrink-0 mt-0.5">
+                  <Bell className="w-3.5 h-3.5" />
                 </div>
-                <div className="space-y-1">
-                  <h4 className="text-xs font-black text-on-surface uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Price Alert</span>
-                    <span className="flex items-center text-[10px] text-green-700 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-normal">
-                      <TrendingDown className="w-2.5 h-2.5 mr-0.5 text-green-600" />
-                      Active
+                <div className="space-y-0.5">
+                  <h4 className="text-[10px] font-black text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                    Price Alert
+                    <span className="flex items-center text-[9px] text-green-700 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-normal normal-case">
+                      <TrendingDown className="w-2 h-2 mr-0.5 text-green-600" />Active
                     </span>
                   </h4>
-                  <p className="text-[11px] text-on-surface-variant/80 leading-relaxed">
-                    Enter your email to receive an instant system notification when the price of the <strong>{product.name}</strong> drops below its current value of <strong>{formatProductPrice(product)}</strong>.
+                  <p className="text-[10px] text-on-surface-variant/80 leading-relaxed">
+                    Get notified when <strong>{product.name}</strong> price drops.
                   </p>
                 </div>
               </div>
-
-              <form onSubmit={handleTrackPrice} className="flex gap-2 items-center">
+              <form onSubmit={handleTrackPrice} className="flex gap-1.5 items-center">
                 <input
                   type="email"
                   value={trackerEmail}
                   onChange={(e) => setTrackerEmail(e.target.value)}
                   placeholder="name@company.com"
-                  className="flex-1 px-3 py-2 text-xs rounded-xl border border-outline/15 bg-surface text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-sans"
+                  className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg border border-outline/15 bg-surface text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary font-sans"
                   disabled={trackerStatus === "submitting"}
                   required
                 />
                 <button
                   type="submit"
                   disabled={trackerStatus === "submitting"}
-                  className="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer select-none disabled:opacity-50 glass-btn-ios-primary"
+                  className="px-3 py-1.5 text-[10px] font-bold rounded-lg cursor-pointer disabled:opacity-50 glass-btn-ios-primary"
                 >
-                  {trackerStatus === "submitting" ? "Setting up..." : "Monitor Price"}
+                  {trackerStatus === "submitting" ? "..." : "Monitor"}
                 </button>
               </form>
-
               {trackerMessage && (
-                <div className={`p-2.5 rounded-xl text-[11px] font-bold ${
-                  trackerStatus === "success" 
-                    ? "bg-green-50 text-green-700 border border-green-100" 
-                    : "bg-red-50 text-red-700 border border-red-100"
+                <div className={`p-2 rounded-lg text-[10px] font-bold ${
+                  trackerStatus === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
                 }`}>
                   {trackerMessage}
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Left Column: Image */}
+        <div className="order-2 lg:order-1 lg:col-span-6 space-y-3">
+          <div
+            className="relative aspect-square rounded-2xl lg:rounded-[32px] bg-surface-container-low flex items-center justify-center p-6 overflow-hidden cursor-zoom-in"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            id="product-zoom-container"
+          >
+            {product.isNew && (
+              <span className="absolute top-3 left-3 z-10 px-2.5 py-0.5 rounded bg-primary text-white text-[9px] font-bold uppercase tracking-wider">
+                New
+              </span>
+            )}
+            <img
+              src={availableImages[slideIndex] || product.image}
+              alt={product.name}
+              referrerPolicy="no-referrer"
+              className="w-full max-w-[380px] h-auto object-contain select-none pointer-events-none transition-transform duration-200 ease-out"
+              style={{
+                ...zoomStyle,
+                transform: isZoomed ? "scale(2.2)" : "scale(1)",
+              }}
+              id="detail-main-img"
+            />
+            <div className="absolute bottom-3 right-3 bg-surface/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-outline/10 flex items-center gap-1 pointer-events-none text-[9px] font-bold text-on-surface-variant">
+              <ZoomIn className="w-2.5 h-2.5 text-primary animate-pulse" />
+              <span>{isZoomed ? "Zoomed" : "Hover to zoom"}</span>
+            </div>
+          </div>
+
+          {availableImages.length > 1 && (
+            <div className="flex flex-wrap gap-1.5 justify-center">
+              {availableImages.map((imgUrl, idx) => (
+                <button
+                  key={`${imgUrl}-${idx}`}
+                  onClick={() => setSlideIndex(idx)}
+                  className={`w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low border p-0.5 transition-all ${
+                    slideIndex === idx
+                      ? "ring-2 ring-primary border-transparent"
+                      : "border-outline/15 hover:border-outline/30"
+                  }`}
+                >
+                  <img src={imgUrl} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 justify-center text-[10px] text-on-surface-variant/60 bg-surface-container-low p-2.5 rounded-xl border border-outline/5">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+            <span>Authorized manufacturer warranty & original packaging included.</span>
           </div>
         </div>
       </div>
