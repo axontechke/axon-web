@@ -764,7 +764,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             <span className="ml-2 text-[10px] text-on-surface-variant/70">{warranty.duration}</span>
                           </div>
                         </div>
-                        <span className="font-bold text-primary">
                       </button>
                     );
                   })}
