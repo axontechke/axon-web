@@ -3058,9 +3058,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                           <input
                                             type="number"
                                             value={overridePrice}
-                                            min={0}
                                             onChange={e => {
-                                              const val = Number(e.target.value) || 0;
+                                              const val = Number(e.target.value);
                                               setSvWarranties(prev =>
                                                 prev.map(sv => sv.id === w.id ? { ...sv, priceKsh: val } : sv)
                                               );
