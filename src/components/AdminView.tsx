@@ -2841,8 +2841,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                                 setEditingProduct(prev => {
                                   const current = prev || {} as any;
+                                  // Filter out the variant being edited (use originalKey to identify it, so we remove the old entry)
+                                  const keyToRemove = editingSvOriginalKey || newKey;
                                   const existing = (current.storageVariants || []).filter(
-                                    (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== (editingSvOriginalKey || newKey)
+                                    (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== keyToRemove
                                   );
                                   const updated = [...existing, { ...editingSv, colors: svColors, warranties: svWarranties } as StorageVariant];
                                   // Optionally merge colors into product-level colors
@@ -2885,11 +2887,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <label className="text-[9px] font-bold text-on-surface-variant uppercase">SIM Type</label>
                               <select
                                 value={editingSv.simType}
-                                onChange={e => setEditingSv({ ...editingSv, simType: e.target.value as "esim" | "physical" })}
+                                onChange={e => setEditingSv({ ...editingSv, simType: e.target.value as "esim" | "physical" | "both" })}
                                 className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
                               >
                                 <option value="physical">Physical SIM</option>
                                 <option value="esim">eSIM</option>
+                                <option value="both">Both</option>
                               </select>
                             </div>
                             <div className="space-y-1">

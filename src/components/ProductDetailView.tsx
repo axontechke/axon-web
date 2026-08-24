@@ -53,10 +53,22 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     storageOptions.length > 0 ? storageOptions[0] : undefined
   );
   // In StorageVariant mode, track the SIM type choice separately (null = not yet selected / single option)
-  const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | null>(() => {
+  // Auto-select the SIM type when there's exactly one variant for the default storage
+  const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | "both" | null>(() => {
     if (!hasStorageVariants) return null;
-    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (storageOnlyOptions[0] || "").toLowerCase());
-    return variants.length === 1 ? (variants[0].simType as "esim" | "physical") : null;
+    if (!storageOnlyOptions.length) return null;
+    const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === storageOnlyOptions[0].toLowerCase());
+    if (variants.length === 1) {
+      // "both" is a valid simType but not a user-selectable option — treat as null (no selector shown)
+      const st = variants[0].simType;
+      return (st === "esim" || st === "physical") ? st : null;
+    }
+    // If multiple SIM types exist for default storage, auto-select the first valid one
+    if (variants.length > 1) {
+      const first = variants[0].simType;
+      return (first === "esim" || first === "physical") ? first : null;
+    }
+    return null;
   });
 
   // Current SV selector key
@@ -87,9 +99,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         (!selectedSimType || sv.simType === selectedSimType)
       ) ?? null)
     : null;
-  const availableColors = hasStorageVariants && selectedStorageVariant
+  // Defensive: ensure availableColors is always an array to prevent crashes
+  const availableColors = (hasStorageVariants && selectedStorageVariant && Array.isArray(selectedStorageVariant.colors))
     ? selectedStorageVariant.colors
-    : product.colors ?? [];
+    : (Array.isArray(product.colors) ? product.colors : []);
   // Resolve warranty objects from the product-level pool using warranties[] (which may have per-variant price overrides)
   const resolvedWarranties: Warranty[] = (selectedStorageVariant?.warranties ?? [])
     .map((va: any) => {
@@ -117,12 +130,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   // selectedColor stores the color NAME string, not the whole ProductColor object
   const getInitialColor = () => {
-    const colors = availableColors;
-    if (colors && colors.length > 0) {
-      const first = colors[0];
-      return typeof first === 'string' ? first : (first as any).name;
-    }
-    return undefined;
+    if (!Array.isArray(availableColors) || availableColors.length === 0) return undefined;
+    const first = availableColors[0];
+    if (!first) return undefined;
+    return typeof first === 'string' ? first : (first as any)?.name;
   };
   const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
@@ -183,11 +194,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
       : (product.storages ?? []);
     setSelectedStorage(opts.length > 0 ? opts[0] : undefined);
-    // Reset SIM type when storage changes
+    // Reset SIM type when storage changes — auto-select when there's only one or multiple (avoid null which causes crashes)
     if (hasStorageVariants) {
       const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (opts[0] || "").toLowerCase());
-      const sim = variants.length === 1 ? variants[0].simType : null;
-      setSelectedSimType(sim as "esim" | "physical" | null);
+      // Auto-select: use first variant when exactly one, or when multiple (don't leave null)
+      const sim = (variants.length >= 1 ? variants[0].simType : null) as "esim" | "physical" | null;
+      setSelectedSimType(sim);
       const matchedSv = variants.find(sv => !sim || sv.simType === sim);
       const resolved = (matchedSv?.warranties ?? [])
         .map((va: any) => {
