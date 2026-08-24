@@ -680,19 +680,46 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                         }
                         setSelectedStorage(storage);
                         if (hasStorageVariants) {
-                          const sv = product.storageVariants?.find(s => s.storage.toLowerCase() === storage.toLowerCase());
-                          if (sv?.warranties?.length) {
-                            const resolved = sv.warranties.map((va: any) => {
-                              const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
-                              return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
-                            }).filter((w: Warranty) => w.id);
-                            if (resolved.length > 0) {
-                              const free = resolved.find(w => w.priceKsh === 0);
-                              setSelectedWarranty(free || resolved[0]);
+                          const variants = product.storageVariants!.filter(sv =>
+                            sv.storage.toLowerCase() === storage.toLowerCase()
+                          );
+                          // Keep current simType only if it's valid for this storage; otherwise auto-select
+                          const currentValid = selectedSimType && variants.some(sv => sv.simType === selectedSimType);
+                          if (currentValid) {
+                            const sv = variants.find(sv => sv.simType === selectedSimType)!;
+                            if (sv.warranties?.length) {
+                              const resolved = sv.warranties.map((va: any) => {
+                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                              }).filter((w: Warranty) => w.id);
+                              if (resolved.length > 0) {
+                                const free = resolved.find(w => w.priceKsh === 0);
+                                setSelectedWarranty(free || resolved[0]);
+                              } else {
+                                setSelectedWarranty(undefined);
+                              }
+                            } else {
+                              setSelectedWarranty(undefined);
+                            }
+                          } else if (variants.length === 1) {
+                            setSelectedSimType(variants[0].simType as "esim" | "physical");
+                            const sv = variants[0];
+                            if (sv.warranties?.length) {
+                              const resolved = sv.warranties.map((va: any) => {
+                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                              }).filter((w: Warranty) => w.id);
+                              if (resolved.length > 0) {
+                                const free = resolved.find(w => w.priceKsh === 0);
+                                setSelectedWarranty(free || resolved[0]);
+                              } else {
+                                setSelectedWarranty(undefined);
+                              }
                             } else {
                               setSelectedWarranty(undefined);
                             }
                           } else {
+                            setSelectedSimType(null);
                             setSelectedWarranty(undefined);
                           }
                         }
