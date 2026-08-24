@@ -1,0 +1,24 @@
+-- Migration 0015: Client display & admin UX changes (code-only, no schema changes)
+--
+-- Summary of changes in this release:
+--
+-- ADMIN:
+-- - Storage variant reordering: storageVariants[] array order now controls display order
+--   in both the saved variants table and the client product selector (storage buttons).
+--   Admin can reorder via ↑↓ buttons in the variants table before publishing.
+-- - Product-level images[] field is now the master URL library for the product.
+--   The "Image Library" section in the product form lists all URLs and lets admin
+--   add/delete. Assigning an image to a color (in variant editor) auto-adds the URL
+--   to the product-level images[] if not already present. Removing the last
+--   assignment from product images removes it from images[] too.
+-- - On opening edit, variant image URLs from both product_variant_images table
+--   and storageVariants[].colors[].image are backfilled into product.images[].
+-- - Product-level colors section is greyed out when storageVariants exist.
+--
+-- CLIENT (ProductDetailView):
+-- - All colors are always shown regardless of whether they have images.
+-- - Slideshow cycles every 3 seconds.
+-- - Storage and SIM type are now separate selector rows:
+--   Storage row shows storage name only (e.g. "256 GB"), no SIM suffix.
+--   SIM type row appears only when multiple SIM types exist for the selected storage.
+-- - availableImages computed from: baseImage + product.images[] + variantImages + color.image
