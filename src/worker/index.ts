@@ -1134,6 +1134,17 @@ async function getAnalytics(_req: Request, env: Env): Promise<Response> {
 async function createProduct(req: Request, env: Env): Promise<Response> {
   const data = await jsonBody(req);
   const id = data.id || generateId("product");
+  // Deduplicate storageVariants: keep last occurrence of each (storage, simType) pair
+  const rawSv = data.storageVariants || [];
+  const lastIndexOfKey = new Map<string, number>();
+  rawSv.forEach((sv: any, i: number) => {
+    const key = `${sv.storage || ""}|${sv.simType || ""}`.toLowerCase();
+    lastIndexOfKey.set(key, i);
+  });
+  const storageVariants = rawSv.filter((_: any, i: number) => {
+    const key = `${_.storage || ""}|${_.simType || ""}`.toLowerCase();
+    return lastIndexOfKey.get(key) === i;
+  });
   await env.DB.prepare(
     `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, colorCodes, variants, storageVariants, simType, warranties, images)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -1141,7 +1152,7 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
     data.brand || "", data.image || "", JSON.stringify(data.colors || []), JSON.stringify(data.storages || []),
     data.rating || 0, data.reviewsCount || 0, data.inStock ? 1 : 0, data.isNew ? 1 : 0, data.isBestSeller ? 1 : 0,
     JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {}), JSON.stringify(data.colorCodes || {}), JSON.stringify(data.variants || []),
-    JSON.stringify(data.storageVariants || []), data.simType || null, JSON.stringify(data.warranties || []), JSON.stringify(data.images || [])).run();
+    JSON.stringify(storageVariants), data.simType || null, JSON.stringify(data.warranties || []), JSON.stringify(data.images || [])).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -1220,7 +1231,20 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   if (data.inStock !== undefined) { fields.push("inStock = ?"); values.push(data.inStock ? 1 : 0); }
   if (data.isNew !== undefined) { fields.push("isNew = ?"); values.push(data.isNew ? 1 : 0); }
   if (data.isBestSeller !== undefined) { fields.push("isBestSeller = ?"); values.push(data.isBestSeller ? 1 : 0); }
-  if (data.storageVariants !== undefined) { fields.push("storageVariants = ?"); values.push(JSON.stringify(data.storageVariants)); }
+  if (data.storageVariants !== undefined) {
+    // Deduplicate: keep last occurrence of each (storage, simType) pair
+    const variants = data.storageVariants as any[];
+    const lastIndexOfKey = new Map<string, number>();
+    variants.forEach((sv, i) => {
+      const key = `${sv.storage || ""}|${sv.simType || ""}`.toLowerCase();
+      lastIndexOfKey.set(key, i);
+    });
+    const deduplicated = variants.filter((_, i) => {
+      const key = `${_.storage || ""}|${_.simType || ""}`.toLowerCase();
+      return lastIndexOfKey.get(key) === i;
+    });
+    fields.push("storageVariants = ?"); values.push(JSON.stringify(deduplicated));
+  }
   if (data.simType !== undefined) { fields.push("simType = ?"); values.push(data.simType); }
   if (data.warranties !== undefined) { fields.push("warranties = ?"); values.push(JSON.stringify(data.warranties)); }
   if (data.images !== undefined) { fields.push("images = ?"); values.push(JSON.stringify(data.images)); }
