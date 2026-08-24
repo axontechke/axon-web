@@ -816,6 +816,66 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setEditingProduct({ ...editingProduct, storageVariants: arr });
   };
 
+  const handleCommitVariant = (): boolean => {
+    if (!editingSv) return true;
+    if (!editingSv.storage?.trim()) {
+      alert("Storage name is required for the variant.");
+      return false;
+    }
+    const newKey = `${editingSv.storage.trim()}|${editingSv.simType}`.toLowerCase();
+    const currentSv = editingProduct?.storageVariants || [];
+    
+    if (editingSvOriginalKey) {
+      if (editingSvOriginalKey !== newKey) {
+        if (currentSv.some(sv => `${sv.storage}|${sv.simType}`.toLowerCase() === newKey)) {
+          alert("This storage + SIM variant already exists.");
+          return false;
+        }
+      }
+    } else {
+      if (currentSv.some(sv => `${sv.storage}|${sv.simType}`.toLowerCase() === newKey)) {
+        alert("This storage + SIM variant already exists.");
+        return false;
+      }
+    }
+
+    const keyToRemove = editingSvOriginalKey || newKey;
+    const existing = (currentSv || []).filter(
+      (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== keyToRemove
+    );
+    const updatedVariant = {
+      ...editingSv,
+      storage: editingSv.storage.trim(),
+      colors: svColors,
+      warranties: svWarranties
+    } as StorageVariant;
+    const updatedSvList = [...existing, updatedVariant];
+
+    const productColorNames = new Set((editingProduct?.colors || []).map((c: any) => c.name));
+    const newProductColors = svColors
+      .filter(c => svColorProductAssignment[c.name])
+      .filter(c => !productColorNames.has(c.name));
+
+    const updatedStorages = Array.from(new Set(updatedSvList.map(sv => sv.storage).filter(Boolean)));
+
+    setEditingProduct(prev => ({
+      ...prev!,
+      storageVariants: updatedSvList,
+      storages: updatedStorages.length > 0 ? updatedStorages : prev?.storages,
+      colors: newProductColors.length > 0
+        ? [...(prev?.colors || []), ...newProductColors]
+        : prev?.colors || []
+    }));
+
+    setEditingSv(null);
+    setEditingSvOriginalKey(null);
+    setSvColors([]);
+    setSvWarranties([]);
+    setSvColorProductAssignment({});
+    setNewSvStorage("");
+    return true;
+  };
+
   const handleAssignColorImage = async (storage: string, color: string, url: string) => {
     if (!editingProduct?.id) return;
     const key = `${storage}|${color}`;
@@ -857,17 +917,56 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
 
     try {
-      const isNew = !editingProduct.id;
-      const url = isNew ? "/api/admin/products" : `/api/admin/products/${editingProduct.id}`;
+      // Auto-commit any currently open variant editing state if storage is present
+      let currentProduct = { ...editingProduct };
+      if (editingSv && editingSv.storage?.trim()) {
+        const newKey = `${editingSv.storage.trim()}|${editingSv.simType}`.toLowerCase();
+        const keyToRemove = editingSvOriginalKey || newKey;
+        const existing = (currentProduct.storageVariants || []).filter(
+          (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== keyToRemove
+        );
+        const updatedVariant = {
+          ...editingSv,
+          storage: editingSv.storage.trim(),
+          colors: svColors,
+          warranties: svWarranties
+        } as StorageVariant;
+        const updatedSvList = [...existing, updatedVariant];
+        const updatedStorages = Array.from(new Set(updatedSvList.map(sv => sv.storage).filter(Boolean)));
+        
+        const productColorNames = new Set((currentProduct.colors || []).map((c: any) => c.name));
+        const newProductColors = svColors
+          .filter(c => svColorProductAssignment[c.name])
+          .filter(c => !productColorNames.has(c.name));
+
+        currentProduct = {
+          ...currentProduct,
+          storageVariants: updatedSvList,
+          storages: updatedStorages.length > 0 ? updatedStorages : currentProduct.storages,
+          colors: newProductColors.length > 0
+            ? [...(currentProduct.colors || []), ...newProductColors]
+            : currentProduct.colors
+        };
+        setEditingProduct(currentProduct);
+        setEditingSv(null);
+        setEditingSvOriginalKey(null);
+        setSvColors([]);
+        setSvWarranties([]);
+        setSvColorProductAssignment({});
+        setNewSvStorage("");
+      }
+
+      const isNew = !currentProduct.id;
+      const url = isNew ? "/api/admin/products" : `/api/admin/products/${currentProduct.id}`;
       const method = isNew ? "POST" : "PUT";
 
       // DEBUG: log storageVariants and warranties being sent
-      console.log("[DEBUG] Saving product warranties:", JSON.stringify(editingProduct.warranties));
-      console.log("[DEBUG] Saving product storageVariants:", JSON.stringify(editingProduct.storageVariants));
+      console.log("[DEBUG] Saving product warranties:", JSON.stringify(currentProduct.warranties));
+      console.log("[DEBUG] Saving product storageVariants:", JSON.stringify(currentProduct.storageVariants));
       const res = await authFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingProduct)
+        body: JSON.stringify(currentProduct)
       });
       // DEBUG: log raw response
       const text = await res.text();
@@ -2814,71 +2913,41 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                       {/* Inline edit form */}
                       {editingSv && (
-                        <div className="bg-surface-container border border-primary/30 rounded-xl p-3 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-black text-primary">
-                              {editingSv.storage}
-                              {editingSv.simType === "esim" ? " (eSIM)" : editingSv.simType === "both" ? " (Dual SIM)" : " (Physical SIM)"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (!editingSv.storage?.trim()) { alert("Storage name is required."); return; }
-                                const newKey = `${editingSv.storage}|${editingSv.simType}`.toLowerCase();
-                                const currentSv = editingProduct?.storageVariants || [];
-                                
-                                if (editingSvOriginalKey) {
-                                  if (editingSvOriginalKey !== newKey) {
-                                    if (currentSv.some(sv => `${sv.storage}|${sv.simType}`.toLowerCase() === newKey)) {
-                                      alert("This storage + SIM variant already exists."); return;
-                                    }
-                                  }
-                                } else {
-                                  if (currentSv.some(sv => `${sv.storage}|${sv.simType}`.toLowerCase() === newKey)) {
-                                    alert("This storage + SIM variant already exists."); return;
-                                  }
-                                }
-
-                                setEditingProduct(prev => {
-                                  const current = prev || {} as any;
-                                  // Filter out the variant being edited (use originalKey to identify it, so we remove the old entry)
-                                  const keyToRemove = editingSvOriginalKey || newKey;
-                                  const existing = (current.storageVariants || []).filter(
-                                    (sv: any) => `${sv.storage}|${sv.simType}`.toLowerCase() !== keyToRemove
-                                  );
-                                  const updated = [...existing, { ...editingSv, colors: svColors, warranties: svWarranties } as StorageVariant];
-                                  // Optionally merge colors into product-level colors
-                                  const productColorNames = new Set((current.colors || []).map((c: any) => c.name));
-                                  const newProductColors = svColors
-                                    .filter(c => svColorProductAssignment[c.name])
-                                    .filter(c => !productColorNames.has(c.name));
-                                  return {
-                                    ...current,
-                                    storageVariants: updated,
-                                    colors: newProductColors.length > 0
-                                      ? [...(current.colors || []), ...newProductColors]
-                                      : current.colors
-                                  };
-                                });
-                                setEditingSv(null);
-                                setEditingSvOriginalKey(null);
-                                setSvColors([]);
-                                setSvWarranties([]);
-                                setSvColorProductAssignment({});
-                              }}
-                              className="text-[10px] font-bold text-green-600 hover:text-green-800 flex items-center gap-1"
-                            >
-                              <Check className="w-3 h-3" /> Save Variant
-                            </button>
+                        <div className="bg-surface-container border-2 border-primary/40 rounded-xl p-3.5 space-y-3.5 shadow-sm">
+                          <div className="flex items-center justify-between pb-2 border-b border-outline/10">
+                            <div>
+                              <span className="text-[12px] font-black text-primary">
+                                {editingSvOriginalKey ? "Editing Variant:" : "New Variant:"} {editingSv.storage || "Unnamed"}
+                                {editingSv.simType === "esim" ? " (eSIM)" : editingSv.simType === "both" ? " (Dual SIM)" : " (Physical SIM)"}
+                              </span>
+                              <p className="text-[9px] text-on-surface-variant/70">Configure options below, then click "Save Variant to List".</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleCommitVariant()}
+                                className="text-[11px] font-bold bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+                              >
+                                <Check className="w-3.5 h-3.5" /> Save Variant to List
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setEditingSv(null); setEditingSvOriginalKey(null); }}
+                                className="text-[11px] font-bold text-red-500 hover:text-red-700 px-2 py-1 flex items-center gap-1"
+                              >
+                                <X className="w-3.5 h-3.5" /> Cancel
+                              </button>
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-4 gap-2">
                             <div className="space-y-1">
-                              <label className="text-[9px] font-bold text-on-surface-variant uppercase">Storage</label>
+                              <label className="text-[9px] font-bold text-on-surface-variant uppercase">Storage *</label>
                               <input
                                 type="text"
                                 value={editingSv.storage}
                                 onChange={e => setEditingSv({ ...editingSv, storage: e.target.value })}
+                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCommitVariant(); } }}
                                 placeholder="e.g. 256GB"
                                 className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
                               />
@@ -2899,8 +2968,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <label className="text-[9px] font-bold text-on-surface-variant uppercase">Price KSh *</label>
                               <input
                                 type="number"
-                                value={editingSv.priceKsh}
+                                value={editingSv.priceKsh || ""}
                                 onChange={e => setEditingSv({ ...editingSv, priceKsh: Number(e.target.value) || 0 })}
+                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCommitVariant(); } }}
+                                placeholder="0"
                                 className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
                                 min="0"
                               />
@@ -2909,8 +2980,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <label className="text-[9px] font-bold text-on-surface-variant uppercase">Stock</label>
                               <input
                                 type="number"
-                                value={editingSv.stock}
+                                value={editingSv.stock || ""}
                                 onChange={e => setEditingSv({ ...editingSv, stock: Number(e.target.value) || 0 })}
+                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCommitVariant(); } }}
+                                placeholder="0"
                                 className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
                                 min="0"
                               />
@@ -3152,6 +3225,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               </>
                             )}
                           </div>
+                          
+                          {/* Bottom action button */}
+                          <div className="pt-2 border-t border-outline/10 flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => { setEditingSv(null); setEditingSvOriginalKey(null); }}
+                              className="px-3 py-1.5 text-[11px] font-bold text-on-surface-variant hover:text-on-surface rounded-lg border border-outline/20"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleCommitVariant()}
+                              className="px-4 py-1.5 text-[11px] font-bold bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+                            >
+                              <Check className="w-3.5 h-3.5" /> {editingSvOriginalKey ? "Update Variant in List" : "Save & Add Variant to List"}
+                            </button>
+                          </div>
                         </div>
                       )}
 
@@ -3264,11 +3355,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                         if (!confirm(`Delete "${sv.storage} ${sv.simType}" variant? This cannot be undone.`)) return;
                                         setEditingProduct(prev => {
                                           const current = prev || {} as any;
+                                          const filtered = (current.storageVariants || []).filter(
+                                            (v: any) => `${v.storage}|${v.simType}`.toLowerCase() !== `${sv.storage}|${sv.simType}`.toLowerCase()
+                                          );
+                                          const updatedStorages = Array.from(new Set(filtered.map((v: any) => v.storage).filter(Boolean)));
                                           return {
                                             ...current,
-                                            storageVariants: (current.storageVariants || []).filter(
-                                              (v: any) => `${v.storage}|${v.simType}`.toLowerCase() !== `${sv.storage}|${sv.simType}`.toLowerCase()
-                                            )
+                                            storageVariants: filtered,
+                                            storages: updatedStorages.length > 0 ? updatedStorages : current.storages
                                           };
                                         });
                                       }}
