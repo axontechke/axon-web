@@ -740,7 +740,6 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 <div className="flex flex-col gap-2">
                   {availableWarranties.map((warranty: Warranty) => {
                     const isSelected = selectedWarranty?.id === warranty.id;
-                    const isFree = warranty.priceKsh === 0;
                     return (
                       <button
                         key={warranty.id}
@@ -765,9 +764,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             <span className="ml-2 text-[10px] text-on-surface-variant/70">{warranty.duration}</span>
                           </div>
                         </div>
-                        <span className={`font-bold ${isFree ? "text-green-600" : "text-primary"}`}>
-                          {isFree ? "Free" : ""}
-                        </span>
+                        <span className="font-bold text-primary">
                       </button>
                     );
                   })}
