@@ -766,7 +766,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           </div>
                         </div>
                         <span className={`font-bold ${isFree ? "text-green-600" : "text-primary"}`}>
-                          {isFree ? "Free" : "Included"}
+                          {isFree ? "Free" : ""}
                         </span>
                       </button>
                     );
