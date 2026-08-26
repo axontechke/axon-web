@@ -800,8 +800,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       </div>
 
       {/* Tabs segment: Specifications & Customer Reviews */}
-      <div className="border-t border-outline/10 pt-10 text-left">
-        <div className="flex border-b border-outline/10 gap-6 text-sm font-semibold mb-6">
+      <div className="border-t border-outline/10 pt-6 md:pt-10 text-left">
+        <div className="flex border-b border-outline/10 gap-4 md:gap-6 text-xs md:text-sm font-semibold mb-4 md:mb-6">
           <button
             onClick={() => setActiveTab("specs")}
             className={`pb-3 border-b-2 transition-all ${
@@ -825,10 +825,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         {/* Tab 1: Specs */}
         {activeTab === "specs" && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start">
               {/* Specification table */}
-              <div className="border border-outline/10 rounded-2xl overflow-hidden bg-surface-container-low">
-                <table className="w-full text-xs text-left border-collapse">
+              <div className="border border-outline/10 rounded-xl md:rounded-2xl overflow-hidden bg-surface-container-low">
+                <table className="w-full text-[11px] md:text-xs text-left border-collapse">
                   <tbody>
                     {product.specifications ? (
                       Object.entries(product.specifications).map(([key, value], idx) => (
@@ -836,8 +836,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           key={key} 
                           className={`border-b border-outline/5 ${idx % 2 === 0 ? "bg-white/40" : "bg-transparent"}`}
                         >
-                          <th className="py-3.5 px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">{key}</th>
-                          <td className="py-3.5 px-4 text-on-surface font-medium">{value}</td>
+                          <th className="py-2.5 md:py-3.5 px-3 md:px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">{key}</th>
+                          <td className="py-2.5 md:py-3.5 px-3 md:px-4 text-on-surface font-medium">{value}</td>
                         </tr>
                       ))
                     ) : null}
@@ -852,15 +852,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
         {/* Tab 2: Customer Reviews Module */}
         {activeTab === "reviews" && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
               
               {/* Left Column: Review Stats and Add Review Form */}
-              <div className="lg:col-span-5 space-y-6 bg-surface-container-low border border-outline/10 p-6 rounded-3xl">
+              <div className="lg:col-span-5 space-y-4 md:space-y-6 bg-surface-container-low border border-outline/10 p-4 md:p-6 rounded-2xl md:rounded-3xl">
                 <div className="space-y-2">
-                  <h3 className="font-display font-bold text-base text-on-surface">Customer Reviews</h3>
+                  <h3 className="font-display font-bold text-sm md:text-base text-on-surface">Customer Reviews</h3>
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl font-black text-on-surface font-display">{averageRating}</span>
+                    <span className="text-2xl md:text-3xl font-black text-on-surface font-display">{averageRating}</span>
                     <div className="space-y-0.5">
                       <div className="flex text-amber-500">
                         {[...Array(5)].map((_, i) => (
@@ -876,7 +876,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 </div>
 
                 {/* Form to post a review */}
-                <form onSubmit={handleAddReview} className="space-y-4 pt-4 border-t border-outline/10" id="write-review-form">
+                <form onSubmit={handleAddReview} className="space-y-3 md:space-y-4 pt-3 md:pt-4 border-t border-outline/10" id="write-review-form">
                   <h4 className="font-display font-semibold text-xs text-on-surface-variant uppercase tracking-wider">Log a Customer Review</h4>
                   
                   {formSuccess && (
@@ -899,7 +899,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                           id={`star-select-${val}`}
                           aria-label={`Rate ${val} stars`}
                         >
-                          <Star className={`w-6 h-6 ${val <= formRating ? "fill-amber-500" : "text-gray-300"}`} />
+                          <Star className={`w-5 h-5 md:w-6 md:h-6 ${val <= formRating ? "fill-amber-500" : "text-gray-300"}`} />
                         </button>
                       ))}
                     </div>
@@ -956,11 +956,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </div>
 
               {/* Right Column: Reviews feed */}
-              <div className="lg:col-span-7 space-y-4">
+              <div className="lg:col-span-7 space-y-3 md:space-y-4">
                 {reviewsList.map((review) => (
                   <div 
                     key={review.id} 
-                    className="p-4 bg-surface-container-low border border-outline/10 rounded-2xl space-y-2 transition-shadow hover:shadow-xs"
+                    className="p-3 md:p-4 bg-surface-container-low border border-outline/10 rounded-xl md:rounded-2xl space-y-1.5 md:space-y-2 transition-shadow hover:shadow-xs"
                     id={`review-item-${review.id}`}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -973,7 +973,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             </span>
                           )}
                         </div>
-                        <h4 className="font-display font-bold text-sm text-on-surface">
+                        <h4 className="font-display font-bold text-xs md:text-sm text-on-surface">
                           {review.title}
                         </h4>
                       </div>
@@ -989,7 +989,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       ))}
                     </div>
 
-                    <p className="text-xs text-on-surface-variant/90 leading-relaxed">
+                    <p className="text-[11px] md:text-xs text-on-surface-variant/90 leading-relaxed">
                       {review.content}
                     </p>
                   </div>
