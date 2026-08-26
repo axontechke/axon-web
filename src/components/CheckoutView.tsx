@@ -434,7 +434,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                     if (!item?.product?.id) return null;
                     return (
                     <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
-                      <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-[#f5f5f5] p-1 border object-contain shrink-0" />
+                      <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-white p-1 border object-contain shrink-0" />
                       <div className="flex-1 min-w-0">
                         <h4 className="text-[11px] font-bold text-on-surface truncate">{item.product.name}</h4>
                         <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
@@ -475,7 +475,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 if (!item?.product?.id) return null;
                 return (
                 <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
-                  <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg bg-surface p-1 border object-contain shrink-0" />
+                  <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg bg-white p-1 border object-contain shrink-0" />
                   <div className="flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-on-surface truncate">{item.product.name}</h4>
                     <p className="text-[10px] text-on-surface-variant/70 font-medium">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>

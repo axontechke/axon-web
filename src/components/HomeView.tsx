@@ -700,7 +700,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )}
                   </div>
                   
-                  <div className="relative w-full flex justify-center items-center bg-[#f5f5f5] rounded-2xl">
+                  <div className="relative w-full flex justify-center items-center bg-white rounded-2xl">
                     {!isLarge && <div className="absolute w-20 sm:w-32 h-20 sm:h-32 rounded-full bg-primary/5 blur-2xl pointer-events-none" />}
                     {isLarge && <div className="absolute w-32 sm:w-44 h-32 sm:h-44 rounded-full bg-primary/5 blur-2xl pointer-events-none" />}
                     <img
@@ -745,7 +745,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             return finalProducts.map((product) => (
               <div 
                 key={product.id}
-                className="bg-surface-container-low rounded-xl md:rounded-[24px] border border-outline/10 p-2 sm:p-3 flex flex-col justify-between group transition-all hover:shadow-xs"
+                className="bg-white rounded-xl md:rounded-[24px] border border-outline/10 p-2 sm:p-3 flex flex-col justify-between group transition-all hover:shadow-xs"
                 id={`spotlight-${product.id}`}
               >
                 <div 
@@ -753,7 +753,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   className="cursor-pointer space-y-2 text-left"
                 >
                   {/* Product Image Stage */}
-                  <div className="relative h-24 sm:h-28 md:h-36 rounded-lg md:rounded-2xl bg-surface flex items-center justify-center p-2 overflow-hidden border border-outline/5">
+                  <div className="relative h-24 sm:h-28 md:h-36 rounded-lg md:rounded-2xl bg-white flex items-center justify-center p-2 overflow-hidden border border-outline/5">
                     {product.isNew && (
                       <span className="absolute top-1.5 left-1.5 px-1.5 py-0.2 rounded bg-primary text-white text-[6px] md:text-[8px] font-bold uppercase tracking-wider">
                         New

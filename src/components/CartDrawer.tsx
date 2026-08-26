@@ -155,7 +155,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         src={item.product.image}
                         alt={item.product.name}
                         referrerPolicy="no-referrer"
-                        className="w-20 h-20 rounded-xl object-contain bg-surface p-1 border border-outline/5 shrink-0"
+                        className="w-20 h-20 rounded-xl object-contain bg-white p-1 border border-outline/10 shrink-0"
                       />
                       <div className="flex-1 space-y-1 min-w-0">
                         <h4 className="font-display font-bold text-sm text-on-surface truncate">

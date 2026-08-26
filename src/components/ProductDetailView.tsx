@@ -424,14 +424,14 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       {/* Main product stage */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start text-left">
 
-        {/* ── Mobile: info FIRST, then image ── */}
+        {/* ── Mobile: image FIRST, then info ── */}
         {/* ── Desktop: image left, info right ── */}
 
-        {/* Right Column: Information — top on mobile, right on desktop */}
-        <div className="order-1 lg:order-2 lg:col-span-6 space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
+        {/* Right Column: Information — bottom on mobile, right on desktop */}
+        <div className="order-2 lg:order-2 lg:col-span-6 space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{product.category}</span>
-            <h1 className="font-display font-black text-2xl md:text-3xl lg:text-4xl text-on-surface leading-tight" id="detail-product-name">
+            <h1 className="font-display font-black text-lg md:text-3xl lg:text-4xl text-on-surface leading-tight" id="detail-product-name">
               {product.name}
             </h1>
 
@@ -452,7 +452,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
           {/* Pricing */}
           <div className="py-1.5 border-y border-outline/10">
-            <span className="text-xl md:text-2xl font-black text-primary font-display">
+            <span className="text-lg md:text-2xl font-black text-primary font-display">
               {product.priceRange || (displayPriceKsh > 0 ? `${CURRENCY_SYMBOL} ${displayPriceKsh.toLocaleString()}` : formatProductPrice(product))}
             </span>
           </div>
@@ -676,7 +676,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             ) : null}
 
             {/* Quantity Selector and CTA */}
-            <div className="pt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            <div className="pt-3 flex flex-row gap-3 items-center">
               <div className="flex items-center bg-surface-container-low border border-outline/20 rounded-full w-fit">
                 <button onClick={handleDecreaseQty} className="p-2 px-3.5 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-40" disabled={quantity <= 1} aria-label="Decrease qty">
                   <Minus className="w-3.5 h-3.5" />
@@ -743,10 +743,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </div>
         </div>
 
-        {/* Left Column: Image */}
-        <div className="order-2 lg:order-1 lg:col-span-6 space-y-3">
+        {/* Left Column: Image — top on mobile, left on desktop */}
+        <div className="order-1 lg:order-1 lg:col-span-6 space-y-3">
           <div
-            className="relative aspect-square rounded-2xl lg:rounded-[32px] bg-surface-container-low flex items-center justify-center p-6 overflow-hidden cursor-zoom-in"
+            className="relative aspect-square rounded-2xl lg:rounded-[32px] bg-white flex items-center justify-center p-6 overflow-hidden cursor-zoom-in border border-outline/10 shadow-xs"
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -780,7 +780,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 <button
                   key={`${imgUrl}-${idx}`}
                   onClick={() => setSlideIndex(idx)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low border p-0.5 transition-all ${
+                  className={`w-12 h-12 rounded-lg overflow-hidden bg-white border p-0.5 transition-all ${
                     slideIndex === idx
                       ? "ring-2 ring-primary border-transparent"
                       : "border-outline/15 hover:border-outline/30"
@@ -792,7 +792,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             </div>
           )}
 
-          <div className="flex items-center gap-2 justify-center text-[10px] text-on-surface-variant/60 bg-surface-container-low p-2.5 rounded-xl border border-outline/5">
+          <div className="hidden md:flex items-center gap-2 justify-center text-[10px] text-on-surface-variant/60 bg-surface-container-low p-2.5 rounded-xl border border-outline/5">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
             <span>Authorized manufacturer warranty & original packaging included.</span>
           </div>
@@ -1025,12 +1025,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   onClick={() => onSelectProduct(prod)}
                   className="text-left group"
                 >
-                  <div className="aspect-square rounded-2xl bg-surface-container-low overflow-hidden border border-outline/10 mb-2">
+                  <div className="aspect-square rounded-2xl bg-white overflow-hidden border border-outline/10 mb-2 p-2 flex items-center justify-center">
                     <img
                       src={prod.image}
                       alt={prod.name}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                   <p className="text-[11px] font-semibold text-on-surface leading-tight line-clamp-2">{prod.name}</p>
