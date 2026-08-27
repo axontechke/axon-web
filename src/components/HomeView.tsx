@@ -275,7 +275,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 {/* Ultra-Clean Floating Device Pill Overlay */}
                 {highlightedProduct && (
                   <div className="absolute bottom-4 left-4 right-auto sm:left-6 sm:bottom-6 z-10 flex flex-row items-center justify-between bg-black/60 backdrop-blur-xl border border-white/10 p-2.5 pr-3 sm:py-3 sm:px-6 rounded-full gap-3 sm:gap-6 shadow-2xl max-w-[85%] sm:max-w-xl animate-in fade-in slide-in-from-bottom-6 duration-500" key={`pill-${activeSlide?.id}`}>
-                    <div className="text-left space-y-0.5 sm:space-y-1 overflow-hidden">
+                    <div className="hidden sm:block text-left space-y-0.5 sm:space-y-1 overflow-hidden">
                       <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-white/50 font-bold block font-mono truncate">
                         {activeSlide?.tag || "Featured Device"}
                       </span>
@@ -289,10 +289,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     
                     <button
                       onClick={handleMediaOnlyCTA}
-                      className="shrink-0 w-auto px-3 sm:px-5 py-1.5 sm:py-2.5 bg-white hover:bg-white/90 text-black active:scale-95 rounded-full text-[9px] sm:text-xs font-black flex items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-lg animate-in fade-in duration-300"
+                      className="shrink-0 w-auto px-2.5 sm:px-4 py-1 sm:py-1.5 bg-white hover:bg-white/90 text-black active:scale-95 rounded-full text-[8px] sm:text-[11px] leading-none font-black flex items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-lg animate-in fade-in duration-300"
                     >
                       <span>Explore</span>
-                      <ArrowRight className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+                      <ArrowRight className="!w-2 !h-2 sm:!w-3 sm:!h-3 shrink-0" />
                     </button>
                   </div>
                 )}
@@ -608,21 +608,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
         return (
           <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4" id="mixed-picks-section">
-            <div className="flex justify-between items-end">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] font-bold text-primary uppercase tracking-wider block">Curated by Admin</span>
-                  <span className="px-1.5 py-0.2 rounded text-[7px] font-bold bg-primary/10 text-primary uppercase tracking-wide">Live</span>
-                </div>
-                <h2 className="font-display font-black text-lg sm:text-xl text-on-surface tracking-tight">
-                  {config?.mixedShowcaseTitle || "Shop Our Mixed Picks"}
-                </h2>
-                {config?.mixedShowcaseSubtitle ? (
-                  <p className="text-[10px] sm:text-xs text-on-surface-variant/70">{config.mixedShowcaseSubtitle}</p>
-                ) : (
-                  <p className="text-[10px] sm:text-xs text-on-surface-variant/70">Hand-picked across every category.</p>
-                )}
-              </div>
+            <div className="flex justify-end items-center">
               <button
                 onClick={() => onNavigateToCatalog("All")}
                 className="text-primary hover:text-primary-hover font-semibold text-xs flex items-center gap-1 group whitespace-nowrap"
