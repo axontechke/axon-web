@@ -13,6 +13,11 @@ export interface WebConfig {
   categoriesList?: string[];
   activePromos?: any[];
   spotlightProducts?: string[];
+  mixedShowcaseEnabled?: boolean;
+  mixedShowcaseTitle?: string;
+  mixedShowcaseSubtitle?: string;
+  mixedShowcaseProducts?: string[];
+  categoriesSectionEnabled?: boolean;
   protocolTitle?: string;
   socialMediaLinks?: any;
   [key: string]: any;

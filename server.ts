@@ -454,7 +454,12 @@ const INITIAL_CONFIG = {
     branch: "Kencom Branch",
     swiftCode: "KCBLKENA"
   },
-  contactPhone: "+254 745 017979"
+  contactPhone: "+254 745 017979",
+  mixedShowcaseEnabled: true,
+  mixedShowcaseTitle: "Shop Our Mixed Picks",
+  mixedShowcaseSubtitle: "Hand-picked across every category.",
+  mixedShowcaseProducts: [],
+  categoriesSectionEnabled: true
 };
 
 // Initial seated orders to demonstrate tracking and analytics on page load

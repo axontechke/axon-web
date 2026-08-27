@@ -440,7 +440,12 @@ const INITIAL_CONFIG: Record<string, any> = {
   ],
   paymentMpesa: { till: "123456", name: "AXON TECHNOLOGIES KE", phone: "+254 745 017979" },
   paymentBank: { name: "KCB Bank", accountName: "Axon Technologies Kenya Limited", accountNumber: "1234567890", branch: "Kencom Branch", swiftCode: "KCBLKENA" },
-  contactPhone: "+254 745 017979"
+  contactPhone: "+254 745 017979",
+  mixedShowcaseEnabled: true,
+  mixedShowcaseTitle: "Shop Our Mixed Picks",
+  mixedShowcaseSubtitle: "Hand-picked across every category.",
+  mixedShowcaseProducts: [],
+  categoriesSectionEnabled: true
 };
 
 const INITIAL_CONTACT: Record<string, any> = {

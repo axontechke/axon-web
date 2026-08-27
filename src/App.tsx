@@ -16,6 +16,7 @@ import { ContactView } from "./components/ContactView";
 import { BlogView } from "./components/BlogView";
 import { SEOHead } from "./components/SEOHead";
 import { WhatsAppFloatingButton } from "./components/WhatsAppFloatingButton";
+import { CookieConsentBanner } from "./components/CookieConsentBanner";
 import { useConfig } from "./context/ConfigContext";
 import API_ROUTES from "./config/api-routes";
 
@@ -549,6 +550,9 @@ function AppContent() {
 
       {/* WhatsApp Floating Button */}
       <WhatsAppFloatingButton />
+
+      {/* Cookie Consent Banner */}
+      <CookieConsentBanner />
     </div>
   );
 }

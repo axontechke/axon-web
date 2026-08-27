@@ -43,7 +43,8 @@ import {
   Plug,
   Palette,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  LayoutGrid
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
@@ -113,6 +114,11 @@ interface WebConfig {
   spotlightTitle?: string;
   spotlightDescription?: string;
   spotlightProducts?: string[];
+  mixedShowcaseEnabled?: boolean;
+  mixedShowcaseTitle?: string;
+  mixedShowcaseSubtitle?: string;
+  mixedShowcaseProducts?: string[];
+  categoriesSectionEnabled?: boolean;
   protocolTitle?: string;
   protocolDescription?: string;
   protocolBadges?: { text: string; icon: string; url: string }[];
@@ -265,7 +271,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [quotaLimitInput, setQuotaLimitInput] = useState<number>(30);
 
   // Config Sub-Tab State
-  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "protocol" | "footer" | "contact" | "whatsapp">("general");
+  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "mixed" | "protocol" | "footer" | "contact" | "whatsapp">("general");
 
   // Data States
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -3787,6 +3793,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
               Catalog Spotlight
             </button>
             <button
+              onClick={() => setConfigSubTab("mixed")}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                configSubTab === "mixed" ? "bg-primary text-white" : "bg-surface-container hover:bg-surface-container-high text-on-surface"
+              }`}
+            >
+              Mixed Showcase ({ (webConfig.mixedShowcaseProducts || []).length || 0 })
+            </button>
+            <button
               onClick={() => setConfigSubTab("protocol")}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 configSubTab === "protocol" ? "bg-primary text-white" : "bg-surface-container hover:bg-surface-container-high text-on-surface"
@@ -4876,6 +4890,35 @@ export const AdminView: React.FC<AdminViewProps> = ({
           {configSubTab === "categories" && (
             <div className="space-y-6">
 
+              {/* ── Section Visibility Toggle ── */}
+              <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+                <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-primary" />
+                  "Shop by Category" Section Visibility
+                </h3>
+                <p className="text-[10px] text-on-surface-variant/70">
+                  This is the existing categories section on the homepage. It is kept by default — but you can turn it off if you prefer to show only the admin-curated Mixed Picks section (or vice versa).
+                </p>
+                <div className="flex items-center justify-between gap-3 border border-outline/10 rounded-2xl p-3 bg-surface">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold text-on-surface block uppercase">Show Shop by Category Section</span>
+                    <span className="text-[9px] text-on-surface-variant/70">Turn off to hide the category grid on the homepage.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setWebConfig(prev => ({ ...prev, categoriesSectionEnabled: !(prev?.categoriesSectionEnabled ?? true) }))}
+                    className={`relative w-12 h-6 rounded-full transition-all cursor-pointer shrink-0 ${
+                      (webConfig.categoriesSectionEnabled ?? true) ? "bg-primary" : "bg-outline/30"
+                    }`}
+                    aria-pressed={webConfig.categoriesSectionEnabled ?? true}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${
+                      (webConfig.categoriesSectionEnabled ?? true) ? "translate-x-6" : "translate-x-0"
+                    }`} />
+                  </button>
+                </div>
+              </div>
+
               {/* ── Live Preview ── */}
               <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b border-outline/10">
@@ -5308,6 +5351,131 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     className="w-full py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md"
                   >
                     Save Spotlight Custom Content
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================= */}
+          {/* CONFIG SUB-TAB: MIXED SHOWCASE          */}
+          {/* ======================================= */}
+          {configSubTab === "mixed" && (
+            <div className="space-y-6">
+              <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+                <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                  <LayoutGrid className="w-4 h-4 text-primary" />
+                  Mixed Picks Showcase (Right After Hero)
+                </h3>
+                <p className="text-[10px] text-on-surface-variant/70">
+                  This section appears immediately after the hero slideshow on the homepage and mixes products from <strong>all categories</strong>. You (the admin) choose exactly which products appear below — the storefront will not pick them randomly.
+                </p>
+
+                <div className="space-y-4 pt-2">
+                  {/* Enable / disable section */}
+                  <div className="flex items-center justify-between gap-3 border border-outline/10 rounded-2xl p-3 bg-surface">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-on-surface block uppercase">Show Mixed Picks Section</span>
+                      <span className="text-[9px] text-on-surface-variant/70">Turn off to hide this section entirely on the homepage.</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setWebConfig(prev => ({ ...prev, mixedShowcaseEnabled: !(prev?.mixedShowcaseEnabled ?? true) }))}
+                      className={`relative w-12 h-6 rounded-full transition-all cursor-pointer shrink-0 ${
+                        (webConfig.mixedShowcaseEnabled ?? true) ? "bg-primary" : "bg-outline/30"
+                      }`}
+                      aria-pressed={webConfig.mixedShowcaseEnabled ?? true}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${
+                        (webConfig.mixedShowcaseEnabled ?? true) ? "translate-x-6" : "translate-x-0"
+                      }`} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-on-surface-variant uppercase block">Section Title</label>
+                    <input
+                      type="text"
+                      value={webConfig.mixedShowcaseTitle || "Shop Our Mixed Picks"}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev, mixedShowcaseTitle: e.target.value }))}
+                      className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                      placeholder="Shop Our Mixed Picks"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-on-surface-variant uppercase block">Section Subtitle</label>
+                    <input
+                      type="text"
+                      value={webConfig.mixedShowcaseSubtitle || ""}
+                      onChange={(e) => setWebConfig(prev => ({ ...prev, mixedShowcaseSubtitle: e.target.value }))}
+                      className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
+                      placeholder="Hand-picked across every category"
+                    />
+                  </div>
+
+                  {/* Admin-selected product list */}
+                  <div className="space-y-3 border-t border-outline/10 pt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-on-surface-variant block uppercase">Products To Show (Mixed Across All Categories)</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = webConfig.mixedShowcaseProducts || [];
+                          setWebConfig(prev => ({ ...prev, mixedShowcaseProducts: [...current, ""] }));
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20 transition-all cursor-pointer"
+                      >
+                        + Add Product
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {(webConfig.mixedShowcaseProducts || []).length === 0 && (
+                        <p className="text-[10px] text-on-surface-variant/60 italic">No products selected. Add products below — they will appear in the order listed.</p>
+                      )}
+                      {(webConfig.mixedShowcaseProducts || []).map((pid, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-on-surface-variant/60 w-5 text-right">{index + 1}.</span>
+                          <select
+                            value={pid || ""}
+                            onChange={(e) => {
+                              const copy = [...(webConfig.mixedShowcaseProducts || [])];
+                              copy[index] = e.target.value;
+                              setWebConfig(prev => ({ ...prev, mixedShowcaseProducts: copy.filter((v, i) => v !== "" || i !== index) }));
+                            }}
+                            className="flex-1 px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-[11px] text-on-surface font-mono"
+                          >
+                            <option value="">-- Choose Product --</option>
+                            {validProductsList.map(p => (
+                              <option key={p.id} value={p.id}>{p.name} ({p.category})</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const copy = [...(webConfig.mixedShowcaseProducts || [])];
+                              copy.splice(index, 1);
+                              setWebConfig(prev => ({ ...prev, mixedShowcaseProducts: copy }));
+                            }}
+                            className="px-2 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-[11px] font-bold hover:bg-red-500/20 transition-all cursor-pointer"
+                            aria-label="Remove product"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-on-surface-variant/60">Tip: pick products from different categories to get a mixed, varied grid. Empty slots are ignored.</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-outline/10">
+                  <button
+                    onClick={handleSaveConfig}
+                    className="w-full py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md"
+                  >
+                    Save Mixed Showcase
                   </button>
                 </div>
               </div>

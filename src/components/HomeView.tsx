@@ -437,7 +437,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="lg:col-span-7 xl:col-span-7 space-y-2.5 sm:space-y-4 text-left flex flex-col justify-center h-full">
                 <div className="inline-flex items-center gap-2 px-3 py-0.5 sm:py-1 rounded-full bg-primary-fixed/60 text-on-primary-fixed text-[8px] sm:text-[10px] font-semibold tracking-wide w-fit animate-in fade-in slide-in-from-top-1 duration-300" key={`tag-${activeSlide?.id}`}>
                   <TagIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
-                  <span>{activeSlide?.tag || config?.announcement?.slice(0, 30) || "AXON TECH"}</span>
+                  <span>{activeSlide?.tag && activeSlide?.tag !== "EDITOR'S PICK" ? activeSlide?.tag : config?.announcement?.slice(0, 30) || "AXON TECH"}</span>
                 </div>
 
                 <h1 className="font-display font-black text-lg sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-on-surface leading-tight tracking-tight flex items-center animate-in fade-in slide-in-from-left-2 duration-400" key={`title-${activeSlide?.id}`}>
@@ -451,11 +451,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="flex flex-wrap gap-1.5 sm:gap-3 pt-0.5 sm:pt-1">
                   <button
                     onClick={activeSlide?.secondaryAction}
-                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-2 cursor-pointer glass-btn-ios-primary"
+                    className="px-1 py-0.5 sm:px-4 sm:py-2 rounded-full text-[7px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 cursor-pointer glass-btn-ios-primary"
                     id="hero-cta-primary"
                   >
                     Explore
-                    <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </button>
                 </div>
 
@@ -564,7 +563,138 @@ export const HomeView: React.FC<HomeViewProps> = ({
         )}
       </section>
 
+      {/* Mixed Picks Showcase (Admin-selected, mixed across all categories) */}
+      {(() => {
+        const mixedEnabled = config?.mixedShowcaseEnabled !== false;
+        if (!mixedEnabled) return null;
+
+        // Resolve admin-selected product ids in the exact order the admin chose
+        const selectedIds: string[] = Array.isArray(config?.mixedShowcaseProducts)
+          ? config.mixedShowcaseProducts
+          : [];
+
+        let mixedProducts: Product[] = selectedIds
+          .map((id) => products.find((p) => p.id === id))
+          .filter(Boolean) as Product[];
+
+        // Fallback so the section still works before an admin configures it:
+        // pick a varied mix across every category (max 8), preserving category variety
+        if (mixedProducts.length === 0 && products.length > 0) {
+          const byCategory = new Map<string, Product[]>();
+          products.forEach((p) => {
+            if (!p?.category) return;
+            if (!byCategory.has(p.category)) byCategory.set(p.category, []);
+            byCategory.get(p.category)!.push(p);
+          });
+          const categories = Array.from(byCategory.keys());
+          const fallback: Product[] = [];
+          let round = 0;
+          while (fallback.length < 8 && categories.length > 0) {
+            let added = false;
+            for (const cat of categories) {
+              const list = byCategory.get(cat)!;
+              if (list[round]) {
+                fallback.push(list[round]);
+                added = true;
+              }
+            }
+            if (!added) break;
+            round += 1;
+          }
+          mixedProducts = fallback;
+        }
+
+        if (mixedProducts.length === 0) return null;
+
+        return (
+          <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4" id="mixed-picks-section">
+            <div className="flex justify-between items-end">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-bold text-primary uppercase tracking-wider block">Curated by Admin</span>
+                  <span className="px-1.5 py-0.2 rounded text-[7px] font-bold bg-primary/10 text-primary uppercase tracking-wide">Live</span>
+                </div>
+                <h2 className="font-display font-black text-lg sm:text-xl text-on-surface tracking-tight">
+                  {config?.mixedShowcaseTitle || "Shop Our Mixed Picks"}
+                </h2>
+                {config?.mixedShowcaseSubtitle ? (
+                  <p className="text-[10px] sm:text-xs text-on-surface-variant/70">{config.mixedShowcaseSubtitle}</p>
+                ) : (
+                  <p className="text-[10px] sm:text-xs text-on-surface-variant/70">Hand-picked across every category.</p>
+                )}
+              </div>
+              <button
+                onClick={() => onNavigateToCatalog("All")}
+                className="text-primary hover:text-primary-hover font-semibold text-xs flex items-center gap-1 group whitespace-nowrap"
+              >
+                View all <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-4">
+              {mixedProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-xl md:rounded-[24px] border border-outline/10 p-2 sm:p-3 flex flex-col justify-between group transition-all hover:shadow-xs"
+                  id={`mixed-${product.id}`}
+                >
+                  <div
+                    onClick={() => onSelectProduct(product)}
+                    className="cursor-pointer space-y-2 text-left"
+                  >
+                    <div className="relative h-24 sm:h-28 md:h-36 rounded-lg md:rounded-2xl bg-white flex items-center justify-center p-2 overflow-hidden border border-outline/5">
+                      {product.isNew && (
+                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.2 rounded bg-primary text-white text-[6px] md:text-[8px] font-bold uppercase tracking-wider">New</span>
+                      )}
+                      {product.isBestSeller && (
+                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.2 rounded bg-on-surface text-surface text-[6px] md:text-[8px] font-bold uppercase tracking-wider">Best</span>
+                      )}
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        referrerPolicy="no-referrer"
+                        className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-103"
+                      />
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <div className="text-[8px] md:text-[10px] font-medium text-on-surface-variant/60">{product.category}</div>
+                      <h3 className="font-display font-bold text-[10px] sm:text-xs md:text-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                        {product.name}
+                      </h3>
+                      <div className="flex items-center gap-0.5">
+                        <div className="flex text-amber-500">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-2 h-2 sm:w-2.5 sm:h-2.5 ${i < Math.floor(product.rating) ? "fill-amber-500 text-amber-500" : "text-gray-300"}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[8px] font-medium text-on-surface-variant/70">({product.reviewsCount})</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 mt-2 border-t border-outline/5">
+                    <span className="font-bold text-[10px] sm:text-xs md:text-sm text-on-surface">{CURRENCY_SYMBOL} {(product.priceKsh || 0).toLocaleString()}</span>
+                    <button
+                      onClick={() => onAddToCart(product, 1)}
+                      className="px-3 py-1.5 rounded-full text-[8px] sm:text-[10px] font-bold text-center cursor-pointer glass-btn-ios"
+                      id={`mixed-add-${product.id}`}
+                    >
+                      Quick Add
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
       {/* Curated Categories */}
+      {config?.categoriesSectionEnabled !== false && (
       <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4" id="curated-categories">
         <div className="flex justify-between items-end">
           <div className="space-y-0.5">
@@ -632,6 +762,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           })}
         </div>
       </section>
+      )}
 
       {/* Bento Grid: Trending Now */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6" id="trending-bento-section">
