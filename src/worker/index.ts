@@ -750,6 +750,8 @@ async function getProducts(_req: Request, env: Env): Promise<Response> {
     inStock: !!p.inStock,
     isNew: !!p.isNew,
     isBestSeller: !!p.isBestSeller,
+    hasVariants: !!p.hasVariants,
+    stock: p.stock || 0,
     colors: JSON.parse(p.colors || "[]"),
     images: JSON.parse(p.images || "[]"),
     storages: JSON.parse(p.storages || "[]"),
@@ -1258,13 +1260,14 @@ async function createProduct(req: Request, env: Env): Promise<Response> {
     return lastIndexOfKey.get(key) === i;
   });
   await env.DB.prepare(
-    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, colorCodes, variants, storageVariants, simType, warranties, images)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, isNew, isBestSeller, specifications, colorImages, colorCodes, variants, storageVariants, simType, warranties, images, hasVariants, stock)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(id, data.name || "", data.price || 0, data.priceKsh || 0, data.description || "", data.category || "",
     data.brand || "", data.image || "", JSON.stringify(data.colors || []), JSON.stringify(data.storages || []),
     data.rating || 0, data.reviewsCount || 0, data.inStock ? 1 : 0, data.isNew ? 1 : 0, data.isBestSeller ? 1 : 0,
     JSON.stringify(data.specifications || {}), JSON.stringify(data.colorImages || {}), JSON.stringify(data.colorCodes || {}), JSON.stringify(data.variants || []),
-    JSON.stringify(storageVariants), data.simType || null, JSON.stringify(data.warranties || []), JSON.stringify(data.images || [])).run();
+    JSON.stringify(storageVariants), data.simType || null, JSON.stringify(data.warranties || []), JSON.stringify(data.images || []),
+    data.hasVariants ? 1 : 0, data.stock || 0).run();
   return corsResponse({ id, ...data }, 201);
 }
 
@@ -1278,6 +1281,8 @@ async function getAdminProduct(_req: Request, env: Env, _ctx: ExecutionContext, 
     inStock: !!row.inStock,
     isNew: !!row.isNew,
     isBestSeller: !!row.isBestSeller,
+    hasVariants: !!row.hasVariants,
+    stock: row.stock || 0,
     colors: JSON.parse(row.colors || "[]"),
     images: JSON.parse(row.images || "[]"),
     storages: JSON.parse(row.storages || "[]"),
@@ -1355,6 +1360,9 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   for (const [jsKey, dbCol] of Object.entries(scalarFields)) {
     if (data[jsKey] !== undefined) { fields.push(`${dbCol} = ?`); values.push(data[jsKey]); }
   }
+  // Boolean fields
+  if (data.hasVariants !== undefined) { fields.push("hasVariants = ?"); values.push(data.hasVariants ? 1 : 0); }
+  if (data.stock !== undefined) { fields.push("stock = ?"); values.push(data.stock); }
   // JSON fields — stringify exactly once per column
   if (data.colors !== undefined) { fields.push("colors = ?"); values.push(JSON.stringify(data.colors)); }
   if (data.storages !== undefined) { fields.push("storages = ?"); values.push(JSON.stringify(data.storages)); }

@@ -559,11 +559,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
       reviewsCount: 1,
       inStock: true,
       colors: [],
-      storages: ["128GB"],
+      storages: [],
       images: [],
       variants: [],
       warranties: [],
       storageVariants: [],
+      hasVariants: false,
+      stock: 10,
       specifications: {
         "Processor": "Quantum Core Architecture",
         "Battery": "Sustained all-day operational capacity"
@@ -679,7 +681,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
       colors: finalColors,
       storages: prod.storages || [],
       variants: prod.variants || [],
-      storageVariants: finalStorageVariants
+      storageVariants: finalStorageVariants,
+      hasVariants: prod.hasVariants !== undefined ? prod.hasVariants : finalStorageVariants.length > 0,
+      stock: prod.stock ?? 10
     });
     setNewVarStorage("");
     setNewVarColor("");
@@ -2599,7 +2603,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     {/* Product Colors — picked from global library */}
                     <div className="border-t border-outline/10 pt-4 space-y-3">
                       {/* Colors for this Product */}
-                      {editingProduct.storageVariants && editingProduct.storageVariants.length > 0 ? (
+                      {(editingProduct.hasVariants ?? false) ? (
                         <div className="opacity-50 pointer-events-none select-none">
                           <h4 className="text-[10px] font-black uppercase text-on-surface-variant/50 tracking-wider">Colors for this Product</h4>
                           <p className="text-[10px] text-on-surface-variant/50 -mt-1">Managed via storage variants below — this section is inactive.</p>
@@ -2707,6 +2711,84 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <span>Instock in Warehouse</span>
                         </label>
                       </div>
+                    </div>
+
+                    {/* Variants toggle */}
+                    <div className="border-t border-outline/10 pt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs">
+                          <input
+                            type="checkbox"
+                            checked={editingProduct.hasVariants ?? false}
+                            onChange={(e) => {
+                              const on = e.target.checked;
+                              setEditingProduct({
+                                ...editingProduct,
+                                hasVariants: on,
+                                storageVariants: on ? (editingProduct.storageVariants || []) : [],
+                                storages: on ? (editingProduct.storages || []) : [],
+                              });
+                              if (!on) { setEditingSv(null); setEditingSvOriginalKey(null); }
+                            }}
+                            className="w-4 h-4 rounded text-primary border-outline/30 focus:ring-0"
+                          />
+                          <span className="font-semibold">Use Storage Variants</span>
+                        </label>
+                        <span className="text-[9px] text-on-surface-variant/60">
+                          {(editingProduct.hasVariants ?? false) ? "ON — per-storage/SIM matrix" : "OFF — single SKU"}
+                        </span>
+                      </div>
+
+                      {/* Simple fields when variants OFF */}
+                      {!(editingProduct.hasVariants ?? false) && (
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant block uppercase">Storage (optional)</label>
+                            <input
+                              type="text"
+                              value={editingProduct.storages?.[0] || ""}
+                              onChange={(e) => {
+                                const val = e.target.value.trim();
+                                setEditingProduct({
+                                  ...editingProduct,
+                                  storages: val ? [val] : [],
+                                });
+                              }}
+                              placeholder="e.g. 256GB"
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant block uppercase">SIM Type (optional)</label>
+                            <select
+                              value={editingProduct.simType || ""}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, simType: e.target.value || undefined })}
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            >
+                              <option value="">None</option>
+                              {globalSimTypes.length > 0 ? globalSimTypes.map((st: any) => (
+                                <option key={st.id} value={st.code}>{st.name}</option>
+                              )) : (
+                                <>
+                                  <option value="physical">Physical SIM</option>
+                                  <option value="esim">eSIM</option>
+                                  <option value="both">Dual SIM</option>
+                                </>
+                              )}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-on-surface-variant block uppercase">Stock</label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={editingProduct.stock ?? 0}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) || 0 })}
+                              className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none text-[11px]"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Rating, Reviews & Badges */}
@@ -2899,9 +2981,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       )}
                     </div>
 
+                    {/* Variant editor — only when hasVariants ON */}
+                    {(editingProduct.hasVariants ?? false) && (
                     <div className="border-t border-outline/10 pt-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-on-surface uppercase">Storage Variants (per-storage + per-SIM-type)</span>
                         {!editingSv ? (
                           <div className="flex items-center gap-2">
                             <input
@@ -3434,6 +3517,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         </div>
                       )}
                     </div>
+                    )}
 
                     <div className="border-t border-outline/10 pt-4 flex gap-3">
                       <button

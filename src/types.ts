@@ -103,6 +103,8 @@ export interface Product {
   reviews?: Review[];
   warranties?: Warranty[]; // available warranty plans; first one is the default/free
   simType?: string; // product-level fallback SIM type — references SimType.code (admin-managed)
+  hasVariants?: boolean; // false = single SKU (no storage/SIM variant matrix)
+  stock?: number; // product-level stock when hasVariants is false
 }
 
 export interface CartItem {
