@@ -72,6 +72,9 @@ export const API_ROUTES = {
 
     colors: `${API_BASE}/admin/colors`,
 
+    simTypes: `${API_BASE}/admin/sim-types`,
+    simTypesPublic: `${API_BASE}/sim-types`,
+
     scrapeUrl: `${API_BASE}/admin/scrape-url`,
     syncRealtimeProducts: `${API_BASE}/admin/sync-realtime-products`,
 

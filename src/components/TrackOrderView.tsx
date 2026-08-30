@@ -58,27 +58,55 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
   const [trackingId, setTrackingId] = useState(initialTrackingId);
   const [searchQuery, setSearchQuery] = useState(initialTrackingId);
   const [order, setOrder] = useState<TrackedOrder | null>(null);
+  const [orders, setOrders] = useState<TrackedOrder[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchQuery.trim()) {
       fetchOrder(searchQuery.trim());
+    } else {
+      setOrder(null);
+      setOrders(null);
+      setError(null);
     }
   }, [searchQuery]);
 
-  const fetchOrder = async (id: string) => {
+  const fetchOrder = async (query: string) => {
     setLoading(true);
     setError(null);
+    setOrder(null);
+    setOrders(null);
+    const q = query.trim();
     try {
-      const res = await fetch(`/api/orders/${id}`);
+      // Privacy-aware search: backend only returns user-related orders matching query (id/email/phone)
+      // Try search endpoint first (supports all three)
+      const searchRes = await fetch(`/api/orders/search?query=${encodeURIComponent(q)}`);
+      if (searchRes.ok) {
+        const data = await searchRes.json();
+        const list: TrackedOrder[] = Array.isArray(data) ? data : [data];
+        if (list.length === 0) throw new Error("No orders found for that tracking ID, email or phone.");
+        if (list.length === 1) {
+          setOrder(list[0]);
+          setOrders(null);
+        } else {
+          // Multiple orders for this email/phone - show list, let user pick one
+          setOrders(list);
+          setOrder(null);
+        }
+        return;
+      }
+      // Fallback: direct ID fetch (for legacy)
+      const res = await fetch(`/api/orders/${encodeURIComponent(q)}`);
       if (!res.ok) {
-        throw new Error("Invalid tracking ID or order not found.");
+        const errBody = await searchRes.json().catch(() => ({}));
+        throw new Error(errBody.error || "No orders found for that tracking ID, email or phone.");
       }
       const data = await res.json();
       setOrder(data);
     } catch (err: any) {
       setOrder(null);
+      setOrders(null);
       setError(err.message || "Failed to locate your package.");
     } finally {
       setLoading(false);
@@ -120,16 +148,16 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
             Track Your Order
           </h1>
           <p className="text-xs text-on-surface-variant/70">
-            Get real-time updates on your delivery status.
+            Enter tracking ID, email or phone - only your orders will be shown.
           </p>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar - privacy: query can be tracking ID or your email/phone */}
         <form onSubmit={handleSearchSubmit} className="flex gap-2 w-full sm:w-auto max-w-md">
           <div className="relative flex-1 sm:w-64">
             <input
               type="text"
-              placeholder="e.g. AXN-827103"
+              placeholder="AXN-xxx, email or 07xx xxx xxx"
               value={trackingId}
               onChange={(e) => setTrackingId(e.target.value)}
               className="w-full px-3.5 py-2 pl-9 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary placeholder:text-on-surface-variant/45"
@@ -154,32 +182,21 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
         </div>
       )}
 
-      {/* Error state */}
+      {/* Error state - privacy: no data leaked, only generic message */}
       {!loading && error && (
         <div className="bg-red-500/5 border border-red-500/15 rounded-2xl p-6 text-center space-y-3">
           <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto">
             <Package className="w-6 h-6" />
           </div>
-          <h3 className="font-display font-bold text-base text-on-surface">Order Not Found</h3>
+          <h3 className="font-display font-bold text-base text-on-surface">No Matching Orders</h3>
           <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-            We couldn't find order <strong className="text-on-surface">{trackingId}</strong>. Please check your order confirmation email for the correct tracking number.
+            No orders found for <strong className="text-on-surface">{trackingId}</strong>. Try your tracking ID, the email or phone you used at checkout.
           </p>
-          <div className="flex justify-center gap-3 pt-2">
-            <button
-              onClick={() => {
-                setTrackingId("AXN-827103");
-                setSearchQuery("AXN-827103");
-              }}
-              className="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer glass-btn-ios"
-            >
-              Use Demo Order
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Empty Search Prompt */}
-      {!loading && !order && !error && (
+      {/* Empty Search Prompt - no data shown until user searches (privacy) */}
+      {!loading && !order && !orders && !error && (
         <div className="py-16 text-center space-y-4 max-w-md mx-auto">
           <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mx-auto text-primary">
             <Truck className="w-8 h-8" />
@@ -187,46 +204,49 @@ export const TrackOrderView: React.FC<TrackOrderViewProps> = ({
           <div className="space-y-1">
             <h2 className="font-display font-bold text-base text-on-surface">Track Your Package</h2>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Enter your order tracking number from your confirmation email to see delivery updates.
+              Enter your tracking number, email or phone. Only orders matching your identifier will be shown - no other customer data is exposed.
             </p>
-          </div>
-          <div className="bg-surface-container-low border border-outline/10 p-4 rounded-2xl text-left space-y-2">
-            <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase block">Sample Tracking Numbers</span>
-            <div className="grid grid-cols-1 gap-2 text-xs">
-              <button
-                onClick={() => {
-                  setTrackingId("AXN-827103");
-                  setSearchQuery("AXN-827103");
-                }}
-                className="flex items-center justify-between p-2 rounded-lg bg-surface hover:bg-surface-container transition-colors text-left border border-outline/5"
-              >
-                <div>
-                  <span className="font-mono font-bold text-primary">AXN-827103</span>
-                  <span className="text-[10px] text-on-surface-variant block">Stephen Paul Kamau (Delivered)</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-on-surface-variant/40" />
-              </button>
-              <button
-                onClick={() => {
-                  setTrackingId("AXN-982714");
-                  setSearchQuery("AXN-982714");
-                }}
-                className="flex items-center justify-between p-2 rounded-lg bg-surface hover:bg-surface-container transition-colors text-left border border-outline/5"
-              >
-                <div>
-                  <span className="font-mono font-bold text-primary">AXN-982714</span>
-                  <span className="text-[10px] text-on-surface-variant block">Clarissa Mitchell (In Transit)</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-on-surface-variant/40" />
-              </button>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Main Order Details Dashboard */}
+      {/* Multiple orders for this email/phone - privacy: only this user's orders */}
+      {!loading && orders && !order && orders.length > 0 && (
+        <div className="space-y-4 text-left">
+          <div className="bg-surface-container-low border border-outline/10 rounded-3xl p-5 shadow-sm">
+            <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-1.5">
+              <Package className="w-4 h-4 text-primary" />
+              <span>Your Orders ({orders.length})</span>
+            </h3>
+            <p className="text-[11px] text-on-surface-variant/70 mt-1">We found {orders.length} orders linked to <strong className="text-on-surface">{searchQuery}</strong>. Select one to view details - only your orders are listed.</p>
+            <div className="divide-y divide-outline/10 mt-4">
+              {orders.map((o) => (
+                <button
+                  key={o.id}
+                  onClick={() => { setOrder(o); setTrackingId(o.id); window.scrollTo({top:0, behavior:"smooth"}); }}
+                  className="w-full flex items-center justify-between py-3.5 text-left hover:bg-surface-container/50 px-2 rounded-xl transition-colors group"
+                >
+                  <div className="space-y-0.5">
+                    <span className="font-mono font-bold text-xs text-primary group-hover:underline">{o.id}</span>
+                    <span className="text-[11px] text-on-surface-variant block">{new Date(o.date).toLocaleDateString()} • {o.status} • {CURRENCY_SYMBOL} {(o.totalKsh || o.total).toLocaleString()}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary" />
+                </button>
+              ))}
+            </div>
+          </div>
+          <button onClick={() => { setOrders(null); setSearchQuery(""); setTrackingId(""); setError(null); }} className="text-xs font-bold text-primary hover:underline">Clear search</button>
+        </div>
+      )}
+
+      {/* Main Order Details Dashboard - only shown after verified search */}
       {!loading && order && (
         <div className="space-y-6 text-left">
+          {orders && orders.length > 1 && (
+            <button onClick={() => setOrder(null)} className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to your orders ({orders.length})
+            </button>
+          )}
           {/* Status Progress Bar Card */}
           <div className="bg-surface-container-low border border-outline/10 rounded-3xl p-5 sm:p-6 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline/10 pb-4">

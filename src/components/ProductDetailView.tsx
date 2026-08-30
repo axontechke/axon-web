@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Star, ShieldCheck, ArrowLeft, Heart, Plus, Minus, CheckCircle, MessageSquare, ZoomIn, Bell, TrendingDown } from "lucide-react";
 import { Product, Review, Warranty, formatProductPrice, CURRENCY_SYMBOL, VariantImagesMap } from "../types";
 
@@ -6,7 +6,7 @@ interface ProductDetailViewProps {
   product: Product;
   products?: Product[];
   onBackToCatalog: () => void;
-  onAddToCart: (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty) => void;
+  onAddToCart: (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty, selectedSimType?: string) => void;
   onSelectProduct: (product: Product) => void;
 }
 
@@ -27,7 +27,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     : (product.storages ?? []);
 
   // In StorageVariant mode, build a list of unique storage options (no simType suffix)
-  type SvOption = { storage: string; simType: "esim" | "physical"; label: string };
+  type SvOption = { storage: string; simType: string; label: string };
   const storageOnlyOptions: string[] = hasStorageVariants
     ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
     : [];
@@ -41,32 +41,37 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           const key = `${sv.storage}|${sv.simType}`;
           if (!seen.has(key)) {
             seen.add(key);
-            opts.push({ storage: sv.storage, simType: sv.simType as "esim" | "physical", label: sv.storage });
+            opts.push({ storage: sv.storage, simType: sv.simType as string, label: sv.storage });
           }
         }
         return opts;
       })()
     : [];
 
+  // ── Global SIM types (admin-managed, fetched once) ──
+  const [globalSimTypes, setGlobalSimTypes] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/sim-types").then(r=>r.json()).then(d=>Array.isArray(d)&&setGlobalSimTypes(d)).catch(()=>{});
+  }, []);
+  const getSimTypeName = (code: string) => {
+    const found = globalSimTypes.find((s:any)=>s.code===code);
+    if (found) return found.name;
+    const raw = String(code||"");
+    return raw.replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase()) || "—";
+  };
+
   // ── useState declarations (must come before any derived values that reference them) ──
   const [selectedStorage, setSelectedStorage] = useState<string | undefined>(
     storageOptions.length > 0 ? storageOptions[0] : undefined
   );
   // In StorageVariant mode, track the SIM type choice separately (null = not yet selected / single option)
-  // Auto-select the SIM type when there's exactly one variant for the default storage
-  const [selectedSimType, setSelectedSimType] = useState<"esim" | "physical" | "both" | null>(() => {
+  // Generic for any product category — auto-select first variant's simType
+  const [selectedSimType, setSelectedSimType] = useState<string | null>(() => {
     if (!hasStorageVariants) return null;
     if (!storageOnlyOptions.length) return null;
     const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === storageOnlyOptions[0].toLowerCase());
-    if (variants.length === 1) {
-      // "both" is a valid simType but not a user-selectable option — treat as null (no selector shown)
-      const st = variants[0].simType;
-      return (st === "esim" || st === "physical") ? st : null;
-    }
-    // If multiple SIM types exist for default storage, auto-select the first valid one
-    if (variants.length > 1) {
-      const first = variants[0].simType;
-      return (first === "esim" || first === "physical") ? first : null;
+    if (variants.length >= 1) {
+      return variants[0].simType || null;
     }
     return null;
   });
@@ -74,12 +79,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   // Current SV selector key
   const svKey = selectedSimType ? `${selectedStorage}|${selectedSimType}` : (selectedStorage ?? "");
 
-  // Available SIM types for the currently selected storage
-  const simTypeOptions: ("esim" | "physical")[] = hasStorageVariants && selectedStorage
+  // Available SIM types for the currently selected storage (dynamic)
+  const simTypeOptions: string[] = hasStorageVariants && selectedStorage
     ? [...new Set(
         product.storageVariants!
           .filter(sv => sv.storage.toLowerCase() === selectedStorage.toLowerCase())
-          .map(sv => sv.simType as "esim" | "physical")
+          .map(sv => sv.simType as string)
       )]
     : [];
 
@@ -100,7 +105,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       ) ?? null)
     : null;
   // Defensive: ensure availableColors is always an array to prevent crashes
-  const availableColors = (hasStorageVariants && selectedStorageVariant && Array.isArray(selectedStorageVariant.colors))
+  // Fix: fallback to product-level colors when variant has empty colors (newly added colors at product level should still display)
+  const availableColors = (hasStorageVariants && selectedStorageVariant && Array.isArray(selectedStorageVariant.colors) && selectedStorageVariant.colors.length > 0)
     ? selectedStorageVariant.colors
     : (Array.isArray(product.colors) ? product.colors : []);
   // Resolve warranty objects from the product-level pool using warranties[] (which may have per-variant price overrides)
@@ -198,7 +204,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     if (hasStorageVariants) {
       const variants = product.storageVariants!.filter(sv => sv.storage.toLowerCase() === (opts[0] || "").toLowerCase());
       // Auto-select: use first variant when exactly one, or when multiple (don't leave null)
-      const sim = (variants.length >= 1 ? variants[0].simType : null) as "esim" | "physical" | null;
+      const sim = (variants.length >= 1 ? variants[0].simType : null) as string | null;
       setSelectedSimType(sim);
       const matchedSv = variants.find(sv => !sim || sv.simType === sim);
       const resolved = (matchedSv?.warranties ?? [])
@@ -404,7 +410,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
 
   const handleAddToCartClick = () => {
-    onAddToCart(product, quantity, selectedColor, selectedStorage, selectedWarranty);
+    // Pass effective SIM type so cart distinguishes variants with newly added SIM types
+    const effectiveSim = selectedSimType || (availableSimType as string) || (simTypeOptions[0] as string) || product.simType || undefined;
+    onAddToCart(product, quantity, selectedColor, selectedStorage, selectedWarranty, effectiveSim);
   };
 
   return (
@@ -457,12 +465,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             </span>
           </div>
 
-          {/* Colors */}
+          {/* Colors — display when any color is set (newly added colors via global library fallback to product-level) */}
           <div className="space-y-3">
             {availableColors && availableColors.length > 0 && (
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  Colorway: <strong className="text-on-surface">{selectedColor}</strong>
+                  Colorway: <strong className="text-on-surface">{selectedColor || (typeof availableColors[0] === 'string' ? availableColors[0] as string : (availableColors[0] as any)?.name) || "—"}</strong>
                 </span>
                 <div className="flex gap-2">
                   {availableColors.map((colorEntry) => {
@@ -527,7 +535,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             sv.storage.toLowerCase() === storage.toLowerCase()
                           );
                           if (variants.length === 1) {
-                            setSelectedSimType(variants[0].simType as "esim" | "physical");
+                            setSelectedSimType(variants[0].simType as string);
                             const sv = variants[0];
                             if (sv.warranties?.length) {
                               const svWarranties = sv.warranties.map((va: any) => {
@@ -557,123 +565,194 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   })}
                 </div>
 
-                {/* SIM type row — only when multiple sim types exist */}
-                {simTypeOptions.length > 1 && (
+                {/* SIM type row — always show when SIM type is set (single = read-only badge, multiple = selector) */}
+                {(simTypeOptions.length > 0 || !!availableSimType) && (
                   <div className="space-y-1.5">
                     <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                      SIM: <strong className="text-on-surface">{selectedSimType === "esim" ? "eSIM" : "Physical SIM"}</strong>
+                      SIM: <strong className="text-on-surface">{getSimTypeName(selectedSimType || (availableSimType as string) || simTypeOptions[0] || "")}</strong>
                     </span>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {simTypeOptions.map((st) => (
-                        <button
-                          key={st}
-                          onClick={() => {
-                            setSelectedSimType(st);
-                            setSelectedColor(undefined);
-                            const sv = product.storageVariants!.find(sv2 =>
-                              sv2.storage.toLowerCase() === selectedStorage?.toLowerCase() && sv2.simType === st
-                            );
-                            if (sv?.warranties?.length) {
-                              const svWarranties = sv.warranties.map((va: any) => {
-                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
-                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
-                              }).filter((w: Warranty) => w.id);
-                              const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
-                              setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
-                            } else {
-                              setSelectedWarranty(undefined);
-                            }
-                          }}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
-                            selectedSimType === st
-                              ? "bg-on-surface text-surface border-on-surface"
-                              : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
-                          }`}
-                        >
-                          {st === "esim" ? "eSIM" : "Physical SIM"}
-                        </button>
-                      ))}
-                    </div>
+                    {simTypeOptions.length > 1 ? (
+                      <div className="flex gap-1.5 flex-wrap">
+                        {simTypeOptions.map((st) => (
+                          <button
+                            key={st}
+                            onClick={() => {
+                              setSelectedSimType(st);
+                              setSelectedColor(undefined);
+                              const sv = product.storageVariants!.find(sv2 =>
+                                sv2.storage.toLowerCase() === selectedStorage?.toLowerCase() && sv2.simType === st
+                              );
+                              if (sv?.warranties?.length) {
+                                const svWarranties = sv.warranties.map((va: any) => {
+                                  const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                  return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                                }).filter((w: Warranty) => w.id);
+                                const free = svWarranties.find((w: Warranty) => w.priceKsh === 0);
+                                setSelectedWarranty((free || svWarranties[0]) as Warranty | undefined);
+                              } else {
+                                setSelectedWarranty(undefined);
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                              selectedSimType === st
+                                ? "bg-on-surface text-surface border-on-surface"
+                                : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                            }`}
+                          >
+                            {getSimTypeName(st)}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex gap-1.5 flex-wrap">
+                        <span className="px-3 py-1.5 rounded-xl text-[11px] font-semibold border bg-on-surface text-surface border-on-surface">
+                          {getSimTypeName(simTypeOptions[0] || (availableSimType as string) || "")}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             ) : storageOptions.length > 0 ? (
+              <div className="space-y-2">
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                    Storage: <strong className="text-on-surface">{selectedStorage}</strong>
+                  </span>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {storageOptions.map((storage) => (
+                      <button
+                        key={storage}
+                        onClick={() => {
+                          if (selectedColor) {
+                            const variantKey = `${storage}|${selectedColor}`;
+                            const hasImg = !!(product.variantImages as VariantImagesMap)?.[variantKey]?.length;
+                            const hasColorImg = !!availableColors.find(c => {
+                              const n = typeof c === 'string' ? c : (c as any).name;
+                              return n === selectedColor && ((typeof c === 'object' ? (c as any).image : product.colorImages?.[n]));
+                            });
+                            if (!hasImg && !hasColorImg) setSelectedColor(undefined);
+                          }
+                          setSelectedStorage(storage);
+                          if (hasStorageVariants) {
+                            const variants = product.storageVariants!.filter(sv =>
+                              sv.storage.toLowerCase() === storage.toLowerCase()
+                            );
+                            const currentValid = selectedSimType && variants.some(sv => sv.simType === selectedSimType);
+                            if (currentValid) {
+                              const sv = variants.find(sv => sv.simType === selectedSimType)!;
+                              if (sv.warranties?.length) {
+                                const resolved = sv.warranties.map((va: any) => {
+                                  const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                  return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                                }).filter((w: Warranty) => w.id);
+                                if (resolved.length > 0) {
+                                  const free = resolved.find(w => w.priceKsh === 0);
+                                  setSelectedWarranty(free || resolved[0]);
+                                } else {
+                                  setSelectedWarranty(undefined);
+                                }
+                              } else {
+                                setSelectedWarranty(undefined);
+                              }
+                            } else if (variants.length === 1) {
+                              setSelectedSimType(variants[0].simType as string);
+                              const sv = variants[0];
+                              if (sv.warranties?.length) {
+                                const resolved = sv.warranties.map((va: any) => {
+                                  const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
+                                  return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
+                                }).filter((w: Warranty) => w.id);
+                                if (resolved.length > 0) {
+                                  const free = resolved.find(w => w.priceKsh === 0);
+                                  setSelectedWarranty(free || resolved[0]);
+                                } else {
+                                  setSelectedWarranty(undefined);
+                                }
+                              } else {
+                                setSelectedWarranty(undefined);
+                              }
+                            } else {
+                              setSelectedSimType(null);
+                              setSelectedWarranty(undefined);
+                            }
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                          selectedStorage === storage
+                            ? "bg-on-surface text-surface border-on-surface"
+                            : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                        }`}
+                        id={`storage-btn-${storage}`}
+                      >
+                        {storage}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* SIM fallback for products without storageVariants (legacy) */}
+                {product.simType && (
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                      SIM: <strong className="text-on-surface">{getSimTypeName(product.simType)}</strong>
+                    </span>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <span className="px-3 py-1.5 rounded-xl text-[11px] font-semibold border bg-on-surface text-surface border-on-surface">
+                        {getSimTypeName(product.simType)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : product.simType ? (
               <div className="space-y-1.5">
                 <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  Storage: <strong className="text-on-surface">{selectedStorage}</strong>
+                  SIM: <strong className="text-on-surface">{getSimTypeName(product.simType)}</strong>
                 </span>
                 <div className="flex gap-1.5 flex-wrap">
-                  {storageOptions.map((storage) => (
-                    <button
-                      key={storage}
-                      onClick={() => {
-                        if (selectedColor) {
-                          const variantKey = `${storage}|${selectedColor}`;
-                          const hasImg = !!(product.variantImages as VariantImagesMap)?.[variantKey]?.length;
-                          const hasColorImg = !!availableColors.find(c => {
-                            const n = typeof c === 'string' ? c : (c as any).name;
-                            return n === selectedColor && ((typeof c === 'object' ? (c as any).image : product.colorImages?.[n]));
-                          });
-                          if (!hasImg && !hasColorImg) setSelectedColor(undefined);
-                        }
-                        setSelectedStorage(storage);
-                        if (hasStorageVariants) {
-                          const variants = product.storageVariants!.filter(sv =>
-                            sv.storage.toLowerCase() === storage.toLowerCase()
-                          );
-                          const currentValid = selectedSimType && variants.some(sv => sv.simType === selectedSimType);
-                          if (currentValid) {
-                            const sv = variants.find(sv => sv.simType === selectedSimType)!;
-                            if (sv.warranties?.length) {
-                              const resolved = sv.warranties.map((va: any) => {
-                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
-                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
-                              }).filter((w: Warranty) => w.id);
-                              if (resolved.length > 0) {
-                                const free = resolved.find(w => w.priceKsh === 0);
-                                setSelectedWarranty(free || resolved[0]);
-                              } else {
-                                setSelectedWarranty(undefined);
-                              }
-                            } else {
-                              setSelectedWarranty(undefined);
-                            }
-                          } else if (variants.length === 1) {
-                            setSelectedSimType(variants[0].simType as "esim" | "physical");
-                            const sv = variants[0];
-                            if (sv.warranties?.length) {
-                              const resolved = sv.warranties.map((va: any) => {
-                                const base = (product.warranties ?? []).find((w: Warranty) => w.id === va.id);
-                                return { ...base, priceKsh: va.priceKsh ?? base?.priceKsh ?? 0 } as Warranty;
-                              }).filter((w: Warranty) => w.id);
-                              if (resolved.length > 0) {
-                                const free = resolved.find(w => w.priceKsh === 0);
-                                setSelectedWarranty(free || resolved[0]);
-                              } else {
-                                setSelectedWarranty(undefined);
-                              }
-                            } else {
-                              setSelectedWarranty(undefined);
-                            }
-                          } else {
-                            setSelectedSimType(null);
-                            setSelectedWarranty(undefined);
-                          }
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
-                        selectedStorage === storage
-                          ? "bg-on-surface text-surface border-on-surface"
-                          : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
-                      }`}
-                      id={`storage-btn-${storage}`}
-                    >
-                      {storage}
-                    </button>
-                  ))}
+                  <span className="px-3 py-1.5 rounded-xl text-[11px] font-semibold border bg-on-surface text-surface border-on-surface">
+                    {getSimTypeName(product.simType)}
+                  </span>
                 </div>
               </div>
             ) : null}
+
+            {/* Warranty selector — always show when warranty is set (single = read-only badge, multiple = selector) */}
+            {availableWarranties && availableWarranties.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
+                  Warranty: <strong className="text-on-surface">{selectedWarranty?.name || availableWarranties[0]?.name || "—"}</strong>
+                  {selectedWarranty?.duration ? ` (${selectedWarranty.duration})` : (availableWarranties[0]?.duration ? ` (${availableWarranties[0].duration})` : "")}
+                </span>
+                {availableWarranties.length > 1 ? (
+                  <div className="flex gap-1.5 flex-wrap">
+                    {availableWarranties.map((w) => (
+                      <button
+                        key={w.id}
+                        onClick={() => setSelectedWarranty(w)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all text-left leading-tight ${
+                          selectedWarranty?.id === w.id
+                            ? "bg-on-surface text-surface border-on-surface"
+                            : "bg-surface border-outline/20 text-on-surface-variant hover:bg-surface-container"
+                        }`}
+                      >
+                        <span className="block">{w.name}{w.duration ? ` (${w.duration})` : ""}</span>
+                        <span className={`block text-[10px] font-bold ${selectedWarranty?.id === w.id ? "text-white/80" : w.priceKsh === 0 ? "text-green-600" : "text-primary"}`}>
+                          {w.priceKsh === 0 ? "Free" : `+KSh ${w.priceKsh.toLocaleString()}`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-1.5 flex-wrap">
+                    <span className="px-3 py-1.5 rounded-xl text-[11px] font-semibold border bg-on-surface text-surface border-on-surface text-left leading-tight">
+                      <span className="block">{availableWarranties[0].name}{availableWarranties[0].duration ? ` (${availableWarranties[0].duration})` : ""}</span>
+                      <span className="block text-[10px] font-bold text-white/80">{availableWarranties[0].priceKsh === 0 ? "Free" : `KSh ${availableWarranties[0].priceKsh.toLocaleString()}`}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Quantity Selector and CTA */}
             <div className="pt-3 flex flex-row gap-3 items-center">
@@ -746,7 +825,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         {/* Left Column: Image — top on mobile, left on desktop */}
         <div className="order-1 lg:order-1 lg:col-span-6 space-y-3">
           <div
-            className="relative aspect-square rounded-2xl lg:rounded-[32px] bg-white flex items-center justify-center p-6 overflow-hidden cursor-zoom-in border border-outline/10 shadow-xs"
+            className="relative aspect-square rounded-2xl lg:rounded-[32px] bg-surface flex items-center justify-center p-6 overflow-hidden cursor-zoom-in border border-outline/10 shadow-xs"
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -780,7 +859,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 <button
                   key={`${imgUrl}-${idx}`}
                   onClick={() => setSlideIndex(idx)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden bg-white border p-0.5 transition-all ${
+                  className={`w-12 h-12 rounded-lg overflow-hidden bg-surface border p-0.5 transition-all ${
                     slideIndex === idx
                       ? "ring-2 ring-primary border-transparent"
                       : "border-outline/15 hover:border-outline/30"
@@ -834,7 +913,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       Object.entries(product.specifications).map(([key, value], idx) => (
                         <tr 
                           key={key} 
-                          className={`border-b border-outline/5 ${idx % 2 === 0 ? "bg-white/40" : "bg-transparent"}`}
+                          className={`border-b border-outline/5 ${idx % 2 === 0 ? "bg-surface-container-lowest/40" : "bg-transparent"}`}
                         >
                           <th className="py-2.5 md:py-3.5 px-3 md:px-4 font-bold text-on-surface-variant/80 w-1/3 border-r border-outline/5">{key}</th>
                           <td className="py-2.5 md:py-3.5 px-3 md:px-4 text-on-surface font-medium">{value}</td>
@@ -1025,7 +1104,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   onClick={() => onSelectProduct(prod)}
                   className="text-left group"
                 >
-                  <div className="aspect-square rounded-2xl bg-white overflow-hidden border border-outline/10 mb-2 p-2 flex items-center justify-center">
+                  <div className="aspect-square rounded-2xl bg-surface overflow-hidden border border-outline/10 mb-2 p-2 flex items-center justify-center">
                     <img
                       src={prod.image}
                       alt={prod.name}

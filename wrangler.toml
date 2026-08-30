@@ -1,8 +1,0 @@
-[[d1_databases]]
-binding = "DB"
-database_name = "axon-tech-db"
-database_id = "f29b9801-d7ef-4b2d-9867-77149278205c"
-
-[vars]
-ADMIN_EMAIL = "axontech254@gmail.com,kamaustephenpaul@gmail.com"
-ADMIN_PASSWORD = "39344323"

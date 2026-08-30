@@ -261,7 +261,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("axon_admin_token") || "");
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"analytics" | "products" | "orders" | "config" | "support" | "delivery" | "whatsapp" | "blog" | "priceTrackers" | "aiReports" | "reviews" | "colors">("analytics");
+  const [activeTab, setActiveTab] = useState<"analytics" | "products" | "orders" | "config" | "support" | "delivery" | "whatsapp" | "blog" | "priceTrackers" | "aiReports" | "reviews" | "colors" | "simTypes">("analytics");
 
   // AI Reports state
   const [selectedReportType, setSelectedReportType] = useState<"sales" | "catalog" | "support" | "system">("sales");
@@ -349,9 +349,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [editingSvOriginalKey, setEditingSvOriginalKey] = useState<string | null>(null);
   const [svColors, setSvColors] = useState<ProductColor[]>([]);
   const [svWarranties, setSvWarranties] = useState<{ id: string; priceKsh: number }[]>([]);
-  // simType is now a variant property, not per-storage — add multiple per storage
+  // simType is now a variant property — admin-managed via global_sim_types (generic for any product category)
   const [newSvStorage, setNewSvStorage] = useState("");
-  const [newSvSimType, setNewSvSimType] = useState<"esim" | "physical" | "both">("physical");
+  const [newSvSimType, setNewSvSimType] = useState<string>("physical");
 
   // Form states for Promo Manager
   const [newPromoCode, setNewPromoCode] = useState("");
@@ -362,6 +362,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [adminReviews, setAdminReviews] = useState<any[]>([]);
   const [globalColors, setGlobalColors] = useState<any[]>([]);
+  const [globalSimTypes, setGlobalSimTypes] = useState<any[]>([]);
   const [generatingBlog, setGeneratingBlog] = useState(false);
   const [topicPrompt, setTopicPrompt] = useState("");
   const [geographicHub, setGeographicHub] = useState("Nairobi, Kenya");
@@ -421,6 +422,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
         .then(res => res.json())
         .then(data => setGlobalColors(data))
         .catch(err => console.error("Error loading colors:", err));
+    }
+    if (isAuthenticated && (activeTab === "simTypes" || activeTab === "products") && globalSimTypes.length === 0) {
+      authFetch("/api/admin/sim-types")
+        .then(res => res.json())
+        .then(data => setGlobalSimTypes(data))
+        .catch(err => console.error("Error loading SIM types:", err));
     }
   }, [isAuthenticated, activeTab]);
 
@@ -963,17 +970,30 @@ export const AdminView: React.FC<AdminViewProps> = ({
       }
 
       const isNew = !currentProduct.id;
-      const url = isNew ? "/api/admin/products" : `/api/admin/products/${currentProduct.id}`;
-      const method = isNew ? "POST" : "PUT";
 
       // DEBUG: log storageVariants and warranties being sent
       console.log("[DEBUG] Saving product warranties:", JSON.stringify(currentProduct.warranties));
       console.log("[DEBUG] Saving product storageVariants:", JSON.stringify(currentProduct.storageVariants));
-      const res = await authFetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(currentProduct)
-      });
+
+      const saveOnce = (u: string, m: string) =>
+        authFetch(u, {
+          method: m,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentProduct)
+        });
+
+      let res = await saveOnce(
+        isNew ? "/api/admin/products" : `/api/admin/products/${currentProduct.id}`,
+        isNew ? "POST" : "PUT"
+      );
+
+      // If editing a product that no longer exists in the DB (e.g. was never persisted),
+      // fall back to creating it so the save never silently fails.
+      if (!res.ok && res.status === 404 && !isNew) {
+        console.warn("[DEBUG] Product not found on update — falling back to create.");
+        res = await saveOnce("/api/admin/products", "POST");
+      }
+
       // DEBUG: log raw response
       const text = await res.text();
       console.log("[DEBUG] Save response status:", res.status, "body:", text.slice(0, 500));
@@ -985,10 +1005,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
         loadAllAdminData();
         onRefreshProducts(); // Trigger app-wide reload
       } else {
-        throw new Error("Failed product transaction: " + text.slice(0, 200));
+        throw new Error((text && text.length ? text : `HTTP ${res.status}`) );
       }
     } catch (err) {
-      showFeedback("Failed to update database item.", true);
+      const msg = err instanceof Error && err.message ? err.message : "Failed to update database item.";
+      console.error("[DEBUG] Save failed:", msg);
+      showFeedback(msg.slice(0, 160), true);
     }
   };
 
@@ -1722,6 +1744,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
         >
           <Palette className="w-4 h-4" />
           Colors ({globalColors.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("simTypes")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer ${
+            activeTab === "simTypes" ? "glass-btn-ios-active" : "glass-btn-ios"
+          }`}
+        >
+          <Smartphone className="w-4 h-4" />
+          SIM Types ({globalSimTypes.length})
         </button>
         <button
           onClick={() => setActiveTab("priceTrackers")}
@@ -2882,12 +2913,18 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             />
                             <select
                               value={newSvSimType}
-                              onChange={e => setNewSvSimType(e.target.value as "esim" | "physical" | "both")}
+                              onChange={e => setNewSvSimType(e.target.value)}
                               className="px-2 py-1 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[10px]"
                             >
-                              <option value="physical">Physical SIM</option>
-                              <option value="esim">eSIM</option>
-                              <option value="both">Both</option>
+                              {globalSimTypes.length > 0 ? globalSimTypes.map((st: any) => (
+                                <option key={st.id} value={st.code}>{st.name}</option>
+                              )) : (
+                                <>
+                                  <option value="physical">Physical SIM</option>
+                                  <option value="esim">eSIM</option>
+                                  <option value="both">Dual SIM</option>
+                                </>
+                              )}
                             </select>
                             <button
                               type="button"
@@ -2924,7 +2961,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <div>
                               <span className="text-[12px] font-black text-primary">
                                 {editingSvOriginalKey ? "Editing Variant:" : "New Variant:"} {editingSv.storage || "Unnamed"}
-                                {editingSv.simType === "esim" ? " (eSIM)" : editingSv.simType === "both" ? " (Dual SIM)" : " (Physical SIM)"}
+                                {" "}({(() => { const found = globalSimTypes.find((s:any)=>s.code===editingSv.simType); return found ? found.name : (editingSv.simType || "—"); })()})
                               </span>
                               <p className="text-[9px] text-on-surface-variant/70">Configure options below, then click "Save Variant to List".</p>
                             </div>
@@ -2962,12 +2999,18 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               <label className="text-[9px] font-bold text-on-surface-variant uppercase">SIM Type</label>
                               <select
                                 value={editingSv.simType}
-                                onChange={e => setEditingSv({ ...editingSv, simType: e.target.value as "esim" | "physical" | "both" })}
+                                onChange={e => setEditingSv({ ...editingSv, simType: e.target.value })}
                                 className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
                               >
-                                <option value="physical">Physical SIM</option>
-                                <option value="esim">eSIM</option>
-                                <option value="both">Both</option>
+                                {globalSimTypes.length > 0 ? globalSimTypes.map((st:any)=>(
+                                  <option key={st.id} value={st.code}>{st.name}</option>
+                                )) : (
+                                  <>
+                                    <option value="physical">Physical SIM</option>
+                                    <option value="esim">eSIM</option>
+                                    <option value="both">Dual SIM</option>
+                                  </>
+                                )}
                               </select>
                             </div>
                             <div className="space-y-1">
@@ -3272,8 +3315,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 <tr key={i} className="hover:bg-surface-container-high/30">
                                   <td className="p-2 font-bold">{sv.storage}</td>
                                   <td className="p-2">
-                                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${sv.simType === "esim" ? "bg-blue-100 text-blue-700" : sv.simType === "both" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700"}`}>
-                                      {sv.simType === "esim" ? "eSIM" : sv.simType === "both" ? "Dual SIM" : "Physical"}
+                                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${String(sv.simType).includes("esim") ? "bg-blue-100 text-blue-700" : String(sv.simType).includes("both") || String(sv.simType).includes("dual") ? "bg-purple-100 text-purple-700" : String(sv.simType)==="none" ? "bg-gray-100 text-gray-500" : "bg-gray-100 text-gray-700"}`}>
+                                      {(() => { const found = globalSimTypes.find((s:any)=>s.code===sv.simType); if (found) return found.name; const raw = String(sv.simType||"—"); return raw.replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase()); })()}
                                     </span>
                                   </td>
                                   <td className="p-2 font-mono">KSh {sv.priceKsh.toLocaleString()}</td>
@@ -3520,6 +3563,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <div>
                           <span className="text-on-surface font-bold block">{order.customer.fullName}</span>
                           <span className="text-[10px] text-on-surface-variant/60 block mt-0.5">{order.customer.email}</span>
+                          <span className="text-[10px] text-on-surface-variant/60 block mt-0.5">{order.customer.phone || "N/A"}</span>
                         </div>
                       </td>
                       <td className="p-4 max-w-xs">
@@ -7336,6 +7380,168 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* TAB: GLOBAL SIM TYPES LIBRARY                            */}
+      {/* ======================================================= */}
+      {activeTab === "simTypes" && (
+        <div className="space-y-6 animate-in fade-in duration-200 text-xs text-left" id="admin-simtypes-view">
+          <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-outline/10">
+              <div>
+                <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-blue-500" />
+                  Global SIM Types Library
+                </h3>
+                <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
+                  Manage SIM types used in storage variants. Works for any product: phones, tablets, watches, routers, laptops. Add "WiFi Only", "No SIM", "Dual eSIM" etc.
+                </p>
+              </div>
+            </div>
+
+            {/* Add new SIM type form */}
+            <div className="bg-surface border border-outline/10 p-4 rounded-xl space-y-3">
+              <span className="text-[10px] font-black text-primary uppercase">Add New SIM Type</span>
+              <div className="grid grid-cols-6 gap-2 items-end">
+                <div className="space-y-1">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Display Name *</label>
+                  <input
+                    type="text"
+                    id="sim-name"
+                    placeholder="e.g. Dual Physical SIM"
+                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Code (auto)</label>
+                  <input
+                    type="text"
+                    id="sim-code"
+                    placeholder="e.g. dual-physical"
+                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px] font-mono"
+                  />
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <label className="text-[9px] text-on-surface-variant/70 block">Description</label>
+                  <input
+                    type="text"
+                    id="sim-desc"
+                    placeholder="e.g. Two nano SIM slots"
+                    className="w-full px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-on-surface focus:outline-none focus:border-primary text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <label className="text-[9px] opacity-0 block">Add</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const name = (document.getElementById("sim-name") as HTMLInputElement)?.value.trim();
+                      const code = (document.getElementById("sim-code") as HTMLInputElement)?.value.trim();
+                      const description = (document.getElementById("sim-desc") as HTMLInputElement)?.value.trim();
+                      if (!name) { alert("SIM type name is required."); return; }
+                      if (globalSimTypes.some((s: any) => s.name.toLowerCase() === name.toLowerCase() || s.code.toLowerCase() === (code || name).toLowerCase().replace(/\s+/g, "-"))) { alert("This SIM type already exists."); return; }
+                      authFetch("/api/admin/sim-types", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, code: code || undefined, description })
+                      }).then(res => res.json()).then((saved: any) => {
+                        if (saved.error) { alert(saved.error); return; }
+                        setGlobalSimTypes(prev => [...prev, saved].sort((a,b)=>a.name.localeCompare(b.name)));
+                        (document.getElementById("sim-name") as HTMLInputElement).value = "";
+                        (document.getElementById("sim-code") as HTMLInputElement).value = "";
+                        (document.getElementById("sim-desc") as HTMLInputElement).value = "";
+                      }).catch(err => console.error(err));
+                    }}
+                    className="w-full py-1.5 bg-primary hover:bg-primary-hover text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add SIM Type
+                  </button>
+                </div>
+              </div>
+              <p className="text-[9px] text-on-surface-variant/50">Code is stored in DB (e.g. "physical"). If empty, auto-generated from name. Used in <code>storageVariants[].simType</code>.</p>
+            </div>
+
+            {/* SIM types grid */}
+            {globalSimTypes.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant/50 text-[11px]">
+                No SIM types yet. Add your first type above. Defaults: Physical SIM, eSIM, Dual SIM.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {globalSimTypes.map((sim: any) => (
+                  <div key={sim.id} className="bg-surface border border-outline/10 rounded-xl p-3 space-y-2 hover:border-primary/30 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                        <Smartphone className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-[11px] text-on-surface truncate">{sim.name}</div>
+                        <div className="font-mono text-[9px] text-primary/70">{sim.code}</div>
+                        {sim.description && <div className="text-[9px] text-on-surface-variant/60 truncate">{sim.description}</div>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newName = prompt("Edit Display Name:", sim.name);
+                          if (newName === null) return;
+                          const newDesc = prompt("Edit Description:", sim.description || "");
+                          if (newDesc === null) return;
+                          authFetch(`/api/admin/sim-types/${sim.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ name: newName, description: newDesc ?? "" })
+                          }).then(res => res.json()).then((updated: any) => {
+                            if (updated.error) { alert(updated.error); return; }
+                            setGlobalSimTypes(prev => prev.map((s: any) => s.id === sim.id ? updated : s).sort((a,b)=>a.name.localeCompare(b.name)));
+                          }).catch(err => console.error(err));
+                        }}
+                        className="flex-1 py-1 bg-surface-container hover:bg-surface-container-high text-[9px] font-bold rounded-lg border border-outline/10 text-on-surface"
+                      >
+                        <Edit3 className="w-3 h-3 inline mr-0.5" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newCode = prompt("Edit Code (stored value):", sim.code);
+                          if (newCode === null) return;
+                          authFetch(`/api/admin/sim-types/${sim.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ code: newCode })
+                          }).then(res => res.json()).then((updated: any) => {
+                            if (updated.error) { alert(updated.error); return; }
+                            setGlobalSimTypes(prev => prev.map((s: any) => s.id === sim.id ? updated : s).sort((a,b)=>a.name.localeCompare(b.name)));
+                          }).catch(err => console.error(err));
+                        }}
+                        className="flex-1 py-1 bg-surface-container hover:bg-surface-container-high text-[9px] font-bold rounded-lg border border-outline/10 text-on-surface font-mono"
+                      >
+                        Code
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!confirm(`Delete SIM type "${sim.name}"? Products using it will keep the value but it won't be selectable.`)) return;
+                          authFetch(`/api/admin/sim-types/${sim.id}`, { method: "DELETE" }).then(res => res.json()).then(() => {
+                            setGlobalSimTypes(prev => prev.filter((s: any) => s.id !== sim.id));
+                          }).catch(err => console.error(err));
+                        }}
+                        className="py-1 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[9px] font-bold rounded-lg border border-red-500/10"
+                      >
+                        <Trash2 className="w-3 h-3 inline" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl p-3 text-[10px] text-blue-800 dark:text-blue-200">
+              <b>Tip:</b> For laptops/tablets without SIM, create "WiFi Only" (code: <code>none</code>) or "No SIM". For watches, "eSIM Only". The code is what gets saved in product variants, so keep it short and kebab-case.
+            </div>
           </div>
         </div>
       )}

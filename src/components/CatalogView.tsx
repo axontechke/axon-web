@@ -431,7 +431,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-3xl border border-outline/10 p-4 flex flex-col justify-between group transition-all hover:shadow-sm"
+                  className="bg-surface rounded-3xl border border-outline/10 p-4 flex flex-col justify-between group transition-all hover:shadow-sm"
                   id={`product-card-${product.id}`}
                 >
                   <div
@@ -439,7 +439,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                     className="cursor-pointer space-y-4 text-left"
                   >
                     {/* Image */}
-                    <div className="relative h-48 rounded-2xl bg-white flex items-center justify-center p-4 overflow-hidden">
+                    <div className="relative h-48 rounded-2xl bg-surface-container-lowest flex items-center justify-center p-4 overflow-hidden">
                       {product.isNew && (
                         <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-primary text-white text-[8px] font-bold uppercase tracking-wider">
                           New Release

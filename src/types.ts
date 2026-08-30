@@ -30,10 +30,18 @@ export interface VariantWarrantyAssignment {
   priceKsh: number; // price for this variant; falls back to Warranty.priceKsh if not set
 }
 
+// Global SIM Type (admin-managed, works for phones, tablets, watches, routers, laptops etc.)
+export interface SimType {
+  id: string;
+  name: string;        // display e.g. "Physical SIM"
+  code: string;        // stored value e.g. "physical" — used in storageVariants.simType
+  description?: string;
+}
+
 export interface StorageVariant {
   storage: string;              // e.g. "256GB", "512GB", "1TB"
   priceKsh: number;             // price for this storage SKU
-  simType: "esim" | "physical" | "both";
+  simType: string;              // references SimType.code — admin CRUD, generic for any product category
   colors: ProductColor[];        // colors available for this storage (each with name, code, image, and optional priceKsh override)
   warranties: VariantWarrantyAssignment[]; // warranty assignments with optional per-variant price override
   stock: number;
@@ -94,7 +102,7 @@ export interface Product {
   specifications?: Record<string, string>;
   reviews?: Review[];
   warranties?: Warranty[]; // available warranty plans; first one is the default/free
-  simType?: "esim" | "physical" | "both"; // SIM type support
+  simType?: string; // product-level fallback SIM type — references SimType.code (admin-managed)
 }
 
 export interface CartItem {
@@ -103,6 +111,7 @@ export interface CartItem {
   selectedColor?: string;
   selectedStorage?: string;
   selectedWarranty?: Warranty;
+  selectedSimType?: string; // references SimType.code — ensures newly added SIM types persist through cart/checkout
 }
 
 export type AppScreen = "Home" | "Catalog" | "ProductDetail" | "Checkout" | "Confirmation" | "TrackOrder" | "Admin" | "Contact" | "Blog";

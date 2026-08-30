@@ -3,6 +3,10 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -16,19 +20,42 @@ const WORKER_URL = process.env.WORKER_URL || "https://website.axontech254.worker
 app.use(express.json());
 
 // ─── REMOTE DB HELPERS ───────────────────────────────────────
-async function remoteDB(method: string, path: string, body?: any, authHeader?: string) {
+async function remoteDB(method: string, path: string, body?: any, authHeader?: string, extraHeaders?: Record<string,string>) {
+  console.log(`[RemoteDB] ${method} ${path}`, { body, authHeader });
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (authHeader) headers["Authorization"] = authHeader;
+  if (extraHeaders) Object.assign(headers, extraHeaders);
   const opts: RequestInit = {
     method,
     headers,
   };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${WORKER_URL}${path}`, opts);
-  const text = await res.text();
-  let data;
-  try { data = JSON.parse(text); } catch { data = text; }
-  return { ok: res.ok, status: res.status, data };
+  if (body && method !== "GET" && method !== "HEAD" && Object.keys(body as object).length > 0) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(`${WORKER_URL}${path}`, opts);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    console.log(`[RemoteDB] Response ${res.status}`, data);
+    return { ok: res.ok, status: res.status, data };
+  } catch (e: any) {
+    console.error(`[RemoteDB] fetch failed ${WORKER_URL}${path}:`, e.message);
+    return { ok: false, status: 502, data: { error: `Worker unreachable at ${WORKER_URL}` } };
+  }
+}
+// JWT verification middleware
+function verifyJwt(req: any, res: any, next: any) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Missing or invalid Authorization header' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string);
+    req.user = payload;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
 }
 
 
@@ -471,6 +498,7 @@ const INITIAL_ORDERS = [
     customer: {
       fullName: "Stephen Paul Kamau",
       email: "kamaustephenpaul@gmail.com",
+      phone: "+254 712 345 678",
       address: "100 Axon Technology Boulevard",
       city: "Nairobi",
       state: "County",
@@ -502,6 +530,7 @@ const INITIAL_ORDERS = [
     customer: {
       fullName: "Clarissa Mitchell",
       email: "clarissa.m@axon.net",
+      phone: "+254 723 456 789",
       address: "740 Silicon Alley, Flat 4B",
       city: "London",
       state: "Greater London",
@@ -531,6 +560,7 @@ const INITIAL_ORDERS = [
     customer: {
       fullName: "Devon Chen",
       email: "devon.chen@coder.io",
+      phone: "+254 734 567 890",
       address: "12 Pine Street",
       city: "San Francisco",
       state: "CA",
@@ -890,29 +920,77 @@ function saveDB(data: any) {
 
 // Auth — proxy to Worker
 app.post("/api/auth/firebase-login", async (req, res) => {
+  const body = req.body;
   if (USE_REMOTE_DB) {
-    const body = req.body;
     const result = await remoteDB("POST", "/api/auth/firebase-login", body);
     if (result.ok) {
+      // Expect worker to return { token, user }
       res.json(result.data);
     } else {
-      res.status(result.status).json({ error: result.data });
+      // Fallback mock admin login if credentials match env admins
+      const adminEmails = (process.env.ADMIN_EMAIL || '').split(',');
+      const adminPassword = process.env.ADMIN_PASSWORD || '';
+      if (body.password && adminPassword && adminEmails.includes(body.email)) {
+        const token = jwt.sign({ uid: 'admin', email: body.email, role: 'super-admin' }, process.env.JWT_SECRET as string, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+        res.json({ token, user: { uid: 'admin', email: body.email, role: 'super-admin' } });
+      } else {
+        res.status(result.status).json({ error: result.data });
+      }
     }
   } else {
-    res.status(503).json({ error: "Auth not available in local mode." });
+    // Local fallback login — support both password and Firebase ID token (for `USE_REMOTE_DB=false` + `wrangler dev --local` workflow)
+    const adminEmails = (process.env.ADMIN_EMAIL || '').split(',').map((e:string)=>e.trim().toLowerCase()).filter(Boolean);
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
+    const jwtSecret = process.env.JWT_SECRET || 'local-dev-jwt-secret-32chars-minimum-change-me';
+    // 1) Password login (legacy)
+    if (body.password && adminPassword && body.email && adminEmails.includes(String(body.email).toLowerCase())) {
+      if (String(body.password) === String(adminPassword)) {
+        const token = jwt.sign({ userId: 'admin', email: body.email, role: 'super-admin' }, jwtSecret, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+        return res.json({ token, user: { id: 'admin', email: body.email, role: 'super-admin' } });
+      }
+    }
+    // 2) Firebase ID token login — verify via Identity Toolkit (same as Worker)
+    if (body.idToken) {
+      try {
+        const apiKey = process.env.FIREBASE_WEB_API_KEY || process.env.VITE_FIREBASE_API_KEY || '';
+        let emailFromToken: string | null = null;
+        if (apiKey) {
+          const verifyRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: body.idToken })
+          });
+          const verifyData: any = await verifyRes.json();
+          if (verifyData?.users?.[0]?.email) emailFromToken = verifyData.users[0].email;
+        } else {
+          // Fallback: decode JWT payload without verification (local dev only, no apiKey)
+          try {
+            const payload = JSON.parse(Buffer.from(String(body.idToken).split('.')[1], 'base64').toString());
+            emailFromToken = payload.email || null;
+          } catch {}
+        }
+        if (!emailFromToken) return res.status(401).json({ error: 'Invalid ID token.' });
+        if (adminEmails.length > 0 && !adminEmails.includes(String(emailFromToken).toLowerCase())) {
+          return res.status(403).json({ error: 'Not authorized as admin.' });
+        }
+        const token = jwt.sign({ userId: 'admin', email: emailFromToken, role: 'super-admin' }, jwtSecret, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+        return res.json({ token, user: { id: 'admin', email: emailFromToken, role: 'super-admin' } });
+      } catch (e: any) {
+        console.error('[local firebase-login error]', e);
+        return res.status(401).json({ error: 'Invalid ID token.' });
+      }
+    }
+    return res.status(401).json({ error: 'Auth failed. Use Google Sign-In or provide admin password.' });
   }
 });
 
-// 1. PRODUCTS ENDPOINTS
+// 1. PRODUCTS ENDPOINTS (public — falls back to local if worker down)
 app.get("/api/products", async (req, res) => {
   if (USE_REMOTE_DB) {
-    const result = await remoteDB("GET", "/api/products");
-    if (result.ok) {
-      res.json(result.data);
-    } else {
-      res.status(result.status).json({ error: result.data });
-    }
-    return;
+    const result = await remoteDB("GET", "/api/products", undefined, req.headers['authorization']);
+    if (result.ok) return res.json(result.data);
+    if (result.status !== 502) return res.status(result.status).json({ error: result.data });
+    console.warn("[fallback] Worker unreachable for /api/products, using local DB");
   }
   const db = getDB();
   res.json(db.products);
@@ -988,7 +1066,11 @@ app.delete("/api/admin/price-trackers/:id", (req, res) => {
 });
 
 // Admin add product
-app.post("/api/admin/products", (req, res) => {
+app.post("/api/admin/products", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("POST", "/api/admin/products", req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
   const db = getDB();
   const newProduct = req.body;
   if (!newProduct.id) {
@@ -1000,7 +1082,11 @@ app.post("/api/admin/products", (req, res) => {
 });
 
 // Admin update product with price drop check
-app.put("/api/admin/products/:id", (req, res) => {
+app.put("/api/admin/products/:id", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("PUT", `/api/admin/products/${req.params.id}`, req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
   const db = getDB();
   const { id } = req.params;
   const idx = db.products.findIndex((p: any) => p.id === id);
@@ -1057,8 +1143,23 @@ app.put("/api/admin/products/:id", (req, res) => {
   }
 });
 
+// Admin get single product (proxy)
+app.get("/api/admin/products/:id", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("GET", `/api/admin/products/${req.params.id}`, undefined, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
+  const db = getDB();
+  const prod = db.products.find((p: any) => p.id === req.params.id);
+  if (prod) res.json(prod); else res.status(404).json({ error: "Product not found" });
+});
+
 // Admin delete product
-app.delete("/api/admin/products/:id", (req, res) => {
+app.delete("/api/admin/products/:id", async (req, res) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB("DELETE", `/api/admin/products/${req.params.id}`, undefined, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
   const db = getDB();
   const { id } = req.params;
   const filtered = db.products.filter((p: any) => p.id !== id);
@@ -1069,6 +1170,46 @@ app.delete("/api/admin/products/:id", (req, res) => {
   } else {
     res.status(444).json({ error: "Product not found" });
   }
+});
+
+// ─── Admin product variant images & variants proxy (when USE_REMOTE_DB) ───
+// Proxy variant images, colors, simTypes to Worker when using D1
+app.use("/api/admin/product-variant-images", async (req: any, res: any, next: any) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB(req.method, req.originalUrl, req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
+  return next();
+});
+app.use("/api/admin/colors", async (req: any, res: any, next: any) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB(req.method, req.originalUrl, req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
+  return next();
+});
+app.use("/api/admin/sim-types", async (req: any, res: any, next: any) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB(req.method, req.originalUrl, req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
+  return next();
+});
+app.use("/api/sim-types", async (req: any, res: any, next: any) => {
+  if (USE_REMOTE_DB) {
+    const result = await remoteDB(req.method, req.originalUrl, req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
+  return next();
+});
+// Proxy for product variants bulk endpoint
+app.use("/api/admin/products", async (req: any, res: any, next: any) => {
+  // Only proxy variant-specific sub-routes that are not already handled (POST/PUT/DELETE for base product are handled above)
+  if (USE_REMOTE_DB && (req.originalUrl.includes("/variants") || req.originalUrl.includes("/variant-stock"))) {
+    const result = await remoteDB(req.method, req.originalUrl, req.body, req.headers.authorization as string, req.headers["x-admin-api-key"] ? { "x-admin-api-key": req.headers["x-admin-api-key"] as string } : undefined);
+    return res.status(result.status).json(result.data);
+  }
+  return next();
 });
 
 let lastScrapeTime = 0;
@@ -1678,6 +1819,34 @@ Reply to this message to continue the conversation with the customer.`;
   res.status(201).json(newOrder);
 });
 
+// Privacy-aware search: ?query= trackingId OR email OR phone — only returns matching user orders
+app.get("/api/orders/search", (req, res) => {
+  const db = getDB();
+  const raw = String((req.query as any).query || (req.query as any).q || "").trim();
+  if (!raw) return res.status(400).json({ error: "Search query is required (tracking ID, email or phone)" });
+  const qLower = raw.toLowerCase();
+  const qDigits = raw.replace(/\D/g, "");
+  const isTrackId = /^AXN-\d+/i.test(raw);
+  if (isTrackId) {
+    const direct = db.orders.find((o: any) => o.id.toUpperCase() === raw.toUpperCase());
+    if (direct) return res.json([direct]);
+  }
+  const matched = (db.orders || []).filter((o: any) => {
+    const cust = o.customer || {};
+    const email = String(cust.email || "").toLowerCase().trim();
+    const phone = String(cust.phone || cust.contact || cust.phoneNumber || "");
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (email && email === qLower) return true;
+    if (qDigits && phoneDigits) {
+      if (qDigits === phoneDigits) return true;
+      if (qDigits.length >= 9 && phoneDigits.length >= 9 && qDigits.slice(-9) === phoneDigits.slice(-9)) return true;
+    }
+    return false;
+  });
+  if (matched.length === 0) return res.status(404).json({ error: "No orders found for that email, phone or tracking ID" });
+  res.json(matched);
+});
+
 // Get single order for user order tracking
 app.get("/api/orders/:trackingId", (req, res) => {
   const db = getDB();
@@ -1756,16 +1925,13 @@ app.get("/api/analytics", (req, res) => {
   });
 });
 
-// 4. CONFIG ENDPOINTS
+// 4. CONFIG ENDPOINTS (falls back to local if worker unreachable)
 app.get("/api/config", async (req, res) => {
   if (USE_REMOTE_DB) {
     const result = await remoteDB("GET", "/api/config");
-    if (result.ok) {
-      res.json(result.data);
-    } else {
-      res.status(result.status).json({ error: result.data });
-    }
-    return;
+    if (result.ok) return res.json(result.data);
+    if (result.status !== 502) return res.status(result.status).json({ error: result.data });
+    console.warn("[fallback] Worker unreachable for /api/config, using local DB");
   }
   const db = getDB();
   res.json(db.config);

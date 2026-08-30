@@ -10,6 +10,7 @@ export interface Env {
   WHATSAPP_ADMIN_NOTIFY_NUMBER?: string; // Admin number to receive order alerts (e.g. 254745017979)
   FIREBASE_WEB_API_KEY?: string;   // Firebase Web API key for ID token verification
   FIREBASE_PROJECT_ID?: string;    // Firebase Project ID for ID token verification (aud check)
+  JWT_SECRET?: string;
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────
@@ -264,6 +265,8 @@ function sanitizeError(err: unknown): string {
 }
 
 // ─── AUTH UTILITIES ──────────────────────────────────────────
+import { sign, verify } from 'jsonwebtoken';
+
 function generateSalt(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
@@ -287,7 +290,14 @@ async function verifyPassword(password: string, salt: string, hash: string): Pro
   return computed === hash;
 }
 
-function generateToken(): string {
+// Generate a signed JWT token - checks Env first (local .dev.vars), then global, then process.env
+function signJwt(payload: object, env?: Env, expiresIn: string = '24h'): string {
+  const secret = env?.JWT_SECRET || (globalThis as any).ENV?.JWT_SECRET || process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET not configured');
+  return sign(payload, secret, { expiresIn });
+}
+
+function generateToken(): string { // deprecated, keep for compatibility
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
@@ -629,7 +639,7 @@ async function firebaseLogin(req: Request, env: Env): Promise<Response> {
       body: JSON.stringify({ idToken })
     }
   );
-  
+
   const verifyData = await verifyRes.json() as any;
 
   if (!verifyData.users || verifyData.users.length === 0) {
@@ -649,12 +659,8 @@ async function firebaseLogin(req: Request, env: Env): Promise<Response> {
     return jsonError("Not authorized as admin.", 403);
   }
 
-  const token = generateToken();
-  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-  await env.DB.prepare(
-    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
-  ).bind(`session:${token}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role, expiresAt, loginIp: clientIp })).run();
+  // Create JWT token - pass env for local .dev.vars support
+  const token = signJwt({ userId: user.id, email: user.email, role: user.role }, env);
 
   clearRateLimit(clientIp);
   return corsResponse({ token, user: { id: user.id, email: user.email, role: user.role } });
@@ -713,24 +719,25 @@ async function verifyAuth(req: Request, env: Env): Promise<{ userId: string; ema
   }
 
   const token = authHeader.slice(7);
-  const session = await env.DB.prepare(
-    "SELECT value FROM config WHERE key = ?"
-  ).bind(`session:${token}`).first<{ value: string }>();
-
-  if (!session) {
+  const secret = env.JWT_SECRET || (globalThis as any).ENV?.JWT_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    console.error("[JWT] Missing secret");
     recordFailedAttempt(getClientIp(req));
     return null;
   }
-
-  const data = JSON.parse(session.value);
-  if (data.expiresAt < Date.now()) {
+  try {
+    const payload = verify(token, secret) as any;
+    // payload should contain userId, email, role, exp, iat
+    if (!payload.userId || !payload.email || !payload.role) throw new Error('Invalid payload');
+    return { userId: payload.userId, email: payload.email, role: payload.role };
+  } catch (e) {
+    console.error("[JWT VERIFY ERROR]", e);
     recordFailedAttempt(getClientIp(req));
-    await env.DB.prepare("DELETE FROM config WHERE key = ?").bind(`session:${token}`).run();
     return null;
   }
-
-  return { userId: data.userId, email: data.email, role: data.role };
 }
+  
+
 
 // ─── ROUTE HANDLERS ──────────────────────────────────────────
 
@@ -847,6 +854,56 @@ async function deleteColor(_req: Request, env: Env, _ctx: ExecutionContext, para
   return corsResponse({ success: true, id: params.id });
 }
 
+// ─── SIM TYPES (Global library for storageVariants.simType) ───
+// Allows admins to CRUD SIM types so site works for phones, tablets, laptops, watches, routers etc.
+async function getAllSimTypes(_req: Request, env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare("SELECT * FROM global_sim_types ORDER BY name ASC").all();
+  return corsResponse(results);
+}
+
+async function createSimType(req: Request, env: Env): Promise<Response> {
+  const { name, code, description } = await jsonBody<{ name?: string; code?: string; description?: string }>(req);
+  if (!name) return jsonError("SIM type name is required.");
+  const normalizedCode = (code || name).trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-_]/g, "");
+  if (!normalizedCode) return jsonError("SIM type code is invalid.");
+  // Ensure code uniqueness
+  const existing = await env.DB.prepare("SELECT id FROM global_sim_types WHERE code = ?").bind(normalizedCode).first();
+  if (existing) return jsonError(`SIM type code "${normalizedCode}" already exists.`, 409);
+  const id = generateId("sim");
+  await env.DB.prepare(
+    "INSERT INTO global_sim_types (id, name, code, description) VALUES (?, ?, ?, ?)"
+  ).bind(id, name.trim(), normalizedCode, (description || "").trim()).run();
+  return corsResponse({ id, name: name.trim(), code: normalizedCode, description: (description || "").trim() }, 201);
+}
+
+async function updateSimType(req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const { name, code, description } = await jsonBody<{ name?: string; code?: string; description?: string }>(req);
+  const existing = await env.DB.prepare("SELECT * FROM global_sim_types WHERE id = ?").bind(params.id).first() as any;
+  if (!existing) return jsonError("SIM type not found.", 404);
+  const fields: string[] = [];
+  const values: any[] = [];
+  if (name !== undefined) { fields.push("name = ?"); values.push(name.trim()); }
+  if (code !== undefined) {
+    const normalizedCode = code.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-_]/g, "");
+    if (!normalizedCode) return jsonError("SIM type code is invalid.");
+    const dup = await env.DB.prepare("SELECT id FROM global_sim_types WHERE code = ? AND id != ?").bind(normalizedCode, params.id).first();
+    if (dup) return jsonError(`SIM type code "${normalizedCode}" already exists.`, 409);
+    fields.push("code = ?"); values.push(normalizedCode);
+  }
+  if (description !== undefined) { fields.push("description = ?"); values.push(description.trim()); }
+  if (fields.length === 0) return jsonError("No fields to update.");
+  values.push(params.id);
+  await env.DB.prepare(`UPDATE global_sim_types SET ${fields.join(", ")} WHERE id = ?`).bind(...values).run();
+  const updated = await env.DB.prepare("SELECT * FROM global_sim_types WHERE id = ?").bind(params.id).first();
+  return corsResponse(updated);
+}
+
+async function deleteSimType(_req: Request, env: Env, _ctx: ExecutionContext, params: Record<string, string>): Promise<Response> {
+  const result = await env.DB.prepare("DELETE FROM global_sim_types WHERE id = ?").bind(params.id).run();
+  if (result.meta?.changes === 0) return jsonError("SIM type not found.", 404);
+  return corsResponse({ success: true, id: params.id });
+}
+
 // GET /api/orders
 async function getOrders(_req: Request, env: Env): Promise<Response> {
   const { results } = await env.DB.prepare("SELECT * FROM orders ORDER BY date DESC").all();
@@ -933,6 +990,56 @@ async function createOrder(req: Request, env: Env): Promise<Response> {
   }, env, whatsappSettings);
 
   return corsResponse({ id, date: orderData.date, status: "pending", ...data }, 201);
+}
+
+// GET /api/orders/search?query=xxx — privacy-aware lookup by trackingId OR email OR phone (only returns matching user orders)
+async function searchOrders(req: Request, env: Env): Promise<Response> {
+  const url = new URL(req.url);
+  const raw = (url.searchParams.get("query") || url.searchParams.get("q") || "").trim();
+  if (!raw) return jsonError("Search query is required (tracking ID, email or phone)", 400);
+  const qLower = raw.toLowerCase();
+  const qDigits = raw.replace(/\D/g, "");
+  const isTrackId = /^AXN-\d+/i.test(raw);
+  // If it looks like a tracking ID, try direct lookup first (privacy: still only that one order)
+  if (isTrackId) {
+    const direct = await env.DB.prepare("SELECT * FROM orders WHERE id = ?").bind(raw.toUpperCase()).first() as any;
+    if (direct) {
+      return corsResponse([{
+        ...direct,
+        customer: JSON.parse(direct.customer || "{}"),
+        payment: JSON.parse(direct.payment || "{}"),
+        items: JSON.parse(direct.items || "[]"),
+        history: JSON.parse(direct.history || "[]"),
+      }]);
+    }
+  }
+  const { results } = await env.DB.prepare("SELECT * FROM orders").all();
+  const matched = (results as any[]).filter((o) => {
+    try {
+      const cust = JSON.parse(o.customer || "{}");
+      const email = String(cust.email || "").toLowerCase().trim();
+      const phone = String(cust.phone || cust.contact || cust.phoneNumber || "");
+      const phoneDigits = phone.replace(/\D/g, "");
+      // Email exact match
+      if (email && email === qLower) return true;
+      // Phone match: exact digits or last 9 digits (KE)
+      if (qDigits && phoneDigits) {
+        if (qDigits === phoneDigits) return true;
+        if (qDigits.length >= 9 && phoneDigits.length >= 9 && qDigits.slice(-9) === phoneDigits.slice(-9)) return true;
+      }
+      // Contact string contains query (fallback for names not shown, but keep limited)
+      // Only allow phone/email exact; tracking id already handled
+      return false;
+    } catch { return false; }
+  }).map((o: any) => ({
+    ...o,
+    customer: JSON.parse(o.customer || "{}"),
+    payment: JSON.parse(o.payment || "{}"),
+    items: JSON.parse(o.items || "[]"),
+    history: JSON.parse(o.history || "[]"),
+  }));
+  if (matched.length === 0) return jsonError("No orders found for that email, phone or tracking ID", 404);
+  return corsResponse(matched);
 }
 
 // GET /api/orders/:trackingId
@@ -1218,41 +1325,49 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
   const fields: string[] = [];
   const values: any[] = [];
 
-  const fieldMap: Record<string, string> = {
-    name: "name", price: "price", priceKsh: "priceKsh", description: "description",
-    category: "category", brand: "brand", image: "image", rating: "rating",
-    reviewsCount: "reviewsCount",
-  };
+  // Deduplicate storageVariants upfront: keep last occurrence of each (storage, simType) pair
+  // This prevents duplicate variants when admin edits existing product and adds new storage
+  if (Array.isArray(data.storageVariants)) {
+    const rawSv = data.storageVariants;
+    const lastIndexOfKey = new Map<string, number>();
+    rawSv.forEach((sv: any, i: number) => {
+      const key = `${sv.storage || ""}|${sv.simType || ""}`.toLowerCase();
+      lastIndexOfKey.set(key, i);
+    });
+    data.storageVariants = rawSv.filter((_: any, i: number) => {
+      const key = `${_.storage || ""}|${_.simType || ""}`.toLowerCase();
+      return lastIndexOfKey.get(key) === i;
+    });
+  }
 
-  for (const [jsKey, dbCol] of Object.entries(fieldMap)) {
+  const scalarFields: Record<string, string> = {
+    name: "name",
+    price: "price",
+    priceKsh: "priceKsh",
+    description: "description",
+    category: "category",
+    brand: "brand",
+    image: "image",
+    rating: "rating",
+    reviewsCount: "reviewsCount",
+    simType: "simType",
+  };
+  for (const [jsKey, dbCol] of Object.entries(scalarFields)) {
     if (data[jsKey] !== undefined) { fields.push(`${dbCol} = ?`); values.push(data[jsKey]); }
   }
+  // JSON fields — stringify exactly once per column
   if (data.colors !== undefined) { fields.push("colors = ?"); values.push(JSON.stringify(data.colors)); }
   if (data.storages !== undefined) { fields.push("storages = ?"); values.push(JSON.stringify(data.storages)); }
   if (data.colorImages !== undefined) { fields.push("colorImages = ?"); values.push(JSON.stringify(data.colorImages)); }
   if (data.colorCodes !== undefined) { fields.push("colorCodes = ?"); values.push(JSON.stringify(data.colorCodes)); }
   if (data.specifications !== undefined) { fields.push("specifications = ?"); values.push(JSON.stringify(data.specifications)); }
   if (data.variants !== undefined) { fields.push("variants = ?"); values.push(JSON.stringify(data.variants)); }
+  if (data.storageVariants !== undefined) { fields.push("storageVariants = ?"); values.push(JSON.stringify(data.storageVariants)); }
+  if (data.warranties !== undefined) { fields.push("warranties = ?"); values.push(JSON.stringify(data.warranties)); }
+  if (data.images !== undefined) { fields.push("images = ?"); values.push(JSON.stringify(data.images)); }
   if (data.inStock !== undefined) { fields.push("inStock = ?"); values.push(data.inStock ? 1 : 0); }
   if (data.isNew !== undefined) { fields.push("isNew = ?"); values.push(data.isNew ? 1 : 0); }
   if (data.isBestSeller !== undefined) { fields.push("isBestSeller = ?"); values.push(data.isBestSeller ? 1 : 0); }
-  if (data.storageVariants !== undefined) {
-    // Deduplicate: keep last occurrence of each (storage, simType) pair
-    const variants = data.storageVariants as any[];
-    const lastIndexOfKey = new Map<string, number>();
-    variants.forEach((sv, i) => {
-      const key = `${sv.storage || ""}|${sv.simType || ""}`.toLowerCase();
-      lastIndexOfKey.set(key, i);
-    });
-    const deduplicated = variants.filter((_, i) => {
-      const key = `${_.storage || ""}|${_.simType || ""}`.toLowerCase();
-      return lastIndexOfKey.get(key) === i;
-    });
-    fields.push("storageVariants = ?"); values.push(JSON.stringify(deduplicated));
-  }
-  if (data.simType !== undefined) { fields.push("simType = ?"); values.push(data.simType); }
-  if (data.warranties !== undefined) { fields.push("warranties = ?"); values.push(JSON.stringify(data.warranties)); }
-  if (data.images !== undefined) { fields.push("images = ?"); values.push(JSON.stringify(data.images)); }
 
   if (fields.length === 0) return jsonError("No fields to update");
 
@@ -1693,8 +1808,16 @@ async function getProductVariantImages(_req: Request, env: Env): Promise<Respons
     bindings.push(productId);
   }
   query += " ORDER BY productId, storage, color, sortOrder";
-  const { results } = await env.DB.prepare(query).bind(...bindings).all();
-  return corsResponse(results.map((r: any) => ({ ...r, sortOrder: r.sortOrder || 0 })));
+  try {
+    let stmt = env.DB.prepare(query);
+    if (bindings.length) stmt = stmt.bind(...bindings);
+    const { results } = await stmt.all();
+    const rows = results ?? [];
+    return corsResponse(rows.map((r: any) => ({ ...r, sortOrder: r.sortOrder || 0 })));
+  } catch (e) {
+    console.error("[GET product-variant-images error]", e);
+    return jsonError("Failed to fetch product variant images", 500);
+  }
 }
 
 // POST /api/admin/product-variant-images
@@ -1827,6 +1950,7 @@ const routes: Route[] = [
 
   // Public
   route("GET", "/api/products", getProducts),
+  route("GET", "/api/orders/search", searchOrders),
   route("GET", "/api/orders", getOrders),
   route("POST", "/api/orders", createOrder),
   route("GET", "/api/orders/:trackingId", getOrder),
@@ -1840,6 +1964,7 @@ const routes: Route[] = [
   route("GET", "/api/blog/:slug", getBlogPost),
   route("GET", "/api/reviews", getReviews),
   route("POST", "/api/reviews", createReview),
+  route("GET", "/api/sim-types", getAllSimTypes),
 
   // Admin
   route("POST", "/api/admin/products", createProduct),
@@ -1855,6 +1980,10 @@ const routes: Route[] = [
   route("POST", "/api/admin/colors", createColor),
   route("PUT", "/api/admin/colors/:id", updateColor),
   route("DELETE", "/api/admin/colors/:id", deleteColor),
+  route("GET", "/api/admin/sim-types", getAllSimTypes),
+  route("POST", "/api/admin/sim-types", createSimType),
+  route("PUT", "/api/admin/sim-types/:id", updateSimType),
+  route("DELETE", "/api/admin/sim-types/:id", deleteSimType),
   route("GET", "/api/admin/support-requests", getSupportRequests),
   route("PUT", "/api/admin/support-requests/:id", updateSupportRequest),
   route("POST", "/api/admin/delivery-methods", createDeliveryMethod),

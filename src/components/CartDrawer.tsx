@@ -6,8 +6,8 @@ interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   cart: CartItem[];
-  onUpdateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedStorage?: string, warrantyId?: string) => void;
-  onRemoveItem: (productId: string, selectedColor?: string, selectedStorage?: string, warrantyId?: string) => void;
+  onUpdateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedStorage?: string, warrantyId?: string, simType?: string) => void;
+  onRemoveItem: (productId: string, selectedColor?: string, selectedStorage?: string, warrantyId?: string, simType?: string) => void;
   onCheckout: () => void;
   onExploreCatalog: () => void;
   couponCode: string;
@@ -144,7 +144,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="space-y-4">
                 {cart.map((item, idx) => {
                   if (!item?.product?.id) return null;
-                  const uniqueId = `${item.product.id}-${item.selectedColor || ""}-${item.selectedStorage || ""}-${item.selectedWarranty?.id || ""}`;
+                  const uniqueId = `${item.product.id}-${item.selectedColor || ""}-${item.selectedStorage || ""}-${item.selectedWarranty?.id || ""}-${item.selectedSimType || ""}`;
+                  // Display SIM type name via raw code if global library not available in cart context
+                  const displaySim = item.selectedSimType ? item.selectedSimType.replace(/-/g, " ").replace(/\b\w/g, (c:string)=>c.toUpperCase()) : "";
                   return (
                     <div 
                       key={uniqueId} 
@@ -155,7 +157,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         src={item.product.image}
                         alt={item.product.name}
                         referrerPolicy="no-referrer"
-                        className="w-20 h-20 rounded-xl object-contain bg-white p-1 border border-outline/10 shrink-0"
+                        className="w-20 h-20 rounded-xl object-contain bg-surface-container-lowest p-1 border border-outline/10 shrink-0"
                       />
                       <div className="flex-1 space-y-1 min-w-0">
                         <h4 className="font-display font-bold text-sm text-on-surface truncate">
@@ -172,6 +174,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                               Capacity: {item.selectedStorage}
                             </span>
                           )}
+                          {item.selectedSimType && (
+                            <span className="px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold">
+                              SIM: {displaySim}
+                            </span>
+                          )}
                           {item.selectedWarranty && (
                             <span className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-semibold">
                               {item.selectedWarranty.name} ({item.selectedWarranty.duration})
@@ -186,7 +193,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         <div className="flex items-center justify-between pt-2">
                           <div className="flex items-center bg-surface border border-outline/25 rounded-full">
                             <button
-                              onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id)}
+                              onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id, item.selectedSimType)}
                               disabled={item.quantity <= 1}
                               className="p-1 px-2.5 text-on-surface-variant disabled:opacity-40 hover:text-primary transition-colors"
                               aria-label="Decrease quantity"
@@ -195,7 +202,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             </button>
                             <span className="text-xs font-bold px-2 text-on-surface">{item.quantity}</span>
                             <button
-                              onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id)}
+                              onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id, item.selectedSimType)}
                               className="p-1 px-2.5 text-on-surface-variant hover:text-primary transition-colors"
                               aria-label="Increase quantity"
                             >
@@ -203,7 +210,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             </button>
                           </div>
                           <button
-                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id)}
+                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedStorage, item.selectedWarranty?.id, item.selectedSimType)}
                             className="p-1.5 text-on-surface-variant/80 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                             aria-label="Delete item"
                           >

@@ -432,12 +432,13 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 <div className="max-h-40 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
                   {cart.map((item, idx) => {
                     if (!item?.product?.id) return null;
+                    const simLabel = item.selectedSimType ? item.selectedSimType.replace(/-/g, " ").replace(/\b\w/g, (c:string)=>c.toUpperCase()) : "";
                     return (
                     <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
-                      <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-white p-1 border object-contain shrink-0" />
+                      <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg bg-surface-container-lowest p-1 border object-contain shrink-0" />
                       <div className="flex-1 min-w-0">
                         <h4 className="text-[11px] font-bold text-on-surface truncate">{item.product.name}</h4>
-                        <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
+                        <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity}{item.selectedColor ? ` | ${item.selectedColor}` : ""}{item.selectedStorage ? ` | ${item.selectedStorage}` : ""}{simLabel ? ` | ${simLabel}` : ""}{item.selectedWarranty ? ` | ${item.selectedWarranty.name}` : ""}</p>
                       </div>
                       <div className="text-[11px] font-bold text-on-surface text-right">
                         {item.product.priceKsh !== undefined && <div>{CURRENCY_SYMBOL} {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
@@ -473,12 +474,13 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
             <div className="max-h-56 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
               {cart.map((item, idx) => {
                 if (!item?.product?.id) return null;
+                const simLabel2 = item.selectedSimType ? item.selectedSimType.replace(/-/g, " ").replace(/\b\w/g, (c:string)=>c.toUpperCase()) : "";
                 return (
                 <div key={`${item.product.id}-${idx}`} className="flex items-center gap-3 py-1">
-                  <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg bg-white p-1 border object-contain shrink-0" />
+                  <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg bg-surface-container-lowest p-1 border object-contain shrink-0" />
                   <div className="flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-on-surface truncate">{item.product.name}</h4>
-                    <p className="text-[10px] text-on-surface-variant/70 font-medium">Qty: {item.quantity} {item.selectedColor ? `| ${item.selectedColor}` : ""}</p>
+                    <p className="text-[10px] text-on-surface-variant/70 font-medium">Qty: {item.quantity}{item.selectedColor ? ` | ${item.selectedColor}` : ""}{item.selectedStorage ? ` | ${item.selectedStorage}` : ""}{simLabel2 ? ` | ${simLabel2}` : ""}{item.selectedWarranty ? ` | ${item.selectedWarranty.name}` : ""}</p>
                   </div>
                   <div className="text-xs font-bold text-on-surface text-right">
                     {item.product.priceKsh !== undefined && (

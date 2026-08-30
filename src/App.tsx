@@ -131,8 +131,8 @@ function AppContent() {
     localStorage.setItem("axon_discount_percent", String(discountPercentage));
   }, [couponCode, discountPercentage]);
 
-  // Cart actions
-  const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty) => {
+  // Cart actions — include SIM type so newly added SIM types persist through cart/checkout and don't merge across variants
+  const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty, selectedSimType?: string) => {
     const getDefaultColor = () => {
       if (!product.colors?.length) return undefined;
       const first = product.colors[0];
@@ -141,10 +141,17 @@ function AppContent() {
     const color = selectedColor || getDefaultColor();
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
     const warranty = selectedWarranty || (product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
+    // Fallback SIM: variant first simType or product-level simType — ensures newly added single SIM still persists
+    const simType = selectedSimType || (product.storageVariants?.[0]?.simType as string | undefined) || product.simType || undefined;
 
-    // Compute dynamic price from ProductVariant[] (storage + color match)
+    // Compute dynamic price from ProductVariant[] (storage + color match) and StorageVariant price
     let dynamicPriceKsh = product.priceKsh;
-    if (product.variants && storage && color) {
+    // Prefer storageVariant price when selection matches
+    if (product.storageVariants && storage) {
+      const svMatch = product.storageVariants.find(sv => sv.storage.toLowerCase() === storage.toLowerCase() && (!simType || sv.simType === simType));
+      if (svMatch?.priceKsh != null) dynamicPriceKsh = svMatch.priceKsh;
+    }
+    if (dynamicPriceKsh === product.priceKsh && product.variants && storage && color) {
       const match = product.variants.find(
         v => v.storage.toLowerCase() === storage.toLowerCase() &&
              v.color.toLowerCase() === color.toLowerCase()
@@ -164,7 +171,8 @@ function AppContent() {
           item.product.id === product.id &&
           item.selectedColor === color &&
           item.selectedStorage === storage &&
-          item.selectedWarranty?.id === warranty?.id
+          item.selectedWarranty?.id === warranty?.id &&
+          (item.selectedSimType || undefined) === (simType || undefined)
       );
 
       if (matchIdx > -1) {
@@ -172,29 +180,29 @@ function AppContent() {
         updated[matchIdx].quantity += quantity;
         return updated;
       } else {
-        return [...prevCart, { product: cartProduct, quantity, selectedColor: color, selectedStorage: storage, selectedWarranty: warranty }];
+        return [...prevCart, { product: cartProduct, quantity, selectedColor: color, selectedStorage: storage, selectedWarranty: warranty, selectedSimType: simType }];
       }
     });
 
     setIsCartOpen(true);
   };
 
-  const handleUpdateCartQuantity = (productId: string, quantity: number, color?: string, storage?: string, warrantyId?: string) => {
+  const handleUpdateCartQuantity = (productId: string, quantity: number, color?: string, storage?: string, warrantyId?: string, simType?: string) => {
     if (quantity <= 0) return;
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage && item.selectedWarranty?.id === warrantyId
+        item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage && item.selectedWarranty?.id === warrantyId && (item.selectedSimType || undefined) === (simType || undefined)
           ? { ...item, quantity }
           : item
       )
     );
   };
 
-  const handleRemoveCartItem = (productId: string, color?: string, storage?: string, warrantyId?: string) => {
+  const handleRemoveCartItem = (productId: string, color?: string, storage?: string, warrantyId?: string, simType?: string) => {
     setCart((prevCart) =>
       prevCart.filter(
         (item) =>
-          !(item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage && item.selectedWarranty?.id === warrantyId)
+          !(item.product.id === productId && item.selectedColor === color && item.selectedStorage === storage && item.selectedWarranty?.id === warrantyId && (item.selectedSimType || undefined) === (simType || undefined))
       )
     );
   };
@@ -232,6 +240,7 @@ function AppContent() {
             quantity: item.quantity,
             color: item.selectedColor,
             storage: item.selectedStorage,
+            simType: item.selectedSimType || undefined,
             warranty: item.selectedWarranty ? `${item.selectedWarranty.name} (${item.selectedWarranty.duration})` : undefined,
             image: item.product.image
           }))
@@ -259,6 +268,7 @@ function AppContent() {
           quantity: item.quantity,
           color: item.selectedColor,
           storage: item.selectedStorage,
+          simType: item.selectedSimType || undefined,
           warranty: item.selectedWarranty ? `${item.selectedWarranty.name} (${item.selectedWarranty.duration})` : undefined,
           image: item.product.image
         }))
@@ -565,7 +575,7 @@ function ProductDetailRoute({
   onSelectProduct
 }: {
   products: Product[];
-  onAddToCart: (product: Product, quantity: number, color?: string, storage?: string, warranty?: Warranty) => void;
+  onAddToCart: (product: Product, quantity: number, color?: string, storage?: string, warranty?: Warranty, simType?: string) => void;
   onSelectProduct: (product: Product) => void;
   onBackToCatalog: () => void;
 }) {
