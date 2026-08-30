@@ -84,19 +84,6 @@ UPDATE products SET
     '"iPhone 12 ', '"'),
     '"iPhone 11 ', '"');
 
--- variantImages keys: "storage|iPhone XX Color" -> "storage|Color"
-UPDATE products SET
-  variantImages = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-    variantImages,
-    '|iPhone 18 ', '|'),
-    '|iPhone 17 ', '|'),
-    '|iPhone 16 ', '|'),
-    '|iPhone 15 ', '|'),
-    '|iPhone 14 ', '|'),
-    '|iPhone 13 ', '|'),
-    '|iPhone 12 ', '|'),
-    '|iPhone 11 ', '|');
-
 -- colors array (legacy): "iPhone XX Color" -> "Color"
 UPDATE products SET
   colors = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
