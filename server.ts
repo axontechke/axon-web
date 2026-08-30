@@ -584,62 +584,8 @@ const INITIAL_ORDERS = [
   }
 ];
 
-// Seed data for the global color library — used across all products
+// Seed data for the global color library — globalized (no iPhone prefix), deduplicated
 const INITIAL_COLORS = [
-  // iPhone 11 Series
-  { id: "col-11-black", name: "iPhone 11 Black", code: "#1F1F21", image: "" },
-  { id: "col-11-white", name: "iPhone 11 White", code: "#F5F5F0", image: "" },
-  { id: "col-11-green", name: "iPhone 11 Green", code: "#AEE1CD", image: "" },
-  { id: "col-11-purple", name: "iPhone 11 Purple", code: "#D1CDDA", image: "" },
-  { id: "col-11-yellow", name: "iPhone 11 Yellow", code: "#F9D045", image: "" },
-  { id: "col-11-red", name: "iPhone 11 Product RED", code: "#A50011", image: "" },
-  // iPhone 12 Series
-  { id: "col-12-black", name: "iPhone 12 Black", code: "#201D24", image: "" },
-  { id: "col-12-white", name: "iPhone 12 White", code: "#FBF7F4", image: "" },
-  { id: "col-12-blue", name: "iPhone 12 Blue", code: "#043458", image: "" },
-  { id: "col-12-green", name: "iPhone 12 Green", code: "#E1F8DC", image: "" },
-  { id: "col-12-purple", name: "iPhone 12 Purple", code: "#B8AFE6", image: "" },
-  { id: "col-12-red", name: "iPhone 12 Product RED", code: "#E23636", image: "" },
-  // iPhone 13 Series
-  { id: "col-13-midnight", name: "iPhone 13 Midnight", code: "#171E27", image: "" },
-  { id: "col-13-starlight", name: "iPhone 13 Starlight", code: "#F9F3EE", image: "" },
-  { id: "col-13-blue", name: "iPhone 13 Blue", code: "#215E7C", image: "" },
-  { id: "col-13-pink", name: "iPhone 13 Pink", code: "#FAE0D8", image: "" },
-  { id: "col-13-green", name: "iPhone 13 Green", code: "#364935", image: "" },
-  { id: "col-13-red", name: "iPhone 13 Product RED", code: "#A50011", image: "" },
-  // iPhone 14 Series
-  { id: "col-14-midnight", name: "iPhone 14 Midnight", code: "#171E27", image: "" },
-  { id: "col-14-starlight", name: "iPhone 14 Starlight", code: "#F9F3EE", image: "" },
-  { id: "col-14-purple", name: "iPhone 14 Purple", code: "#5856D6", image: "" },
-  { id: "col-14-yellow", name: "iPhone 14 Yellow", code: "#F9D045", image: "" },
-  { id: "col-14-blue", name: "iPhone 14 Blue", code: "#215E7C", image: "" },
-  { id: "col-14-red", name: "iPhone 14 Product RED", code: "#A50011", image: "" },
-  // iPhone 15 Series
-  { id: "col-15-black", name: "iPhone 15 Black", code: "#1F1F21", image: "" },
-  { id: "col-15-blue", name: "iPhone 15 Blue", code: "#9BB5CE", image: "" },
-  { id: "col-15-green", name: "iPhone 15 Green", code: "#AEE1CD", image: "" },
-  { id: "col-15-yellow", name: "iPhone 15 Yellow", code: "#F9D045", image: "" },
-  { id: "col-15-pink", name: "iPhone 15 Pink", code: "#FAE0D8", image: "" },
-  // iPhone 16 Series
-  { id: "col-16-black", name: "iPhone 16 Black", code: "#3C4042", image: "" },
-  { id: "col-16-white", name: "iPhone 16 White", code: "#FAFAFA", image: "" },
-  { id: "col-16-pink", name: "iPhone 16 Pink", code: "#F2ADDA", image: "" },
-  { id: "col-16-teal", name: "iPhone 16 Teal", code: "#B0D4D2", image: "" },
-  { id: "col-16-ultramarine", name: "iPhone 16 Ultramarine", code: "#9AADF6", image: "" },
-  // iPhone 17 Series
-  { id: "col-17-black", name: "iPhone 17 Black", code: "#1F1F21", image: "" },
-  { id: "col-17-white", name: "iPhone 17 White", code: "#FAFAFA", image: "" },
-  { id: "col-17-lavender", name: "iPhone 17 Lavender", code: "#B8AFE6", image: "" },
-  { id: "col-17-mist-blue", name: "iPhone 17 Mist Blue", code: "#7095A8", image: "" },
-  { id: "col-17-sage", name: "iPhone 17 Sage", code: "#505F4E", image: "" },
-  { id: "col-17-cosmic-orange", name: "iPhone 17 Cosmic Orange", code: "#CC5500", image: "" },
-  { id: "col-17-deep-blue", name: "iPhone 17 Deep Blue", code: "#091318", image: "" },
-  // iPhone 18 Series (Pre-release)
-  { id: "col-18-dark-cherry", name: "iPhone 18 Dark Cherry", code: "#A50034", image: "" },
-  { id: "col-18-light-blue", name: "iPhone 18 Light Blue", code: "#1E4D8C", image: "" },
-  { id: "col-18-dark-gray", name: "iPhone 18 Dark Gray", code: "#3C3C3C", image: "" },
-  { id: "col-18-silver", name: "iPhone 18 Silver", code: "#C0C0C0", image: "" },
-  // Generics / universals
   { id: "col-black", name: "Black", code: "#000000", image: "" },
   { id: "col-white", name: "White", code: "#FFFFFF", image: "" },
   { id: "col-gray", name: "Gray", code: "#8E8E93", image: "" },
@@ -650,6 +596,24 @@ const INITIAL_COLORS = [
   { id: "col-cyan", name: "Cyan", code: "#00FFFF", image: "" },
   { id: "col-teal", name: "Teal", code: "#008080", image: "" },
   { id: "col-mint", name: "Mint", code: "#98FFB6", image: "" },
+  { id: "col-11-green", name: "Green", code: "#AEE1CD", image: "" },
+  { id: "col-11-purple", name: "Purple", code: "#D1CDDA", image: "" },
+  { id: "col-11-yellow", name: "Yellow", code: "#F9D045", image: "" },
+  { id: "col-11-red", name: "Product RED", code: "#A50011", image: "" },
+  { id: "col-12-blue", name: "Blue", code: "#043458", image: "" },
+  { id: "col-13-midnight", name: "Midnight", code: "#171E27", image: "" },
+  { id: "col-13-starlight", name: "Starlight", code: "#F9F3EE", image: "" },
+  { id: "col-13-pink", name: "Pink", code: "#FAE0D8", image: "" },
+  { id: "col-16-ultramarine", name: "Ultramarine", code: "#9AADF6", image: "" },
+  { id: "col-17-lavender", name: "Lavender", code: "#B8AFE6", image: "" },
+  { id: "col-17-mist-blue", name: "Mist Blue", code: "#7095A8", image: "" },
+  { id: "col-17-sage", name: "Sage", code: "#505F4E", image: "" },
+  { id: "col-17-cosmic-orange", name: "Cosmic Orange", code: "#CC5500", image: "" },
+  { id: "col-17-deep-blue", name: "Deep Blue", code: "#091318", image: "" },
+  { id: "col-18-dark-cherry", name: "Dark Cherry", code: "#A50034", image: "" },
+  { id: "col-18-light-blue", name: "Light Blue", code: "#1E4D8C", image: "" },
+  { id: "col-18-dark-gray", name: "Dark Gray", code: "#3C3C3C", image: "" },
+  { id: "col-18-silver", name: "Silver", code: "#C0C0C0", image: "" },
 ];
 
 const INITIAL_DELIVERY_METHODS = [
