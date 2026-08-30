@@ -3130,7 +3130,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                 const key = `${editingSv.storage}|${c.name}`;
                                 const imgs = variantImgMap[key] || [];
                                 return (
-                                  <div key={i} className="flex flex-col gap-1 bg-surface border border-outline/20 rounded-xl p-2 text-[10px] min-w-[80px]">
+                                  <div key={i} className="flex flex-col gap-1 bg-surface border border-outline/20 rounded-xl p-2 text-[10px] min-w-[80px] max-w-[140px] overflow-hidden">
                                     {/* Color dot + name + remove */}
                                     <div className="flex items-center gap-1">
                                       <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.code || "#ccc" }} />
@@ -3308,13 +3308,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                       {svColors.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
                                     </select>
                                   </div>
-                                  <div className="space-y-1 col-span-2">
+                                  <div className="space-y-1 col-span-2 min-w-0">
                                     <label className="text-[8px] text-on-surface-variant/70 uppercase block">Pick image</label>
-                                    <div className="flex gap-1">
+                                    <div className="flex gap-1 min-w-0">
                                       <select
                                         value={newVarImgUrl}
                                         onChange={e => setNewVarImgUrl(e.target.value)}
-                                        className="flex-1 px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary"
+                                        className="flex-1 min-w-0 px-2 py-1.5 bg-surface border border-outline/15 rounded-lg text-[10px] text-on-surface focus:outline-none focus:border-primary truncate"
                                       >
                                         <option value="">— Select URL —</option>
                                         {(editingProduct.images || []).map((url, i) => <option key={i} value={url}>{url}</option>)}

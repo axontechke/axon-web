@@ -825,7 +825,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         {/* Left Column: Image — top on mobile, left on desktop */}
         <div className="order-1 lg:order-1 lg:col-span-6 space-y-3">
           <div
-            className="relative aspect-square rounded-2xl lg:rounded-[32px] bg-surface flex items-center justify-center p-6 overflow-hidden cursor-zoom-in border border-outline/10 shadow-xs"
+            className="relative aspect-[4/3] lg:aspect-square rounded-2xl lg:rounded-[32px] bg-surface flex items-center justify-center p-3 lg:p-6 overflow-hidden cursor-zoom-in border border-outline/10 shadow-xs"
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -840,16 +840,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               src={availableImages[slideIndex] || product.image}
               alt={product.name}
               referrerPolicy="no-referrer"
-              className="w-full max-w-[380px] h-auto object-contain select-none pointer-events-none transition-transform duration-200 ease-out"
+              className="w-full max-w-[220px] lg:max-w-[380px] h-auto object-contain select-none pointer-events-none transition-transform duration-200 ease-out"
               style={{
                 ...zoomStyle,
                 transform: isZoomed ? "scale(2.2)" : "scale(1)",
               }}
               id="detail-main-img"
             />
-            <div className="absolute bottom-3 right-3 bg-surface/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-outline/10 flex items-center gap-1 pointer-events-none text-[9px] font-bold text-on-surface-variant">
+            <div className="absolute bottom-2 right-2 bg-surface/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-outline/10 flex items-center gap-1 pointer-events-none text-[9px] font-bold text-on-surface-variant">
               <ZoomIn className="w-2.5 h-2.5 text-primary animate-pulse" />
-              <span>{isZoomed ? "Zoomed" : "Hover to zoom"}</span>
+              <span className="hidden sm:inline">{isZoomed ? "Zoomed" : "Hover to zoom"}</span>
+              <span className="sm:hidden">{isZoomed ? "Zoomed" : "Tap to zoom"}</span>
             </div>
           </div>
 
@@ -859,7 +860,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 <button
                   key={`${imgUrl}-${idx}`}
                   onClick={() => setSlideIndex(idx)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden bg-surface border p-0.5 transition-all ${
+                  className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg overflow-hidden bg-surface border p-0.5 transition-all ${
                     slideIndex === idx
                       ? "ring-2 ring-primary border-transparent"
                       : "border-outline/15 hover:border-outline/30"
