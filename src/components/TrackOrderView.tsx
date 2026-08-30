@@ -37,6 +37,7 @@ interface TrackedOrder {
   discountPercentage: number;
   taxes: number;
   total: number;
+  totalKsh?: number;
   payment: {
     lastFour: string;
   };

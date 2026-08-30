@@ -19,7 +19,7 @@ export interface SEOConfig {
 }
 
 const SITE_NAME = 'AXON TECH Kenya';
-export const SITE_URL = 'https://axontech.co.ke';
+export const SITE_URL = 'https://www.axontech.co.ke';
 const DEFAULT_OG_IMAGE = '';
 
 export const SEO_DEFAULTS: SEOConfig = {

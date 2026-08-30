@@ -4,35 +4,35 @@
 
 ## Company Information
 
-- [About AXON TECH Kenya](https://axontech.co.ke/contact): Our story, location at Simara Mall Nairobi, business hours, and contact details
-- [Contact & Location](https://axontech.co.ke/contact): Simara Mall, Ground Floor, Shop G50, Nairobi, Kenya. Phone: +254 745 017979
+- [About AXON TECH Kenya](https://www.axontech.co.ke/contact): Our story, location at Simara Mall Nairobi, business hours, and contact details
+- [Contact & Location](https://www.axontech.co.ke/contact): Simara Mall, Ground Floor, Shop G50, Nairobi, Kenya. Phone: +254 745 017979
 
 ## Products
 
-- [Full Product Catalog](https://axontech.co.ke/catalog): Browse all our technology products across categories
-- [Axon Slate Pro Tablet](https://axontech.co.ke/product/axon-slate-pro): Our flagship tablet with Axon-X1 chip, 12.9" Liquid Infinity Display, starting at $899
-- [Axon Book 16 Laptop](https://axontech.co.ke/product/axon-book-16): High-performance 16" laptop with multi-core processors, starting at $1,499
-- [Axon Book 14 Laptop](https://axontech.co.ke/product/axon-book-14): Compact professional laptop in aerospace-grade alloy, starting at $1,299
-- [Axon Phone 1 Pro](https://axontech.co.ke/product/axon-phone-1-pro): Flagship smartphone with Axon-M1 neural processor, starting at $799
-- [Axon Buds Pro](https://axontech.co.ke/product/axon-buds-pro): Immersive spatial audio earbuds with noise cancellation, starting at $249
-- [Axon Studio Pro Headphones](https://axontech.co.ke/product/axon-studio-pro): Premium over-ear headphones with adaptive sound, starting at $349
-- [Axon Audio Engine](https://axontech.co.ke/product/axon-audio-engine): Professional sound processor and amplification stage, starting at $1,299
-- [Axon Slate Air Tablet](https://axontech.co.ke/product/axon-slate-air): Ultra-thin featherweight tablet, starting at $899
-- [Axon Buds Light](https://axontech.co.ke/product/axon-buds-light): Lightweight true wireless earphones, starting at $129
-- [Power Capsule V2](https://axontech.co.ke/product/power-capsule-v2): Modular power bank and charging capsule, starting at $79
-- [Power Hub Pro](https://axontech.co.ke/product/power-hub-pro): Aluminum desktop dock and charging hub, starting at $79
-- [Axon Click 2 Keyboard](https://axontech.co.ke/product/axon-click-2): Mechanical precision keyboard, starting at $129
+- [Full Product Catalog](https://www.axontech.co.ke/catalog): Browse all our technology products across categories
+- [Axon Slate Pro Tablet](https://www.axontech.co.ke/product/axon-slate-pro): Our flagship tablet with Axon-X1 chip, 12.9" Liquid Infinity Display, starting at $899
+- [Axon Book 16 Laptop](https://www.axontech.co.ke/product/axon-book-16): High-performance 16" laptop with multi-core processors, starting at $1,499
+- [Axon Book 14 Laptop](https://www.axontech.co.ke/product/axon-book-14): Compact professional laptop in aerospace-grade alloy, starting at $1,299
+- [Axon Phone 1 Pro](https://www.axontech.co.ke/product/axon-phone-1-pro): Flagship smartphone with Axon-M1 neural processor, starting at $799
+- [Axon Buds Pro](https://www.axontech.co.ke/product/axon-buds-pro): Immersive spatial audio earbuds with noise cancellation, starting at $249
+- [Axon Studio Pro Headphones](https://www.axontech.co.ke/product/axon-studio-pro): Premium over-ear headphones with adaptive sound, starting at $349
+- [Axon Audio Engine](https://www.axontech.co.ke/product/axon-audio-engine): Professional sound processor and amplification stage, starting at $1,299
+- [Axon Slate Air Tablet](https://www.axontech.co.ke/product/axon-slate-air): Ultra-thin featherweight tablet, starting at $899
+- [Axon Buds Light](https://www.axontech.co.ke/product/axon-buds-light): Lightweight true wireless earphones, starting at $129
+- [Power Capsule V2](https://www.axontech.co.ke/product/power-capsule-v2): Modular power bank and charging capsule, starting at $79
+- [Power Hub Pro](https://www.axontech.co.ke/product/power-hub-pro): Aluminum desktop dock and charging hub, starting at $79
+- [Axon Click 2 Keyboard](https://www.axontech.co.ke/product/axon-click-2): Mechanical precision keyboard, starting at $129
 
 ## Blog & Technical Insights
 
-- [AXON TECH Blog](https://axontech.co.ke/blog): Technical articles on metrology, calibration, and engineering
-- [Metrology and Calibration in East Africa](https://axontech.co.ke/blog/future-of-metrology-calibration-nodes-east-africa): Analysis of electronic hardware certification in Nairobi and Sub-Saharan Africa
-- [Silicon Core Diagnostics Guide](https://axontech.co.ke/blog/optimizing-silicon-core-diagnostics-iso-17025): ISO/IEC 17025 guide for hardware developers and calibration labs
+- [AXON TECH Blog](https://www.axontech.co.ke/blog): Technical articles on metrology, calibration, and engineering
+- [Metrology and Calibration in East Africa](https://www.axontech.co.ke/blog/future-of-metrology-calibration-nodes-east-africa): Analysis of electronic hardware certification in Nairobi and Sub-Saharan Africa
+- [Silicon Core Diagnostics Guide](https://www.axontech.co.ke/blog/optimizing-silicon-core-diagnostics-iso-17025): ISO/IEC 17025 guide for hardware developers and calibration labs
 
 ## Services
 
-- [Order Tracking](https://axontech.co.ke/track-order): Real-time order tracking and delivery status
-- [Checkout & Delivery](https://axontech.co.ke/checkout): Secure payment with DHL Express, FedEx, and local courier delivery
+- [Order Tracking](https://www.axontech.co.ke/track-order): Real-time order tracking and delivery status
+- [Checkout & Delivery](https://www.axontech.co.ke/checkout): Secure payment with DHL Express, FedEx, and local courier delivery
 
 ## Policies
 

@@ -159,4 +159,4 @@ Disallow: /db.json
 # SECTION 6: SITEMAP
 # ============================================================
 
-Sitemap: https://axontech.co.ke/sitemap.xml
+Sitemap: https://www.axontech.co.ke/sitemap.xml

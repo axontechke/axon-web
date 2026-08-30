@@ -205,7 +205,7 @@ ${orderData.customerName}
 Items:
 ${orderData.items}
 
-Login to admin to process: https://axontech.co.ke/admin`;
+Login to admin to process: https://www.axontech.co.ke/admin`;
 
   // Message to customer
   const customerMessage = `✅ Order Confirmed — #${orderData.orderId}
@@ -305,7 +305,7 @@ function generateToken(): string { // deprecated, keep for compatibility
 
 // ─── CORS ────────────────────────────────────────────────────
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "https://axontech.co.ke https://www.axontech.co.ke", // Restrict to your domain(s)
+  "Access-Control-Allow-Origin": "https://www.axontech.co.ke", // Canonical origin
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, x-admin-api-key",
   "Access-Control-Max-Age": "86400",
@@ -1908,7 +1908,7 @@ async function updateProductVariantStock(req: Request, env: Env, _ctx: Execution
 // ─── SITEMAP & SEO ───────────────────────────────────────────
 async function generateSitemap(env: Env): Promise<Response> {
   await seedDatabase(env.DB);
-  const SITE_URL = "https://axontech.co.ke";
+  const SITE_URL = "https://www.axontech.co.ke";
   const today = new Date().toISOString().split("T")[0];
 
   const urls: string[] = [
