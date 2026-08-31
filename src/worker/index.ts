@@ -1385,6 +1385,26 @@ async function updateProduct(req: Request, env: Env, _ctx: ExecutionContext, par
 
   await env.DB.prepare(`UPDATE products SET ${fields.join(", ")} WHERE id = ?`).bind(...values).run();
 
+  // Clean up orphaned variant images when storageVariants changes
+  if (data.storageVariants !== undefined) {
+    const validKeys = new Set<string>();
+    for (const sv of data.storageVariants) {
+      for (const c of (sv as any).colors || []) {
+        const name = typeof c === 'string' ? c : (c as any).name;
+        if (name) validKeys.add(`${sv.storage}|${name}`);
+      }
+    }
+    const { results: existing } = await env.DB.prepare(
+      "SELECT id, storage, color FROM product_variant_images WHERE productId = ?"
+    ).bind(params.id).all();
+    for (const row of existing) {
+      const key = `${(row as any).storage}|${(row as any).color}`;
+      if (!validKeys.has(key)) {
+        await env.DB.prepare("DELETE FROM product_variant_images WHERE id = ?").bind((row as any).id).run();
+      }
+    }
+  }
+
   // Handle price drop checks
   if (data.price !== undefined) {
     const trackers = await env.DB.prepare(

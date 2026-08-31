@@ -655,29 +655,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
     setVariantImgMap(grouped);
 
-    // Backfill variant image URLs into product.images if not already present
-    const existingUrls = new Set<string>(prod.images || []);
-    const additionalUrls: string[] = [];
-    // From product_variant_images table
-    for (const img of variantImgs) {
-      if (img.imageUrl && !existingUrls.has(img.imageUrl)) {
-        existingUrls.add(img.imageUrl);
-        additionalUrls.push(img.imageUrl);
-      }
-    }
-    // Also backfill from storageVariants[].colors[].image
-    for (const sv of prod.storageVariants || []) {
-      for (const c of sv.colors || []) {
-        if ((c as any).image && !existingUrls.has((c as any).image)) {
-          existingUrls.add((c as any).image);
-          additionalUrls.push((c as any).image);
-        }
-      }
-    }
-
     setEditingProduct({
       ...prod,
-      images: [...(prod.images || []), ...additionalUrls],
+      images: prod.images || [],
       colors: finalColors,
       storages: prod.storages || [],
       variants: prod.variants || [],
