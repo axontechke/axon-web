@@ -53,7 +53,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const itemsSubtotalKsh = cart.reduce((acc, item) => {
     const basePrice = (item.product.priceKsh || 0) * item.quantity;
     const warrantyPrice = (item.selectedWarranty?.priceKsh || 0) * item.quantity;
-    return acc + basePrice + warrantyPrice;
+    return acc + (warrantyPrice > 0 ? warrantyPrice : basePrice);
   }, 0);
 
   const discountKsh = itemsSubtotalKsh * (discountPercentage / 100);

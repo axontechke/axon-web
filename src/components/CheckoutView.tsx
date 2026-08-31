@@ -38,7 +38,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   const itemsSubtotalKsh = cart.reduce((acc, item) => {
     const basePrice = (item.product.priceKsh || 0) * item.quantity;
     const warrantyPrice = (item.selectedWarranty?.priceKsh || 0) * item.quantity;
-    return acc + basePrice + warrantyPrice;
+    return acc + (warrantyPrice > 0 ? warrantyPrice : basePrice);
   }, 0);
 
   const discountAmountKsh = itemsSubtotalKsh * (discountPercentage / 100);
@@ -441,7 +441,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                         <p className="text-[10px] text-on-surface-variant/70">Qty: {item.quantity}{item.selectedColor ? ` | ${item.selectedColor}` : ""}{item.selectedStorage ? ` | ${item.selectedStorage}` : ""}{simLabel ? ` | ${simLabel}` : ""}{item.selectedWarranty ? ` | ${item.selectedWarranty.name}` : ""}</p>
                       </div>
                       <div className="text-[11px] font-bold text-on-surface text-right">
-                        {item.product.priceKsh !== undefined && <div>{CURRENCY_SYMBOL} {(item.product.priceKsh * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
+                        {item.product.priceKsh !== undefined && <div>{CURRENCY_SYMBOL} {(((item.selectedWarranty?.priceKsh || 0) > 0 ? item.selectedWarranty!.priceKsh : item.product.priceKsh) * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>}
                       </div>
                     </div>
                   );
@@ -484,7 +484,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                   </div>
                   <div className="text-xs font-bold text-on-surface text-right">
                     {item.product.priceKsh !== undefined && (
-                      <div>{CURRENCY_SYMBOL} {((item.product.priceKsh + (item.selectedWarranty?.priceKsh || 0)) * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                      <div>{CURRENCY_SYMBOL} {(((item.selectedWarranty?.priceKsh || 0) > 0 ? item.selectedWarranty!.priceKsh : item.product.priceKsh) * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     )}
                   </div>
                 </div>

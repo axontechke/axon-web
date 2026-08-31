@@ -267,7 +267,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     );
     return (variantMatch as any)?.warrantyPriceKsh ?? selectedWarranty.priceKsh ?? 0;
   };
-  const displayPriceKsh = basePriceKsh + getVariantWarrantyPrice();
+  const warrantyPrice = getVariantWarrantyPrice();
+  const displayPriceKsh = warrantyPrice > 0 ? warrantyPrice : basePriceKsh;
 
   // All in-stock (variants always in stock for now)
   const isSelectedVariantInStock = hasLegacyVariants ? true : product.inStock;
@@ -738,7 +739,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       >
                         <span className="block">{w.name}{w.duration ? ` (${w.duration})` : ""}</span>
                         <span className={`block text-[10px] font-bold ${selectedWarranty?.id === w.id ? "text-white/80" : w.priceKsh === 0 ? "text-green-600" : "text-primary"}`}>
-                          {w.priceKsh === 0 ? "Free" : `+KSh ${w.priceKsh.toLocaleString()}`}
+                          {w.priceKsh === 0 ? "Free" : `KSh ${w.priceKsh.toLocaleString()}`}
                         </span>
                       </button>
                     ))}
