@@ -19,6 +19,7 @@ const IMAGES = {
   Google:  'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80',
   OnePlus: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80',
   Nothing: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80',
+  Other:   '',
 };
 
 function parseRows() {
@@ -50,8 +51,9 @@ function parseRows() {
 function extractMeta(name) {
   const original = name.toUpperCase();
 
-  let brand = 'Apple';
-  if (/SAMSUNG|GALAXY|S26|S25|S24|FOLD|A0[5-9]|A1[0-9]|A2[0-9]/i.test(original)) brand = 'Samsung';
+  let brand = 'Other';
+  if (/APPLE|iPhone/i.test(original)) brand = 'Apple';
+  else if (/SAMSUNG|GALAXY|S26|S25|S24|FOLD|A0[5-9]|A1[0-9]|A2[0-9]/i.test(original)) brand = 'Samsung';
   else if (/PIXEL/i.test(original)) brand = 'Google';
   else if (/ONE\s*PLUS|ONEPLUS/i.test(original)) brand = 'OnePlus';
   else if (/NOTHING/i.test(original)) brand = 'Nothing';
@@ -188,12 +190,7 @@ async function run() {
   }
   console.log(`\n${products.length} products to import`);
 
-  // Delete all phones
-  console.log('\nDeleting existing phone products...');
-  const delOut = runSql("DELETE FROM products WHERE category = 'Phones'");
-  console.log(delOut.includes('"success": true') ? '✅ Deleted' : `⚠️ ${delOut.substring(0, 200)}`);
-
-  // Insert new products in batches of 10
+  // Insert new products in batches of 10 (INSERT OR IGNORE preserves existing products and their images)
   console.log('\nInserting products...');
   let sql = '';
   for (const p of products) {
@@ -201,7 +198,7 @@ async function run() {
       `id, name, price, priceKsh, description, category, brand, image, colors, storages, rating, reviewsCount, inStock, specifications, variants`,
       `${sqlStr(p.id)}, ${sqlStr(p.name)}, ${p.price}, ${p.priceKsh}, ${sqlStr(p.description)}, ${sqlStr(p.category)}, ${sqlStr(p.brand)}, ${sqlStr(p.image)}, ${sqlJson(p.colors)}, ${sqlJson(p.storages)}, ${p.rating}, ${p.reviewsCount}, ${p.inStock ? 1 : 0}, ${sqlJson(p.specifications)}, ${sqlJson(p.variants)}`,
     ];
-    sql += `INSERT OR REPLACE INTO products (${cols[0]}) VALUES (${cols[1]});\n`;
+    sql += `INSERT OR IGNORE INTO products (${cols[0]}) VALUES (${cols[1]});\n`;
   }
 
   // Write to SQL file and execute

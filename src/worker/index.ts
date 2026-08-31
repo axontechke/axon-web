@@ -1790,8 +1790,8 @@ async function syncRealtimeProducts(_req: Request, env: Env): Promise<Response> 
   for (const p of fallbackProducts) {
     const existing = await env.DB.prepare("SELECT id FROM products WHERE id = ?").bind(p.id).first();
     if (existing) {
-      await env.DB.prepare("UPDATE products SET price = ?, priceKsh = ?, name = ?, image = ? WHERE id = ?")
-        .bind(p.price, p.priceKsh, p.name, p.image, p.id).run();
+      await env.DB.prepare("UPDATE products SET price = ?, priceKsh = ?, name = ? WHERE id = ?")
+        .bind(p.price, p.priceKsh, p.name, p.id).run();
     } else {
       await env.DB.prepare(
         `INSERT INTO products (id, name, price, priceKsh, description, category, brand, image, rating, reviewsCount, inStock, colors, storages, specifications)
