@@ -40,6 +40,10 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
     return `WTY-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   }, []);
 
+  const orderItems = (orderDetails as any).items || [];
+  const warrantyItem = orderItems.find((it: any) => it.warranty);
+  const hasWarranty = !!warrantyItem;
+
   const mpesaConfig = config?.paymentMpesa || { till: "123456", name: "AXON TECHNOLOGIES KE" };
   const bankConfig = config?.paymentBank || {
     name: "KCB Bank",
@@ -70,14 +74,16 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
         </p>
       </div>
 
-      {/* Warranty Card */}
-      <div className="bg-primary-fixed/30 border border-primary/10 rounded-2xl p-4 flex items-center gap-3 text-left">
-        <ShieldCheck className="w-8 h-8 text-primary shrink-0" />
-        <div className="space-y-0.5 text-xs">
-          <span className="font-bold text-primary uppercase block tracking-wider">3-Year Warranty Activated</span>
-          <span className="text-on-surface-variant block">Your registered license core is: <strong>{warrantyCode}</strong>.</span>
+      {/* Warranty Card — only shown when at least one item includes a warranty */}
+      {hasWarranty && (
+        <div className="bg-primary-fixed/30 border border-primary/10 rounded-2xl p-4 flex items-center gap-3 text-left">
+          <ShieldCheck className="w-8 h-8 text-primary shrink-0" />
+          <div className="space-y-0.5 text-xs">
+            <span className="font-bold text-primary uppercase block tracking-wider">{warrantyItem.warranty} Activated</span>
+            <span className="text-on-surface-variant block">Your registered license core is: <strong>{warrantyCode}</strong>.</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Payment Instructions */}
       <div className="bg-surface-container-low border border-outline/10 rounded-3xl p-6 text-left space-y-5">

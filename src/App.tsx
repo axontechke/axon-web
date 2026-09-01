@@ -140,7 +140,7 @@ function AppContent() {
     };
     const color = selectedColor || getDefaultColor();
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
-    const warranty = selectedWarranty || (product.warranties && product.warranties.length > 0 ? product.warranties[0] : undefined);
+    const warranty = selectedWarranty || undefined;
     // Fallback SIM: variant first simType or product-level simType — ensures newly added single SIM still persists
     const simType = selectedSimType || (product.storageVariants?.[0]?.simType as string | undefined) || product.simType || undefined;
 

@@ -120,12 +120,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       } as Warranty;
     })
     .filter((w: Warranty) => w.id);
-  const DEFAULT_WARRANTIES: Warranty[] = [
-    { id: "default-1yr", name: "1 Year Official Warranty", duration: "1 Year", priceKsh: 0 },
-  ];
   const availableWarranties = hasStorageVariants && selectedStorageVariant
-    ? (resolvedWarranties.length > 0 ? resolvedWarranties : (product.warranties && product.warranties.length > 0 ? product.warranties : DEFAULT_WARRANTIES))
-    : (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
+    ? resolvedWarranties
+    : (product.warranties && product.warranties.length > 0) ? product.warranties : [];
   // When multiple SIM types exist for the selected storage, show the selector
   const storageSimTypes = hasStorageVariants && selectedStorage
     ? product.storageVariants!.filter(sv => sv.storage.toLowerCase() === selectedStorage.toLowerCase()).map(sv => sv.simType)
@@ -143,10 +140,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
   const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
-    // Default to free warranty (priceKsh === 0) if available
     if (availableWarranties.length > 0) {
       const freeWarranty = availableWarranties.find(w => w.priceKsh === 0);
-      return freeWarranty || availableWarranties[0];
+      return freeWarranty || undefined;
     }
     return undefined;
   });
@@ -215,17 +211,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         .filter((w: Warranty) => w.id);
       if (resolved.length > 0) {
         const free = resolved.find((w: Warranty) => w.priceKsh === 0);
-        setSelectedWarranty(free || resolved[0]);
+        setSelectedWarranty(free || undefined);
       } else {
-        const fallback = (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
-        const free = fallback.find((w: Warranty) => w.priceKsh === 0);
-        setSelectedWarranty(free || fallback[0]);
+        setSelectedWarranty(undefined);
       }
     } else {
       setSelectedSimType(null);
-      const warranties = (product.warranties && product.warranties.length > 0) ? product.warranties : DEFAULT_WARRANTIES;
+      const warranties = (product.warranties && product.warranties.length > 0) ? product.warranties : [];
       const free = warranties.find((w: Warranty) => w.priceKsh === 0);
-      setSelectedWarranty(free || warranties[0]);
+      setSelectedWarranty(free || undefined);
     }
     setQuantity(1);
   }, [product.id, product.image]);
@@ -873,10 +867,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             </div>
           )}
 
-          <div className="hidden md:flex items-center gap-2 justify-center text-[10px] text-on-surface-variant/60 bg-surface-container-low p-2.5 rounded-xl border border-outline/5">
-            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <span>Authorized manufacturer warranty & original packaging included.</span>
-          </div>
+          {availableWarranties.length > 0 && (
+            <div className="hidden md:flex items-center gap-2 justify-center text-[10px] text-on-surface-variant/60 bg-surface-container-low p-2.5 rounded-xl border border-outline/5">
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+              <span>Authorized manufacturer warranty & original packaging included.</span>
+            </div>
+          )}
         </div>
       </div>
 
