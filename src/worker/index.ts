@@ -455,7 +455,18 @@ const INITIAL_CONFIG: Record<string, any> = {
   mixedShowcaseTitle: "Shop Our Mixed Picks",
   mixedShowcaseSubtitle: "Hand-picked across every category.",
   mixedShowcaseProducts: [],
-  categoriesSectionEnabled: true
+  categoriesSectionEnabled: true,
+  headerLinks: [
+    { name: "Home", category: "Home", enabled: true },
+    { name: "Shop All", category: "All", enabled: true },
+    { name: "Laptops", category: "Laptops", enabled: true },
+    { name: "Tablets", category: "Tablets", enabled: true },
+    { name: "Audio", category: "Audio", enabled: true },
+    { name: "Phones", category: "Phones", enabled: true },
+    { name: "Track Order", category: "TrackOrder", enabled: true },
+    { name: "Contact Us", category: "Contact", enabled: true },
+    { name: "Blog", category: "Blog", enabled: true }
+  ]
 };
 
 const INITIAL_CONTACT: Record<string, any> = {

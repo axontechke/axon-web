@@ -44,7 +44,8 @@ import {
   Palette,
   ChevronUp,
   ChevronDown,
-  LayoutGrid
+  LayoutGrid,
+  Menu
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { 
@@ -160,6 +161,7 @@ interface WebConfig {
   aiCreditsUsed?: number;
   heroTargetProduct?: string;
   heroButtonText?: string;
+  headerLinks?: { name: string; category: string; enabled: boolean }[];
 }
 
 const defaultCategories = [
@@ -271,7 +273,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [quotaLimitInput, setQuotaLimitInput] = useState<number>(30);
 
   // Config Sub-Tab State
-  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "mixed" | "protocol" | "footer" | "contact" | "whatsapp">("general");
+  const [configSubTab, setConfigSubTab] = useState<"general" | "hero" | "categories" | "trending" | "spotlight" | "mixed" | "protocol" | "footer" | "contact" | "whatsapp" | "header">("general");
 
   // Data States
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -3940,6 +3942,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
             >
               WhatsApp
             </button>
+            <button
+              onClick={() => setConfigSubTab("header")}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                configSubTab === "header" ? "bg-primary text-white" : "bg-surface-container hover:bg-surface-container-high text-on-surface"
+              }`}
+            >
+              Header Nav ({ (webConfig.headerLinks || []).length || 9 })
+            </button>
           </div>
 
           {/* ======================================= */}
@@ -6568,6 +6578,173 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 Save WhatsApp Settings
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================= */}
+      {/* CONFIG SUB-TAB: HEADER NAV              */}
+      {/* ======================================= */}
+      {configSubTab === "header" && (
+        <div className="space-y-6 animate-in fade-in duration-200 text-xs font-semibold text-left">
+          <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+            <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+              <Menu className="w-4 h-4 text-primary" />
+              Header Navigation Links
+            </h3>
+            <p className="text-[11px] text-on-surface-variant/70">
+              Manage the category links shown in the header. Max 9 items. The first 3 links are fully editable (name + category redirect). Items 4–9 can be toggled on/off and reordered but use fixed category targets.
+            </p>
+
+            {(() => {
+              const currentLinks = webConfig.headerLinks || [
+                { name: "Home", category: "Home", enabled: true },
+                { name: "Shop All", category: "All", enabled: true },
+                { name: "Laptops", category: "Laptops", enabled: true },
+                { name: "Tablets", category: "Tablets", enabled: true },
+                { name: "Audio", category: "Audio", enabled: true },
+                { name: "Phones", category: "Phones", enabled: true },
+                { name: "Track Order", category: "TrackOrder", enabled: true },
+                { name: "Contact Us", category: "Contact", enabled: true },
+                { name: "Blog", category: "Blog", enabled: true }
+              ];
+              const categoryOptions = [
+                "Home", "All", "Laptops", "Tablets", "Audio", "Phones",
+                "Accessories", "Power", "TrackOrder", "Contact", "Blog"
+              ];
+              const updateLink = (idx: number, field: string, value: any) => {
+                const copy = [...currentLinks];
+                copy[idx] = { ...copy[idx], [field]: value };
+                setWebConfig(prev => ({ ...prev, headerLinks: copy }));
+              };
+              const moveLink = (idx: number, dir: -1 | 1) => {
+                const copy = [...currentLinks];
+                const newIdx = idx + dir;
+                if (newIdx < 0 || newIdx >= copy.length) return;
+                [copy[idx], copy[newIdx]] = [copy[newIdx], copy[idx]];
+                setWebConfig(prev => ({ ...prev, headerLinks: copy }));
+              };
+              const enabledCount = currentLinks.filter(l => l.enabled).length;
+              return (
+                <>
+                  <div className="flex items-center justify-between p-3 bg-surface border border-outline/10 rounded-xl">
+                    <span className="text-[11px] text-on-surface-variant">
+                      {enabledCount} of 9 links enabled
+                    </span>
+                    {currentLinks.length < 9 && (
+                      <button
+                        onClick={() => {
+                          const copy = [...currentLinks, { name: "New Link", category: "All", enabled: false }];
+                          setWebConfig(prev => ({ ...prev, headerLinks: copy }));
+                        }}
+                        className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-bold rounded-lg hover:bg-primary/20 transition-colors"
+                      >
+                        + Add Link
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    {currentLinks.map((link, idx) => {
+                      const isEditable = idx < 3;
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${
+                            link.enabled
+                              ? "bg-surface border-outline/15"
+                              : "bg-surface-container-low/50 border-outline/5 opacity-60"
+                          }`}
+                        >
+                          {/* Drag handle / position */}
+                          <div className="flex flex-col gap-0.5 shrink-0">
+                            <button
+                              onClick={() => moveLink(idx, -1)}
+                              disabled={idx === 0}
+                              className="text-on-surface-variant/40 hover:text-on-surface disabled:opacity-20 cursor-pointer"
+                              title="Move up"
+                            >
+                              <ChevronUp className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => moveLink(idx, 1)}
+                              disabled={idx === currentLinks.length - 1}
+                              className="text-on-surface-variant/40 hover:text-on-surface disabled:opacity-20 cursor-pointer"
+                              title="Move down"
+                            >
+                              <ChevronDown className="w-3 h-3" />
+                            </button>
+                          </div>
+
+                          {/* Position badge */}
+                          <span className="w-5 h-5 rounded-full bg-surface-container-high text-[9px] font-bold text-on-surface-variant flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+
+                          {/* Name input (only for first 3) */}
+                          {isEditable ? (
+                            <input
+                              type="text"
+                              value={link.name}
+                              onChange={(e) => updateLink(idx, "name", e.target.value)}
+                              placeholder="Link name"
+                              className="flex-1 min-w-0 px-2.5 py-1.5 bg-surface border border-outline/10 rounded-lg text-[11px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                          ) : (
+                            <span className="flex-1 min-w-0 text-[11px] text-on-surface truncate">{link.name}</span>
+                          )}
+
+                          {/* Category select (only for first 3) */}
+                          {isEditable ? (
+                            <select
+                              value={link.category}
+                              onChange={(e) => updateLink(idx, "category", e.target.value)}
+                              className="px-2 py-1.5 bg-surface border border-outline/10 rounded-lg text-[11px] text-on-surface focus:outline-none shrink-0"
+                            >
+                              {categoryOptions.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="px-2 py-1 bg-surface-container-high rounded-lg text-[10px] text-on-surface-variant font-medium shrink-0">
+                              {link.category}
+                            </span>
+                          )}
+
+                          {/* Editable badge */}
+                          {isEditable && (
+                            <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[8px] font-bold rounded uppercase shrink-0">
+                              Editable
+                            </span>
+                          )}
+
+                          {/* Enable toggle */}
+                          <button
+                            onClick={() => updateLink(idx, "enabled", !link.enabled)}
+                            className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
+                              link.enabled ? "bg-primary" : "bg-outline/20"
+                            }`}
+                          >
+                            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                              link.enabled ? "translate-x-4" : "translate-x-0.5"
+                            }`} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={handleSaveConfig}
+                      className="w-full py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md"
+                    >
+                      Save Header Navigation
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

@@ -198,90 +198,84 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
-          <button
-            onClick={() => handleNavClick("Home")}
-            className={`transition-colors hover:text-primary ${
-              activeScreen === "Home" ? "text-primary font-semibold" : "text-on-surface/80"
-            }`}
-            id="nav-link-home"
-          >
-            Home
-          </button>
-          <button
-            onClick={() => handleNavClick("Catalog")}
-            className={`transition-colors hover:text-primary ${
-              activeScreen === "Catalog" ? "text-primary font-semibold" : "text-on-surface/80"
-            }`}
-            id="nav-link-catalog"
-          >
-            Shop All
-          </button>
-          <button
-            onClick={() => handleNavClick("Catalog", "Laptops")}
-            className="text-on-surface/80 hover:text-primary transition-colors"
-            id="nav-link-laptops"
-          >
-            Laptops
-          </button>
-          <button
-            onClick={() => handleNavClick("Catalog", "Tablets")}
-            className="text-on-surface/80 hover:text-primary transition-colors"
-            id="nav-link-tablets"
-          >
-            Tablets
-          </button>
-          <button
-            onClick={() => handleNavClick("Catalog", "Audio")}
-            className="text-on-surface/80 hover:text-primary transition-colors"
-            id="nav-link-audio"
-          >
-            Audio
-          </button>
-          <button
-            onClick={() => handleNavClick("Catalog", "Phones")}
-            className="text-on-surface/80 hover:text-primary transition-colors"
-            id="nav-link-phones"
-          >
-            Phones
-          </button>
-          <button
-            onClick={() => handleNavClick("TrackOrder")}
-            className={`transition-colors hover:text-primary ${
-              activeScreen === "TrackOrder" ? "text-primary font-semibold" : "text-on-surface/80"
-            }`}
-            id="nav-link-track-order"
-          >
-            Track Order
-          </button>
-          <button
-            onClick={() => handleNavClick("Contact")}
-            className={`transition-colors hover:text-primary ${
-              activeScreen === "Contact" ? "text-primary font-semibold" : "text-on-surface/80"
-            }`}
-            id="nav-link-contact-us"
-          >
-            Contact Us
-          </button>
-          <button
-            onClick={() => handleNavClick("Blog")}
-            className={`transition-colors hover:text-primary ${
-              activeScreen === "Blog" ? "text-primary font-semibold" : "text-on-surface/80"
-            }`}
-            id="nav-link-blog"
-          >
-            Blog
-          </button>
+          {(config?.headerLinks || [
+            { name: "Home", category: "Home", enabled: true },
+            { name: "Shop All", category: "All", enabled: true },
+            { name: "Laptops", category: "Laptops", enabled: true },
+            { name: "Tablets", category: "Tablets", enabled: true },
+            { name: "Audio", category: "Audio", enabled: true },
+            { name: "Phones", category: "Phones", enabled: true },
+            { name: "Track Order", category: "TrackOrder", enabled: true },
+            { name: "Contact Us", category: "Contact", enabled: true },
+            { name: "Blog", category: "Blog", enabled: true }
+          ]).filter((l: any) => l.enabled).map((link: any) => {
+            const screen = link.category === "Home" ? "Home"
+              : link.category === "TrackOrder" ? "TrackOrder"
+              : link.category === "Contact" ? "Contact"
+              : link.category === "Blog" ? "Blog"
+              : "Catalog";
+            const isCategory = ["All","Laptops","Tablets","Audio","Phones","Accessories","Power"].includes(link.category);
+            const isActive = link.category === "Home"
+              ? activeScreen === "Home"
+              : link.category === "TrackOrder"
+                ? activeScreen === "TrackOrder"
+                : link.category === "Contact"
+                  ? activeScreen === "Contact"
+                  : link.category === "Blog"
+                    ? activeScreen === "Blog"
+                    : activeScreen === "Catalog" && selectedCategory === (isCategory ? link.category : "All");
+            return (
+              <button
+                key={link.name}
+                onClick={() => handleNavClick(screen as AppScreen, isCategory ? link.category : undefined)}
+                className={`transition-colors hover:text-primary ${
+                  isActive ? "text-primary font-semibold" : "text-on-surface/80"
+                }`}
+              >
+                {link.name}
+              </button>
+            );
+          })}
           {/* Tablet-only nav links (hidden lg+, hidden md-) */}
           <div className="hidden md:flex lg:hidden items-center gap-4 text-xs font-medium shrink-0">
-            <button onClick={() => handleNavClick("Home")} className={`transition-colors hover:text-primary ${activeScreen === "Home" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Home</button>
-            <button onClick={() => handleNavClick("Catalog")} className={`transition-colors hover:text-primary ${activeScreen === "Catalog" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Shop All</button>
-            <button onClick={() => handleNavClick("Catalog", "Laptops")} className="text-on-surface/80 hover:text-primary transition-colors">Laptops</button>
-            <button onClick={() => handleNavClick("Catalog", "Tablets")} className="text-on-surface/80 hover:text-primary transition-colors">Tablets</button>
-            <button onClick={() => handleNavClick("Catalog", "Audio")} className="text-on-surface/80 hover:text-primary transition-colors">Audio</button>
-            <button onClick={() => handleNavClick("Catalog", "Phones")} className="text-on-surface/80 hover:text-primary transition-colors">Phones</button>
-            <button onClick={() => handleNavClick("TrackOrder")} className={`transition-colors hover:text-primary ${activeScreen === "TrackOrder" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Track</button>
-            <button onClick={() => handleNavClick("Contact")} className={`transition-colors hover:text-primary ${activeScreen === "Contact" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Contact</button>
-            <button onClick={() => handleNavClick("Blog")} className={`transition-colors hover:text-primary ${activeScreen === "Blog" ? "text-primary font-semibold" : "text-on-surface/80"}`}>Blog</button>
+            {(config?.headerLinks || [
+              { name: "Home", category: "Home", enabled: true },
+              { name: "Shop All", category: "All", enabled: true },
+              { name: "Laptops", category: "Laptops", enabled: true },
+              { name: "Tablets", category: "Tablets", enabled: true },
+              { name: "Audio", category: "Audio", enabled: true },
+              { name: "Phones", category: "Phones", enabled: true },
+              { name: "Track Order", category: "TrackOrder", enabled: true },
+              { name: "Contact Us", category: "Contact", enabled: true },
+              { name: "Blog", category: "Blog", enabled: true }
+            ]).filter((l: any) => l.enabled).map((link: any) => {
+              const screen = link.category === "Home" ? "Home"
+                : link.category === "TrackOrder" ? "TrackOrder"
+                : link.category === "Contact" ? "Contact"
+                : link.category === "Blog" ? "Blog"
+                : "Catalog";
+              const isCategory = ["All","Laptops","Tablets","Audio","Phones","Accessories","Power"].includes(link.category);
+              const isActive = link.category === "Home"
+                ? activeScreen === "Home"
+                : link.category === "TrackOrder"
+                  ? activeScreen === "TrackOrder"
+                  : link.category === "Contact"
+                    ? activeScreen === "Contact"
+                    : link.category === "Blog"
+                      ? activeScreen === "Blog"
+                      : activeScreen === "Catalog" && selectedCategory === (isCategory ? link.category : "All");
+              return (
+                <button
+                  key={link.name}
+                  onClick={() => handleNavClick(screen as AppScreen, isCategory ? link.category : undefined)}
+                  className={`transition-colors hover:text-primary ${
+                    isActive ? "text-primary font-semibold" : "text-on-surface/80"
+                  }`}
+                >
+                  {link.name.length > 8 ? link.name.substring(0, 7) + "…" : link.name}
+                </button>
+              );
+            })}
           </div>
           {isAdminAuthenticated && (
             <div className="flex items-center gap-1.5">
@@ -587,8 +581,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Categories
               </span>
 
-              {/* Collapsible Categories */}
-              {["Laptops", "Tablets", "Audio", "Phones", "Accessories", "Power"].map((cat) => {
+              {/* Collapsible Categories — derived from headerLinks */}
+              {(config?.headerLinks || [
+                { name: "Laptops", category: "Laptops", enabled: true },
+                { name: "Tablets", category: "Tablets", enabled: true },
+                { name: "Audio", category: "Audio", enabled: true },
+                { name: "Phones", category: "Phones", enabled: true },
+                { name: "Accessories", category: "Accessories", enabled: true },
+                { name: "Power", category: "Power", enabled: true }
+              ]).filter((l: any) => l.enabled && ["Laptops","Tablets","Audio","Phones","Accessories","Power"].includes(l.category)).map((link: any) => {
+                const cat = link.category;
                 const isExpanded = expandedCategory === cat;
                 const brands = getBrandsForCategory(cat);
                 const isActiveCat = activeScreen === "Catalog" && selectedCategory === cat;
