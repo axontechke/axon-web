@@ -133,12 +133,7 @@ function AppContent() {
 
   // Cart actions — include SIM type so newly added SIM types persist through cart/checkout and don't merge across variants
   const handleAddToCart = (product: Product, quantity: number, selectedColor?: string, selectedStorage?: string, selectedWarranty?: Warranty, selectedSimType?: string) => {
-    const getDefaultColor = () => {
-      if (!product.colors?.length) return undefined;
-      const first = product.colors[0];
-      return typeof first === 'string' ? first : (first as any).name;
-    };
-    const color = selectedColor || getDefaultColor();
+    const color = selectedColor || undefined;
     const storage = selectedStorage || (product.storages ? product.storages[0] : undefined);
     const warranty = selectedWarranty || undefined;
     // Fallback SIM: variant first simType or product-level simType — ensures newly added single SIM still persists

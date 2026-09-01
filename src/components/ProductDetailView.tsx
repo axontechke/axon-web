@@ -131,14 +131,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   // availableSimType: used for the SIM type selector UI (null = show selector)
   const availableSimType = hasMultipleSimTypes ? null : (hasStorageVariants && selectedStorageVariant ? selectedStorageVariant.simType : product.simType);
 
-  // selectedColor stores the color NAME string, not the whole ProductColor object
-  const getInitialColor = () => {
-    if (!Array.isArray(availableColors) || availableColors.length === 0) return undefined;
-    const first = availableColors[0];
-    if (!first) return undefined;
-    return typeof first === 'string' ? first : (first as any)?.name;
-  };
-  const [selectedColor, setSelectedColor] = useState<string | undefined>(getInitialColor());
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [selectedWarranty, setSelectedWarranty] = useState<Warranty | undefined>(() => {
     if (availableWarranties.length > 0) {
       const freeWarranty = availableWarranties.find(w => w.priceKsh === 0);
@@ -191,7 +184,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   React.useEffect(() => {
     setSlideIndex(0);
-    setSelectedColor(getInitialColor());
+    setSelectedColor(undefined);
     const opts = hasStorageVariants
       ? [...new Map(product.storageVariants!.map(sv => [sv.storage, sv.storage])).values()]
       : (product.storages ?? []);
@@ -465,7 +458,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             {availableColors && availableColors.length > 0 && (
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-on-surface-variant/85 uppercase tracking-wider">
-                  Colorway: <strong className="text-on-surface">{selectedColor || (typeof availableColors[0] === 'string' ? availableColors[0] as string : (availableColors[0] as any)?.name) || "—"}</strong>
+                  Colorway: <strong className="text-on-surface">{selectedColor || "—"}</strong>
                 </span>
                 <div className="flex gap-2">
                   {availableColors.map((colorEntry) => {
