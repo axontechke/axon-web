@@ -62,6 +62,7 @@ import {
   Cell 
 } from "recharts";
 import { Product, ProductColor, Warranty, StorageVariant, formatProductPrice, VariantImagesMap } from "../types";
+import { useConfig } from "../context/ConfigContext";
 
 interface AdminViewProps {
   onSelectProduct: (product: Product) => void;
@@ -254,6 +255,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   isAuthValidating,
   setIsAuthValidating,
 }) => {
+  const { refetch: refetchConfig } = useConfig();
   // Firebase Auth
   const { signInWithGoogle } = useFirebaseAuth();
 
@@ -1165,20 +1167,20 @@ export const AdminView: React.FC<AdminViewProps> = ({
     if (!webConfig) return;
     try {
       const payload = JSON.stringify(webConfig);
-      console.log("[CONFIG SAVE] Sending with authToken:", authToken ? "YES" : "NO");
-      console.log("[CONFIG SAVE] URL:", "/api/admin/config");
       const res = await authFetch("/api/admin/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: payload
       });
-      console.log("[CONFIG SAVE] Response status:", res.status);
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("[CONFIG SAVE FAILED]", res.status, errorText);
         throw new Error(`Config sync failed: ${res.status} ${errorText}`);
       }
+
+      // Bust the storefront cache so Navbar picks up fresh config
+      try { localStorage.removeItem("axon_site_data"); } catch {}
+      refetchConfig();
 
       showFeedback("Catalog configuration synced successfully.");
       loadAllAdminData();
@@ -6593,11 +6595,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
               Header Navigation Links
             </h3>
             <p className="text-[11px] text-on-surface-variant/70">
-              Manage the category links shown in the header. Max 9 items. The first 3 links are fully editable (name + category redirect). Items 4–9 can be toggled on/off and reordered but use fixed category targets.
+              Manage category links in the header. Max 9 items. Fixed routes (Home, Track Order, Contact Us, Blog) always appear — you can rename and reorder them. Category links (Laptops, Tablets, etc.) can be toggled on/off, reordered, and pointed to any category.
             </p>
 
             {(() => {
-              const currentLinks = webConfig.headerLinks || [
+              const FIXED_CATEGORIES = ["Home", "TrackOrder", "Contact", "Blog"];
+              const CATEGORY_OPTIONS = ["All", "Laptops", "Tablets", "Audio", "Phones", "Accessories", "Power"];
+              const DEFAULT_LINKS = [
                 { name: "Home", category: "Home", enabled: true },
                 { name: "Shop All", category: "All", enabled: true },
                 { name: "Laptops", category: "Laptops", enabled: true },
@@ -6608,45 +6612,63 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 { name: "Contact Us", category: "Contact", enabled: true },
                 { name: "Blog", category: "Blog", enabled: true }
               ];
-              const categoryOptions = [
-                "Home", "All", "Laptops", "Tablets", "Audio", "Phones",
-                "Accessories", "Power", "TrackOrder", "Contact", "Blog"
-              ];
+              const currentLinks = webConfig.headerLinks || DEFAULT_LINKS;
+
+              // Ensure fixed routes always exist
+              const missingFixed = DEFAULT_LINKS.filter(
+                d => FIXED_CATEGORIES.includes(d.category) && !currentLinks.some((l: any) => l.category === d.category)
+              );
+              const mergedLinks = missingFixed.length > 0 ? [...currentLinks, ...missingFixed] : currentLinks;
+
+              const isFixed = (link: any) => FIXED_CATEGORIES.includes(link.category);
+              const isCategory = (link: any) => CATEGORY_OPTIONS.includes(link.category);
+
               const updateLink = (idx: number, field: string, value: any) => {
-                const copy = [...currentLinks];
+                const copy = [...mergedLinks];
                 copy[idx] = { ...copy[idx], [field]: value };
                 setWebConfig(prev => ({ ...prev, headerLinks: copy }));
               };
               const moveLink = (idx: number, dir: -1 | 1) => {
-                const copy = [...currentLinks];
+                const copy = [...mergedLinks];
                 const newIdx = idx + dir;
                 if (newIdx < 0 || newIdx >= copy.length) return;
                 [copy[idx], copy[newIdx]] = [copy[newIdx], copy[idx]];
                 setWebConfig(prev => ({ ...prev, headerLinks: copy }));
               };
-              const enabledCount = currentLinks.filter(l => l.enabled).length;
+              const removeLink = (idx: number) => {
+                const link = mergedLinks[idx];
+                if (isFixed(link)) return;
+                const copy = mergedLinks.filter((_: any, i: number) => i !== idx);
+                setWebConfig(prev => ({ ...prev, headerLinks: copy }));
+              };
+              const enabledCount = mergedLinks.filter((l: any) => l.enabled).length;
+
               return (
                 <>
                   <div className="flex items-center justify-between p-3 bg-surface border border-outline/10 rounded-xl">
                     <span className="text-[11px] text-on-surface-variant">
                       {enabledCount} of 9 links enabled
                     </span>
-                    {currentLinks.length < 9 && (
+                    {mergedLinks.length < 9 && (
                       <button
                         onClick={() => {
-                          const copy = [...currentLinks, { name: "New Link", category: "All", enabled: false }];
+                          const copy = [...mergedLinks, { name: "New Category", category: "All", enabled: false }];
                           setWebConfig(prev => ({ ...prev, headerLinks: copy }));
                         }}
                         className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-bold rounded-lg hover:bg-primary/20 transition-colors"
                       >
-                        + Add Link
+                        + Add Category Link
                       </button>
                     )}
                   </div>
 
+                  <p className="text-[10px] text-on-surface-variant/60 italic">
+                    Fixed routes (Home, Track Order, Contact Us, Blog) always appear and cannot be removed — only reordered and renamed.
+                  </p>
+
                   <div className="space-y-2">
-                    {currentLinks.map((link, idx) => {
-                      const isEditable = idx < 3;
+                    {mergedLinks.map((link: any, idx: number) => {
+                      const fixed = isFixed(link);
                       return (
                         <div
                           key={idx}
@@ -6668,7 +6690,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             </button>
                             <button
                               onClick={() => moveLink(idx, 1)}
-                              disabled={idx === currentLinks.length - 1}
+                              disabled={idx === mergedLinks.length - 1}
                               className="text-on-surface-variant/40 hover:text-on-surface disabled:opacity-20 cursor-pointer"
                               title="Move down"
                             >
@@ -6681,44 +6703,44 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             {idx + 1}
                           </span>
 
-                          {/* Name input (only for first 3) */}
-                          {isEditable ? (
-                            <input
-                              type="text"
-                              value={link.name}
-                              onChange={(e) => updateLink(idx, "name", e.target.value)}
-                              placeholder="Link name"
-                              className="flex-1 min-w-0 px-2.5 py-1.5 bg-surface border border-outline/10 rounded-lg text-[11px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
-                            />
-                          ) : (
-                            <span className="flex-1 min-w-0 text-[11px] text-on-surface truncate">{link.name}</span>
-                          )}
+                          {/* Name — always editable */}
+                          <input
+                            type="text"
+                            value={link.name}
+                            onChange={(e) => updateLink(idx, "name", e.target.value)}
+                            placeholder="Link name"
+                            className="flex-1 min-w-0 px-2.5 py-1.5 bg-surface border border-outline/10 rounded-lg text-[11px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
 
-                          {/* Category select (only for first 3) */}
-                          {isEditable ? (
+                          {/* Category — locked for fixed routes, editable for category links */}
+                          {fixed ? (
+                            <span className="px-2 py-1 bg-primary/5 border border-primary/10 rounded-lg text-[10px] text-primary font-bold shrink-0">
+                              {link.category}
+                            </span>
+                          ) : (
                             <select
                               value={link.category}
                               onChange={(e) => updateLink(idx, "category", e.target.value)}
                               className="px-2 py-1.5 bg-surface border border-outline/10 rounded-lg text-[11px] text-on-surface focus:outline-none shrink-0"
                             >
-                              {categoryOptions.map(cat => (
+                              {CATEGORY_OPTIONS.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
                               ))}
                             </select>
+                          )}
+
+                          {/* Badge */}
+                          {fixed ? (
+                            <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-700 text-[8px] font-bold rounded uppercase shrink-0">
+                              Fixed
+                            </span>
                           ) : (
-                            <span className="px-2 py-1 bg-surface-container-high rounded-lg text-[10px] text-on-surface-variant font-medium shrink-0">
-                              {link.category}
+                            <span className="px-1.5 py-0.5 bg-surface-container-high text-on-surface-variant text-[8px] font-bold rounded uppercase shrink-0">
+                              Category
                             </span>
                           )}
 
-                          {/* Editable badge */}
-                          {isEditable && (
-                            <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[8px] font-bold rounded uppercase shrink-0">
-                              Editable
-                            </span>
-                          )}
-
-                          {/* Enable toggle */}
+                          {/* Enable toggle — fixed routes can be hidden/shown but not removed */}
                           <button
                             onClick={() => updateLink(idx, "enabled", !link.enabled)}
                             className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
@@ -6729,6 +6751,17 @@ export const AdminView: React.FC<AdminViewProps> = ({
                               link.enabled ? "translate-x-4" : "translate-x-0.5"
                             }`} />
                           </button>
+
+                          {/* Delete — only for non-fixed links */}
+                          {!fixed && (
+                            <button
+                              onClick={() => removeLink(idx)}
+                              className="text-red-400 hover:text-red-600 shrink-0 cursor-pointer"
+                              title="Remove link"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       );
                     })}
