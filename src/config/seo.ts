@@ -23,8 +23,8 @@ export const SITE_URL = 'https://www.axontech.co.ke';
 const DEFAULT_OG_IMAGE = '';
 
 export const SEO_DEFAULTS: SEOConfig = {
-  title: `${SITE_NAME} | Premium Technology Hardware in Kenya`,
-  description: 'Discover cutting-edge technology hardware from AXON TECH. Premium laptops, tablets, phones, and audio devices. Free delivery in Nairobi, Kenya.',
+  title: `${SITE_NAME} | Premium Living. Smart Tech`,
+  description: 'Discover cutting-edge technology hardware from AXON TECH Kenya. Shop premium Iphones, Ipads,Macbooks, Google pixel, samsung, tablets, , Premium Audio Etc',
   keywords: ['technology', 'hardware', 'Kenya', 'Nairobi', 'laptops', 'tablets', 'phones', 'Axon'],
   ogTitle: SITE_NAME,
   ogDescription: 'Your Trusted Technology Partner in Kenya - Premium Hardware & Electronics',
@@ -36,8 +36,8 @@ export const SEO_DEFAULTS: SEOConfig = {
 
 export const PAGE_SEO: Record<string, SEOConfig> = {
   home: {
-    title: `${SITE_NAME} | Premium Technology Hardware in Kenya`,
-    description: 'Discover cutting-edge technology hardware from AXON TECH Kenya. Shop premium Axon Slate Pro tablets, Book laptops, Phone 1 Pro, and Buds Pro audio devices. Free delivery in Nairobi.',
+    title: `${SITE_NAME} | Premium Living. Smart Tech`,
+    description: 'Discover cutting-edge technology hardware from AXON TECH Kenya. Shop premium Iphones, Ipads,Macbooks, Google pixel, samsung, tablets, , Premium Audio Etc',
     keywords: ['Axon Kenya', 'technology hardware Nairobi', 'premium laptops Kenya', 'tablets Kenya', 'smartphones Nairobi'],
     ogType: 'website',
     jsonLd: [

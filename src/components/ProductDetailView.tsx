@@ -176,11 +176,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   React.useEffect(() => {
     if (availableImages.length <= 1) return;
+    // Disable auto‑slider when a specific color is selected
+    if (selectedColor) return;
     const timer = setInterval(() => {
       setSlideIndex(i => (i + 1) % availableImages.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [availableImages.length]);
+  }, [availableImages.length, selectedColor]);
 
   React.useEffect(() => {
     setSlideIndex(0);
