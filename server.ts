@@ -2769,8 +2769,8 @@ interface PageSEO {
 
 const PAGE_SEO_CONFIG: Record<string, PageSEO> = {
   '/': {
-    title: `${SITE_NAME} | Premium Technology Hardware in Kenya`,
-    description: 'Discover cutting-edge technology hardware from AXON TECH Kenya. Shop premium Axon Slate Pro tablets, Book laptops, Phone 1 Pro, and Buds Pro audio devices.',
+    title: `${SITE_NAME} | Premium Living. Smart Tech`,
+    description: 'Discover cutting-edge technology hardware from AXON TECH Kenya. Shop premium Iphones, Ipads, Macbooks, Google Pixel, Samsung, tablets, Premium Audio Etc',
     keywords: 'Axon Kenya, technology hardware Nairobi, premium laptops Kenya, tablets Kenya',
     jsonLd: {
       '@context': 'https://schema.org',
