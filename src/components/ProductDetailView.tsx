@@ -187,12 +187,21 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       ? (product.variantImages as VariantImagesMap)?.[variantKey]?.map(vi => vi.imageUrl).filter(Boolean) || []
       : [];
     const colorEntry = getColorEntry(selectedColor);
-    const colorImg: string[] = colorEntry?.image ? [colorEntry.image] : [];
+    const colorImg: string[] = colorEntry?.image
+      ? [colorEntry.image]
+      : selectedColor && product.colorImages?.[selectedColor]
+        ? [product.colorImages[selectedColor]]
+        : [];
     const extraImgs: string[] = product.images?.filter(
       img => !baseImages.includes(img) && !colorImg.includes(img) && !variantImgs.includes(img)
     ) || [];
-    return [...new Set([...baseImages, ...colorImg, ...variantImgs, ...extraImgs])];
-  }, [product.image, product.images, product.variantImages, selectedStorage, selectedColor, product.colors]);
+    // When a color is selected, show its assigned images first so the swatch
+    // click immediately switches the main preview to that color's image.
+    const ordered = selectedColor
+      ? [...colorImg, ...variantImgs, ...baseImages, ...extraImgs]
+      : [...baseImages, ...colorImg, ...variantImgs, ...extraImgs];
+    return [...new Set(ordered)];
+  }, [product.image, product.images, product.variantImages, product.colorImages, selectedStorage, selectedColor, product.colors]);
 
   React.useEffect(() => {
     setSlideIndex(0);
