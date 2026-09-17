@@ -101,6 +101,7 @@ interface WebConfig {
   supportEmail?: string;
   heroSlides?: any[];
   categoriesList?: any[];
+  mobileCategoriesList?: any[];
   trendingSlot1Product?: string;
   trendingSlot1Tag?: string;
   trendingSlot1Desc?: string;
@@ -171,6 +172,14 @@ const defaultCategories = [
   { name: "Audio", desc: "Adaptive isolation Pure DAC", icon: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", navigateTo: "Audio" },
   { name: "Continuous Power Banks", desc: "Continuous wireless power", icon: "Plug", image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2", navigateTo: "Continuous Power Banks" },
   { name: "Click Keyboards & Gear", desc: "Modular engineered tools", icon: "Layers", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3", navigateTo: "Click Keyboards & Gear" },
+];
+
+const defaultMobileCategories = [
+  { name: "Phones", desc: "Flagship smartphones", icon: "Smartphone", image: "", navigateTo: "Phones" },
+  { name: "Tablets", desc: "Liquid Infinity screens", icon: "Tablet", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0", navigateTo: "Tablets" },
+  { name: "Laptops", desc: "Aerospace alloys performance", icon: "Laptop", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853", navigateTo: "Laptops" },
+  { name: "Audio", desc: "Adaptive isolation Pure DAC", icon: "Headphones", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", navigateTo: "Audio" },
+  { name: "Continuous Power Banks", desc: "Continuous wireless power", icon: "Plug", image: "https://images.unsplash.com/photo-1609592806598-94d6b1589da2", navigateTo: "Continuous Power Banks" },
 ];
 
 const defaultSlides = [
@@ -5084,13 +5093,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 </div>
               </div>
 
-              {/* ── Editor ── */}
+              {/* ── Editor Desktop ── */}
               <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b border-outline/10">
                   <div>
                     <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                       <Package className="w-4 h-4 text-primary" />
-                      Dynamic Curated Categories
+                      Desktop Categories (Homepage & Sidebar)
                     </h3>
                     <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
                       Up to 5 categories. "Shop All" dynamically detects added/removed categories.
@@ -5102,7 +5111,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         const currentCats = webConfig.categoriesList || defaultCategories;
                         const newCat = { name: "", desc: "", icon: "Layers", image: "" };
                         setWebConfig(prev => ({ ...prev, categoriesList: [...currentCats, newCat] }));
-                        showFeedback("New category slot added!");
+                        showFeedback("New desktop category slot added!");
                       }}
                       className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center gap-1 font-bold text-[11px]"
                     >
@@ -5118,7 +5127,35 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     return currentCats.map((cat: any, cIdx: number) => (
                       <div key={cIdx} className="bg-surface border border-outline/10 p-4 rounded-2xl space-y-3 relative">
                         <div className="flex justify-between items-center border-b border-outline/5 pb-2">
-                          <span className="font-bold text-xs text-primary uppercase">#{cIdx + 1}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-primary uppercase">#{cIdx + 1}</span>
+                            <div className="flex gap-1">
+                              {cIdx > 0 && (
+                                <button
+                                  onClick={() => {
+                                    const updated = [...currentCats];
+                                    [updated[cIdx - 1], updated[cIdx]] = [updated[cIdx], updated[cIdx - 1]];
+                                    setWebConfig(prev => ({ ...prev, categoriesList: updated }));
+                                  }}
+                                  className="p-1 bg-surface-container rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"
+                                >
+                                  ↑
+                                </button>
+                              )}
+                              {cIdx < currentCats.length - 1 && (
+                                <button
+                                  onClick={() => {
+                                    const updated = [...currentCats];
+                                    [updated[cIdx], updated[cIdx + 1]] = [updated[cIdx + 1], updated[cIdx]];
+                                    setWebConfig(prev => ({ ...prev, categoriesList: updated }));
+                                  }}
+                                  className="p-1 bg-surface-container rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"
+                                >
+                                  ↓
+                                </button>
+                              )}
+                            </div>
+                          </div>
                           <button
                             onClick={() => {
                               const updated = currentCats.filter((_: any, idx: number) => idx !== cIdx);
@@ -5202,9 +5239,122 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   })()}
                 </div>
               </div>
+
+              {/* ── Editor Mobile ── */}
+              <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
+                <div className="flex justify-between items-center pb-2 border-b border-outline/10">
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
+                      <Package className="w-4 h-4 text-primary" />
+                      Mobile Categories (Mobile Filter Menu)
+                    </h3>
+                    <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
+                      Up to 5 categories. Defines sorting order on mobile.
+                    </p>
+                  </div>
+                  {((webConfig.mobileCategoriesList || defaultMobileCategories).length) < 5 && (
+                    <button
+                      onClick={() => {
+                        const currentCats = webConfig.mobileCategoriesList || defaultMobileCategories;
+                        const newCat = { name: "", desc: "", icon: "Layers", image: "" };
+                        setWebConfig(prev => ({ ...prev, mobileCategoriesList: [...currentCats, newCat] }));
+                        showFeedback("New mobile category slot added!");
+                      }}
+                      className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center gap-1 font-bold text-[11px]"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Category</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none lg:grid lg:grid-cols-5 lg:overflow-visible lg:pb-0">
+                  {(() => {
+                    const currentCats = (webConfig.mobileCategoriesList || defaultMobileCategories).slice(0, 5);
+                    return currentCats.map((cat: any, cIdx: number) => (
+                      <div key={cIdx} className="bg-surface border border-outline/10 p-4 rounded-2xl space-y-3 relative">
+                        <div className="flex justify-between items-center border-b border-outline/5 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-primary uppercase">#{cIdx + 1}</span>
+                            <div className="flex gap-1">
+                              {cIdx > 0 && (
+                                <button
+                                  onClick={() => {
+                                    const updated = [...currentCats];
+                                    [updated[cIdx - 1], updated[cIdx]] = [updated[cIdx], updated[cIdx - 1]];
+                                    setWebConfig(prev => ({ ...prev, mobileCategoriesList: updated }));
+                                  }}
+                                  className="p-1 bg-surface-container rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"
+                                >
+                                  ↑
+                                </button>
+                              )}
+                              {cIdx < currentCats.length - 1 && (
+                                <button
+                                  onClick={() => {
+                                    const updated = [...currentCats];
+                                    [updated[cIdx], updated[cIdx + 1]] = [updated[cIdx + 1], updated[cIdx]];
+                                    setWebConfig(prev => ({ ...prev, mobileCategoriesList: updated }));
+                                  }}
+                                  className="p-1 bg-surface-container rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"
+                                >
+                                  ↓
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const updated = currentCats.filter((_: any, idx: number) => idx !== cIdx);
+                              setWebConfig(prev => ({ ...prev, mobileCategoriesList: updated }));
+                              showFeedback("Category removed.");
+                            }}
+                            className="p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/15 border border-red-500/10 rounded-lg transition-colors"
+                            title="Delete category"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Category Name</label>
+                          <input
+                            type="text"
+                            value={cat.name || ""}
+                            onChange={(e) => {
+                              const updated = currentCats.map((c: any, idx: number) => idx === cIdx ? { ...c, name: e.target.value } : c);
+                              setWebConfig(prev => ({ ...prev, mobileCategoriesList: updated }));
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
+                            placeholder="e.g. Phones"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-on-surface-variant block uppercase">Render Icon</label>
+                          <select
+                            value={cat.icon || "Smartphone"}
+                            onChange={(e) => {
+                              const updated = currentCats.map((c: any, idx: number) => idx === cIdx ? { ...c, icon: e.target.value } : c);
+                              setWebConfig(prev => ({ ...prev, mobileCategoriesList: updated }));
+                            }}
+                            className="w-full px-2 py-1.5 bg-surface-container border border-outline/15 rounded-xl text-xs text-on-surface font-semibold"
+                          >
+                            <option value="Laptop">Laptop</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Headphones">Headphones</option>
+                            <option value="Smartphone">Smartphone</option>
+                            <option value="Layers">Layers</option>
+                            <option value="Plug">Plug</option>
+                          </select>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
             </div>
           )}
-
           {/* ======================================= */}
           {/* CONFIG SUB-TAB: TRENDING NOW BENTO      */}
           {/* ======================================= */}

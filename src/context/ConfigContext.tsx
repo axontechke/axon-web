@@ -10,7 +10,8 @@ export interface WebConfig {
   announcement?: string;
   heroTitle?: string;
   heroDescription?: string;
-  categoriesList?: string[];
+  categoriesList?: any[];
+  mobileCategoriesList?: any[];
   activePromos?: any[];
   spotlightProducts?: string[];
   mixedShowcaseEnabled?: boolean;

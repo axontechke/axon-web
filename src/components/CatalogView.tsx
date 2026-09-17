@@ -78,7 +78,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     return Array.from(keys);
   }, [compareList]);
 
-  const categories = useMemo(() => {
+  const desktopCategories = useMemo(() => {
     const customList = config?.categoriesList;
     const productCategories = Array.from(new Set(products.filter(p => p && p.category).map(p => p.category)));
     
@@ -90,13 +90,28 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     return Array.from(new Set(["All", ...baseCategories, ...productCategories]));
   }, [config?.categoriesList, products]);
 
+  const mobileCategories = useMemo(() => {
+    const customList = config?.mobileCategoriesList;
+    const productCategories = Array.from(new Set(products.filter(p => p && p.category).map(p => p.category)));
+    
+    let baseCategories: string[] = [];
+    if (Array.isArray(customList) && customList.length > 0) {
+      baseCategories = customList.filter((c: any) => c?.name).map((c: any) => c.name);
+    } else {
+      // Fallback
+      baseCategories = ["Phones", "Tablets", "Laptops", "Audio", "Continuous Power Banks"];
+    }
+
+    return Array.from(new Set(["All", ...baseCategories, ...productCategories]));
+  }, [config?.mobileCategoriesList, products]);
+
   // Reset selected category to "All" if it was deleted from configuration categories
   useEffect(() => {
-    if (selectedCategory !== "All" && !categories.includes(selectedCategory)) {
+    if (selectedCategory !== "All" && !desktopCategories.includes(selectedCategory) && !mobileCategories.includes(selectedCategory)) {
       setSelectedCategory("All");
       setSelectedBrand("All");
     }
-  }, [categories, selectedCategory, setSelectedCategory, setSelectedBrand]);
+  }, [desktopCategories, mobileCategories, selectedCategory, setSelectedCategory, setSelectedBrand]);
 
   // Dynamically extract brands available for current selected category segment
   const availableBrands = useMemo(() => {
@@ -230,7 +245,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider">Category</h4>
             <div className="space-y-1.5">
-              {categories.map((cat) => (
+              {desktopCategories.map((cat) => (
                 <div key={cat} className="space-y-1">
                   <button
                     onClick={() => handleCategoryToggle(cat)}
@@ -571,7 +586,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider">Category</h4>
                 <div className="space-y-2">
-                  {categories.map((cat) => (
+                  {mobileCategories.map((cat) => (
                     <div key={cat} className="space-y-1">
                       <button
                         onClick={() => {
