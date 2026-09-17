@@ -142,6 +142,30 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
   const [slideIndex, setSlideIndex] = useState(0);
+  const [slidePaused, setSlidePaused] = useState(false);
+  const colorPauseTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Selecting a color pauses the auto-slideshow for 10s, then it resumes
+  const handleColorSelect = (name: string) => {
+    setSelectedColor(name);
+    setSlideIndex(0);
+    setSlidePaused(true);
+    if (colorPauseTimer.current) clearTimeout(colorPauseTimer.current);
+    colorPauseTimer.current = setTimeout(() => setSlidePaused(false), 10000);
+  };
+
+  React.useEffect(() => () => {
+    if (colorPauseTimer.current) clearTimeout(colorPauseTimer.current);
+  }, []);
+
+  // Resume immediately if the color selection is cleared (e.g. storage change)
+  React.useEffect(() => {
+    if (!selectedColor && colorPauseTimer.current) {
+      clearTimeout(colorPauseTimer.current);
+      colorPauseTimer.current = null;
+      setSlidePaused(false);
+    }
+  }, [selectedColor]);
 
   // Helper to get color entry by name (handles both legacy string[] and new ProductColor[])
   const getColorEntry = (name: string | undefined) => {
@@ -176,13 +200,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   React.useEffect(() => {
     if (availableImages.length <= 1) return;
-    // Disable auto‑slider when a specific color is selected
-    if (selectedColor) return;
+    // Pause auto-slideshow while a color is being previewed
+    if (slidePaused) return;
     const timer = setInterval(() => {
       setSlideIndex(i => (i + 1) % availableImages.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [availableImages.length, selectedColor]);
+  }, [availableImages.length, slidePaused]);
 
   React.useEffect(() => {
     setSlideIndex(0);
@@ -491,7 +515,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                     return (
                       <button
                         key={name}
-                        onClick={() => setSelectedColor(name)}
+                        onClick={() => handleColorSelect(name)}
                         style={bgStyle}
                         className={`w-7 h-7 rounded-full ${!hexCode ? bgClass : ""} transition-all duration-150 flex items-center justify-center ${
                           selectedColor === name ? "ring-2 ring-primary ring-offset-2" : "opacity-85 hover:opacity-100 hover:scale-105"
