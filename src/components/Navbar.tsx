@@ -214,7 +214,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               : link.category === "Contact" ? "Contact"
               : link.category === "Blog" ? "Blog"
               : "Catalog";
-            const isCategory = ["All","Laptops","Tablets","Audio","Phones","Accessories","Power"].includes(link.category);
+            const isCategory = !["Home", "TrackOrder", "Contact", "Blog"].includes(link.category);
             const isActive = link.category === "Home"
               ? activeScreen === "Home"
               : link.category === "TrackOrder"
@@ -254,7 +254,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : link.category === "Contact" ? "Contact"
                 : link.category === "Blog" ? "Blog"
                 : "Catalog";
-              const isCategory = ["All","Laptops","Tablets","Audio","Phones","Accessories","Power"].includes(link.category);
+              const isCategory = !["Home", "TrackOrder", "Contact", "Blog"].includes(link.category);
               const isActive = link.category === "Home"
                 ? activeScreen === "Home"
                 : link.category === "TrackOrder"
@@ -589,7 +589,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 { name: "Phones", category: "Phones", enabled: true },
                 { name: "Accessories", category: "Accessories", enabled: true },
                 { name: "Power", category: "Power", enabled: true }
-              ]).filter((l: any) => l.enabled && ["Laptops","Tablets","Audio","Phones","Accessories","Power"].includes(l.category)).map((link: any) => {
+              ]).filter((l: any) => l.enabled && !["Home", "TrackOrder", "Contact", "Blog", "All"].includes(l.category)).map((link: any) => {
                 const cat = link.category;
                 const isExpanded = expandedCategory === cat;
                 const brands = getBrandsForCategory(cat);

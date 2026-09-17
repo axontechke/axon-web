@@ -80,18 +80,23 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
 
   const categories = useMemo(() => {
     const customList = config?.categoriesList;
+    const productCategories = Array.from(new Set(products.filter(p => p && p.category).map(p => p.category)));
+    
+    let baseCategories: string[] = [];
     if (Array.isArray(customList) && customList.length > 0) {
-      return ["All", ...customList.filter((c: any) => c?.name).map((c: any) => c.name)];
+      baseCategories = customList.filter((c: any) => c?.name).map((c: any) => c.name);
     }
-    return ["All", "Laptops", "Tablets", "Audio", "Accessories", "Power", "Phones"];
-  }, [config?.categoriesList]);
+
+    return Array.from(new Set(["All", ...baseCategories, ...productCategories]));
+  }, [config?.categoriesList, products]);
 
   // Reset selected category to "All" if it was deleted from configuration categories
   useEffect(() => {
     if (selectedCategory !== "All" && !categories.includes(selectedCategory)) {
       setSelectedCategory("All");
+      setSelectedBrand("All");
     }
-  }, [categories, selectedCategory, setSelectedCategory]);
+  }, [categories, selectedCategory, setSelectedCategory, setSelectedBrand]);
 
   // Dynamically extract brands available for current selected category segment
   const availableBrands = useMemo(() => {
@@ -111,6 +116,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     } else {
       setSelectedCategory(cat);
     }
+    setSelectedBrand("All");
   };
 
   // Filtered and sorted products

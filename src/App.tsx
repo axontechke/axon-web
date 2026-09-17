@@ -60,9 +60,8 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Reset brand filter whenever category changes
-  useEffect(() => {
-    setSelectedBrand("All");
-  }, [selectedCategory]);
+  // Removed naive useEffect that was clearing selectedBrand when category was changed
+  // This is now handled explicitly in the category change handlers to prevent race conditions.
 
   // Cart persistence state
   const [cart, setCart] = useState<CartItem[]>(() => {
