@@ -375,7 +375,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [adminReviews, setAdminReviews] = useState<any[]>([]);
   const [globalColors, setGlobalColors] = useState<any[]>([]);
+  const [colorSearch, setColorSearch] = useState("");
+  const [editingColor, setEditingColor] = useState<{ id: any; name: string; code: string; image: string } | null>(null);
   const [globalSimTypes, setGlobalSimTypes] = useState<any[]>([]);
+  const filteredGlobalColors = useMemo(() => {
+    const q = colorSearch.trim().toLowerCase();
+    if (!q) return globalColors;
+    return globalColors.filter((c: any) =>
+      (c.name || "").toLowerCase().includes(q) || (c.code || "").toLowerCase().includes(q)
+    );
+  }, [globalColors, colorSearch]);
   const [generatingBlog, setGeneratingBlog] = useState(false);
   const [topicPrompt, setTopicPrompt] = useState("");
   const [geographicHub, setGeographicHub] = useState("Nairobi, Kenya");
@@ -7668,7 +7677,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {activeTab === "colors" && (
         <div className="space-y-6 animate-in fade-in duration-200 text-xs text-left" id="admin-colors-view">
           <div className="bg-surface-container-low border border-outline/10 p-5 sm:p-6 rounded-3xl space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-outline/10">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-2 border-b border-outline/10">
               <div>
                 <h3 className="font-display font-bold text-sm text-on-surface flex items-center gap-2">
                   <Palette className="w-4 h-4 text-purple-500" />
@@ -7677,6 +7686,26 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <p className="text-[10px] text-on-surface-variant/70 mt-0.5">
                   Add, edit or remove colors used across all products. Click any color to edit its hex code or image URL.
                 </p>
+              </div>
+              <div className="relative w-full sm:w-64 shrink-0">
+                <Search className="w-3.5 h-3.5 text-on-surface-variant/50 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={colorSearch}
+                  onChange={(e) => setColorSearch(e.target.value)}
+                  placeholder="Search colors by name or hex..."
+                  className="w-full pl-8 pr-8 py-2 bg-surface border border-outline/15 rounded-xl text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary text-[11px]"
+                />
+                {colorSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setColorSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-surface-container text-on-surface-variant/60"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -7751,9 +7780,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
               <div className="p-6 text-center text-on-surface-variant/50 text-[11px]">
                 No colors yet. Add your first color above.
               </div>
+            ) : filteredGlobalColors.length === 0 ? (
+              <div className="p-6 text-center text-on-surface-variant/50 text-[11px]">
+                No colors match "{colorSearch}".
+              </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {globalColors.map((color: any) => (
+                {filteredGlobalColors.map((color: any) => (
                   <div key={color.id} className="bg-surface border border-outline/10 rounded-xl p-3 space-y-2 hover:border-primary/30 transition-colors">
                     <div className="flex items-start gap-2">
                       <div
@@ -7772,17 +7805,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     <div className="flex gap-1">
                       <button
                         type="button"
-                        onClick={() => {
-                          const newCode = prompt("Edit Hex Code:", color.code || "");
-                          if (newCode === null) return;
-                          authFetch(`/api/admin/colors/${color.id}`, {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ code: newCode })
-                          }).then(res => res.json()).then((updated: any) => {
-                            setGlobalColors(prev => prev.map((c: any) => c.id === color.id ? updated : c));
-                          }).catch(err => console.error(err));
-                        }}
+                        onClick={() => setEditingColor({ id: color.id, name: color.name, code: color.code || "", image: color.image || "" })}
                         className="flex-1 py-1 bg-surface-container hover:bg-surface-container-high text-[9px] font-bold rounded-lg border border-outline/10 text-on-surface"
                       >
                         <Edit3 className="w-3 h-3 inline mr-0.5" /> Hex
@@ -7805,6 +7828,81 @@ export const AdminView: React.FC<AdminViewProps> = ({
               </div>
             )}
           </div>
+
+          {/* In-app Hex Edit Dialog */}
+          {editingColor && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs px-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const newCode = editingColor.code.trim();
+                  authFetch(`/api/admin/colors/${editingColor.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code: newCode })
+                  }).then(res => res.json()).then((updated: any) => {
+                    setGlobalColors(prev => prev.map((c: any) => c.id === editingColor.id ? updated : c));
+                    setEditingColor(null);
+                  }).catch(err => console.error(err));
+                }}
+                className="w-full max-w-sm bg-surface-container-high p-6 rounded-3xl shadow-2xl space-y-5 text-left border border-outline/10 animate-in zoom-in-95 duration-200"
+              >
+                <div className="flex justify-between items-center border-b border-outline/10 pb-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-primary uppercase">Edit Color</span>
+                    <h3 className="font-display font-black text-base text-on-surface">{editingColor.name}</h3>
+                  </div>
+                  <button type="button" onClick={() => setEditingColor(null)} className="p-1 rounded-full hover:bg-surface-container-highest">
+                    <X className="w-5 h-5 text-on-surface-variant" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 text-xs text-on-surface">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-16 h-16 rounded-xl border border-outline/20 shrink-0"
+                      style={{ backgroundColor: editingColor.code || "#cccccc" }}
+                    />
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-[10px] font-bold text-on-surface-variant block uppercase">Hex Code</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={/^#[0-9a-fA-F]{6}$/.test(editingColor.code) ? editingColor.code : "#cccccc"}
+                          onChange={(e) => setEditingColor({ ...editingColor, code: e.target.value })}
+                          className="w-9 h-9 rounded-lg border border-outline/15 cursor-pointer bg-surface p-0.5"
+                          aria-label="Pick color"
+                        />
+                        <input
+                          type="text"
+                          value={editingColor.code}
+                          onChange={(e) => setEditingColor({ ...editingColor, code: e.target.value })}
+                          placeholder="#1a1a1a"
+                          className="flex-1 px-3 py-2.5 bg-surface border border-outline/15 rounded-xl focus:outline-none focus:border-primary text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditingColor(null)}
+                    className="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface text-[11px] font-bold rounded-xl border border-outline/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-[11px] font-bold rounded-xl flex items-center gap-1.5"
+                  >
+                    <Check className="w-3.5 h-3.5" /> Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
 
