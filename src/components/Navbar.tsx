@@ -39,6 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   products = [],
   config,
 }) => {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const logoUrl = typeof config?.navbarLogoUrl === "string" ? config.navbarLogoUrl.trim() : "";
   // Helper to convert pathname to screen name for active state comparison
   const getScreenFromPath = (path: string): AppScreen => {
     if (path === '/') return 'Home';
@@ -188,16 +190,88 @@ export const Navbar: React.FC<NavbarProps> = ({
           className="flex flex-row items-center cursor-pointer group shrink-0"
           id="nav-logo-container"
         >
-          <img
-            src={config?.navbarLogoUrl || undefined}
-            alt="Axon Logo"
-            className="w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
-            referrerPolicy="no-referrer"
-          />
+          {logoUrl && !logoFailed ? (
+            <img
+              src={logoUrl}
+              alt="Axon Logo"
+              className="w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
+              referrerPolicy="no-referrer"
+              onError={() => setLogoFailed(true)}
+            />
+          ) : logoFailed ? (
+            <span className="font-display font-black text-lg md:text-xl text-on-surface dark:text-on-surface tracking-tight select-none">
+              AXON<span className="text-primary font-light">TECH</span>
+            </span>
+          ) : null}
         </div>
 
+        {/* Search Bar — next to logo on mobile, after links on desktop */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="relative flex-1 min-w-0 md:flex-initial max-w-none sm:max-w-[200px] lg:max-w-[260px] w-full order-3 lg:order-5"
+          id="nav-search-form"
+        >
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onFocus={() => setIsInputFocused(true)}
+            onBlur={() => setIsInputFocused(false)}
+            className="w-full bg-surface-container-low border border-outline/20 rounded-full py-1.5 pl-8 pr-4 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 animate-all"
+          />
+          <Search className="absolute left-2.5 top-2 w-4 h-4 text-on-surface-variant/60" />
+
+          {/* Recent Searches Dropdown */}
+          {isInputFocused && recentSearches.length > 0 && (
+            <div
+              className="absolute left-0 right-0 top-full mt-2 bg-surface-container-high border border-outline/15 rounded-2xl shadow-xl py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left overflow-hidden"
+              id="nav-search-history-dropdown"
+            >
+              <div className="flex justify-between items-center px-4 pb-2 mb-1 border-b border-outline/5">
+                <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Recent Searches</span>
+                <button
+                  type="button"
+                  onMouseDown={clearAllSearches}
+                  className="text-[9px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer"
+                >
+                  Clear All
+                </button>
+              </div>
+              <div className="max-h-[220px] overflow-y-auto">
+                {recentSearches.map((query, idx) => (
+                  <div
+                    key={idx}
+                    className="group flex justify-between items-center px-4 py-2 hover:bg-surface-container-highest transition-colors cursor-pointer text-xs text-on-surface"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleRecentSearchClick(query);
+                    }}
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden mr-2">
+                      <History className="w-3.5 h-3.5 text-on-surface-variant/50 shrink-0" />
+                      <span className="truncate">{query}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        deleteSearchQuery(e, query);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-surface-container rounded transition-all cursor-pointer"
+                      title="Remove from history"
+                    >
+                      <X className="w-3.5 h-3.5 text-on-surface-variant/70 hover:text-on-surface" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </form>
+
         {/* Desktop Links */}
-        <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
+        <div className="hidden lg:flex items-center gap-6 text-sm font-medium order-5">
           {(config?.headerLinks || [
             { name: "Home", category: "Home", enabled: true },
             { name: "Shop All", category: "All", enabled: true },
@@ -237,7 +311,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
           {/* Tablet-only nav links (hidden lg+, hidden md-) */}
-          <div className="hidden md:flex lg:hidden items-center gap-4 text-xs font-medium shrink-0">
+          <div className="hidden md:flex lg:hidden items-center gap-4 text-xs font-medium shrink-0 order-5">
             {(config?.headerLinks || [
               { name: "Home", category: "Home", enabled: true },
               { name: "Shop All", category: "All", enabled: true },
@@ -301,68 +375,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        {/* Search & Cart Actions */}
-        <div className="flex items-center gap-3 flex-1 md:flex-initial justify-end">
-          <form onSubmit={handleSearchSubmit} className="relative hidden sm:block max-w-[200px] lg:max-w-[260px] w-full" id="nav-search-form">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              onFocus={() => setIsInputFocused(true)}
-              onBlur={() => setIsInputFocused(false)}
-              className="w-full bg-surface-container-low border border-outline/20 rounded-full py-1.5 pl-8 pr-4 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 animate-all"
-            />
-            <Search className="absolute left-2.5 top-2 w-4 h-4 text-on-surface-variant/60" />
-
-            {/* Recent Searches Dropdown */}
-            {isInputFocused && recentSearches.length > 0 && (
-              <div 
-                className="absolute left-0 right-0 top-full mt-2 bg-surface-container-high border border-outline/15 rounded-2xl shadow-xl py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left overflow-hidden"
-                id="nav-search-history-dropdown"
-              >
-                <div className="flex justify-between items-center px-4 pb-2 mb-1 border-b border-outline/5">
-                  <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Recent Searches</span>
-                  <button 
-                    type="button"
-                    onMouseDown={clearAllSearches}
-                    className="text-[9px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className="max-h-[220px] overflow-y-auto">
-                  {recentSearches.map((query, idx) => (
-                    <div 
-                      key={idx}
-                      className="group flex justify-between items-center px-4 py-2 hover:bg-surface-container-highest transition-colors cursor-pointer text-xs text-on-surface"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleRecentSearchClick(query);
-                      }}
-                    >
-                      <div className="flex items-center gap-2 overflow-hidden mr-2">
-                        <History className="w-3.5 h-3.5 text-on-surface-variant/50 shrink-0" />
-                        <span className="truncate">{query}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          deleteSearchQuery(e, query);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-surface-container rounded transition-all cursor-pointer"
-                        title="Remove from history"
-                      >
-                        <X className="w-3.5 h-3.5 text-on-surface-variant/70 hover:text-on-surface" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </form>
-
+        {/* Actions — Dark Mode & Cart */}
+        <div className="flex items-center gap-3 shrink-0 order-6">
           {/* Dark Mode Toggle */}
           <button
             onClick={onToggleDarkMode}
@@ -410,12 +424,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => { handleNavClick("Home"); }} 
                 className="flex flex-row items-center cursor-pointer group shrink-0"
               >
-                <img
-                  src={config?.navbarLogoUrl || ""}
-                  alt="Axon Logo"
-                  className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
-                  referrerPolicy="no-referrer"
-                />
+                {logoUrl && !logoFailed ? (
+                  <img
+                    src={logoUrl}
+                    alt="Axon Logo"
+                    className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
+                    referrerPolicy="no-referrer"
+                    onError={() => setLogoFailed(true)}
+                  />
+                ) : logoFailed ? (
+                  <span className="font-display font-black text-lg text-on-surface dark:text-on-surface tracking-tight select-none">
+                    AXON<span className="text-primary font-light">TECH</span>
+                  </span>
+                ) : null}
               </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)} 
