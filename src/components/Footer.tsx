@@ -94,7 +94,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   // Derived values from database
   const businessName = config?.footerBrandName || contact?.businessName || "AXON";
   const brandSuffix = config?.footerBrandSuffix || "TECH";
-  const brandLogo = config?.footerBrandLogoUrl || "";
+  const brandLogo = config?.footerBrandLogoUrl || config?.footerLogoUrl || "";
   const footerDesc = config?.footerDescription || `${businessName} | Your Trusted Technology Partner`;
   const address = contact?.location?.addressString || "";
   const formattedPhone = contact?.phones?.formattedPrimary || "";
@@ -139,12 +139,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
         {/* Brand Column */}
         <div className="space-y-4 text-left">
           <div className="flex flex-row items-center gap-2 shrink-0 whitespace-nowrap">
-            <img 
-              src={brandLogo || undefined}
-              alt={`${businessName} Logo`}
-              className="w-8 h-8 object-contain bg-transparent shrink-0"
-              referrerPolicy="no-referrer"
-            />
+            {brandLogo ? (
+              <img
+                key={brandLogo}
+                src={brandLogo}
+                alt={`${businessName} Logo`}
+                className="w-8 h-8 object-contain bg-transparent shrink-0"
+                referrerPolicy="no-referrer"
+              />
+            ) : null}
             <span className="font-display font-bold text-xl tracking-tight text-white select-none">
               {businessName}<span className="text-[#ffdbce] font-light">{brandSuffix}</span>
             </span>

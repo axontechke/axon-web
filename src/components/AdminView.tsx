@@ -4053,28 +4053,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       )}
                     </div>
 
-                    {/* Footer Logo */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] text-on-surface-variant uppercase block">Footer Logo URL</label>
-                      <input
-                        type="url"
-                        value={webConfig.footerLogoUrl || ""}
-                        onChange={(e) => setWebConfig(prev => ({ ...prev, footerLogoUrl: e.target.value }))}
-                        className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface focus:outline-none"
-                        placeholder="https://example.com/footer-logo.png"
-                      />
-                      {webConfig.footerLogoUrl && (
-                        <div className="mt-2 rounded-xl overflow-hidden border border-outline/10 w-fit">
-                          <img
-                            src={webConfig.footerLogoUrl}
-                            alt="Footer logo preview"
-                            className="h-12 object-contain bg-transparent"
-                            referrerPolicy="no-referrer"
-                          />
-                        </div>
-                      )}
-                    </div>
-
                     {/* Brand Accent Color */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] text-on-surface-variant uppercase block">Brand Accent Color</label>
