@@ -92,10 +92,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   };
 
   // Derived values from database
-  const businessName = config?.footerBrandName || contact?.businessName || "AXON";
-  const brandSuffix = config?.footerBrandSuffix || "TECH";
   const brandLogo = config?.footerBrandLogoUrl || config?.footerLogoUrl || "";
-  const footerDesc = config?.footerDescription || `${businessName} | Your Trusted Technology Partner`;
+  const configuredName = (config?.footerBrandName || contact?.businessName || "").trim();
+  const configuredSuffix = (config?.footerBrandSuffix || "").trim();
+  // Brand name is optional when a logo is present; fall back only when there is no logo.
+  const businessName = brandLogo ? configuredName : (configuredName || "AXON");
+  const brandSuffix = brandLogo ? configuredSuffix : (configuredSuffix || "TECH");
+  const displayName = businessName || "AXON";
+  const footerDesc = config?.footerDescription || `${displayName} | Your Trusted Technology Partner`;
   const address = contact?.location?.addressString || "";
   const formattedPhone = contact?.phones?.formattedPrimary || "";
   const salesEmail = contact?.emails?.sales || "";
@@ -105,7 +109,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   const col1Links = config?.footerCol1Links || [];
   const col2Title = config?.footerCol2Title || "Support & Care";
   const col2Links = config?.footerCol2Links || [];
-  const copyrightText = config?.footerCopyrightText || `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`;
+  const copyrightText = config?.footerCopyrightText || `© ${new Date().getFullYear()} ${displayName}. All rights reserved.`;
   const newsletterTitle = config?.footerNewsletterTitle || "Stay Updated";
   const newsletterDesc = config?.footerNewsletterDescription || "Subscribe to receive notifications on new arrivals, deals, and exclusive bundles.";
   const bottomLinks = config?.footerBottomLinks || [
@@ -148,9 +152,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
                 referrerPolicy="no-referrer"
               />
             ) : null}
-            <span className="font-display font-bold text-xl tracking-tight text-white select-none">
-              {businessName}<span className="text-[#ffdbce] font-light">{brandSuffix}</span>
-            </span>
+            {businessName ? (
+              <span className="font-display font-bold text-xl tracking-tight text-white select-none">
+                {businessName}{brandSuffix ? <span className="text-[#ffdbce] font-light">{brandSuffix}</span> : null}
+              </span>
+            ) : null}
           </div>
           <p className="text-xs text-[#e2d5cf]/70 max-w-[280px] leading-relaxed">
             {footerDesc}

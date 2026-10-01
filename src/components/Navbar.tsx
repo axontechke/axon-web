@@ -56,6 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     : currentScreen as AppScreen;
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
@@ -102,6 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleRecentSearchClick = (query: string) => {
+    setIsSearchOpen(false);
     setLocalSearch(query);
     setSearchQuery(query);
     setSelectedCategory("All");
@@ -136,6 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSearchOpen(false);
     setSearchQuery(localSearch);
     setSelectedCategory("All");
     setSelectedBrand("All");
@@ -145,6 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleNavClick = (screen: AppScreen, category?: string) => {
+    setIsSearchOpen(false);
     if (category) {
       setSelectedCategory(category);
     } else {
@@ -200,71 +204,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           ) : null}
         </div>
-
-        {/* Search Bar — desktop/tablet inline (mobile uses stacked search below header) */}
-        <form
-          onSubmit={handleSearchSubmit}
-          className="relative hidden md:block flex-1 min-w-0 md:max-w-[200px] lg:max-w-[260px] w-full"
-          id="nav-search-form"
-        >
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            onFocus={() => setIsInputFocused(true)}
-            onBlur={() => setIsInputFocused(false)}
-            className="w-full bg-surface-container-low border border-outline/20 rounded-full py-1.5 pl-8 pr-4 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 animate-all"
-          />
-          <Search className="absolute left-2.5 top-2 w-4 h-4 text-on-surface-variant/60" />
-
-          {/* Recent Searches Dropdown */}
-          {isInputFocused && recentSearches.length > 0 && (
-            <div
-              className="absolute left-0 right-0 top-full mt-2 bg-surface-container-high border border-outline/15 rounded-2xl shadow-xl py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left overflow-hidden"
-              id="nav-search-history-dropdown"
-            >
-              <div className="flex justify-between items-center px-4 pb-2 mb-1 border-b border-outline/5">
-                <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Recent Searches</span>
-                <button
-                  type="button"
-                  onMouseDown={clearAllSearches}
-                  className="text-[9px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer"
-                >
-                  Clear All
-                </button>
-              </div>
-              <div className="max-h-[220px] overflow-y-auto">
-                {recentSearches.map((query, idx) => (
-                  <div
-                    key={idx}
-                    className="group flex justify-between items-center px-4 py-2 hover:bg-surface-container-highest transition-colors cursor-pointer text-xs text-on-surface"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleRecentSearchClick(query);
-                    }}
-                  >
-                    <div className="flex items-center gap-2 overflow-hidden mr-2">
-                      <History className="w-3.5 h-3.5 text-on-surface-variant/50 shrink-0" />
-                      <span className="truncate">{query}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        deleteSearchQuery(e, query);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-surface-container rounded transition-all cursor-pointer"
-                      title="Remove from history"
-                    >
-                      <X className="w-3.5 h-3.5 text-on-surface-variant/70 hover:text-on-surface" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </form>
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
@@ -330,8 +269,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        {/* Actions — Cart */}
+        {/* Actions — Search & Cart */}
         <div className="flex items-center gap-3 shrink-0">
+          {/* Search Toggle — desktop/tablet (mobile has the always-visible search below header) */}
+          <button
+            onClick={() => setIsSearchOpen((v) => !v)}
+            className="hidden md:inline-flex p-2 text-on-surface/90 hover:text-primary hover:bg-surface-container-low rounded-full transition-colors cursor-pointer"
+            id="nav-search-toggle-btn"
+            aria-label="Toggle Search"
+            aria-expanded={isSearchOpen}
+          >
+            {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+          </button>
+
           {/* Cart Icon */}
           <button
             onClick={onOpenCart}
@@ -348,6 +298,75 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
         </div>
+
+        {/* Search Bar — expandable panel below header on desktop/tablet */}
+        {isSearchOpen && (
+          <form
+            onSubmit={handleSearchSubmit}
+            onKeyDown={(e) => { if (e.key === "Escape") setIsSearchOpen(false); }}
+            className="relative w-full hidden md:block animate-in fade-in slide-in-from-top-1 duration-150"
+            id="nav-search-form"
+          >
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
+              autoFocus
+              className="w-full bg-surface-container-low border border-outline/20 rounded-full py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 animate-all"
+            />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-on-surface-variant/60" />
+
+            {/* Recent Searches Dropdown */}
+            {isInputFocused && recentSearches.length > 0 && (
+              <div
+                className="absolute left-0 right-0 top-full mt-2 bg-surface-container-high border border-outline/15 rounded-2xl shadow-xl py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left overflow-hidden"
+                id="nav-search-history-dropdown"
+              >
+                <div className="flex justify-between items-center px-4 pb-2 mb-1 border-b border-outline/5">
+                  <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Recent Searches</span>
+                  <button
+                    type="button"
+                    onMouseDown={clearAllSearches}
+                    className="text-[9px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="max-h-[220px] overflow-y-auto">
+                  {recentSearches.map((query, idx) => (
+                    <div
+                      key={idx}
+                      className="group flex justify-between items-center px-4 py-2 hover:bg-surface-container-highest transition-colors cursor-pointer text-xs text-on-surface"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleRecentSearchClick(query);
+                      }}
+                    >
+                      <div className="flex items-center gap-2 overflow-hidden mr-2">
+                        <History className="w-3.5 h-3.5 text-on-surface-variant/50 shrink-0" />
+                        <span className="truncate">{query}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          deleteSearchQuery(e, query);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-surface-container rounded transition-all cursor-pointer"
+                        title="Remove from history"
+                      >
+                        <X className="w-3.5 h-3.5 text-on-surface-variant/70 hover:text-on-surface" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </form>
+        )}
 
         {/* Search Bar — full-width below header on mobile */}
         <form

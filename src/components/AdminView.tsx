@@ -5898,7 +5898,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[10px] text-on-surface-variant uppercase block">Brand Name</label>
                         <input
                           type="text"
-                          value={webConfig.footerBrandName || "AXON"}
+                          value={webConfig.footerBrandName || ""}
                           onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandName: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="AXON"
@@ -5908,7 +5908,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <label className="text-[10px] text-on-surface-variant uppercase block">Brand Suffix</label>
                         <input
                           type="text"
-                          value={webConfig.footerBrandSuffix || "TECH"}
+                          value={webConfig.footerBrandSuffix || ""}
                           onChange={(e) => setWebConfig(prev => ({ ...prev,footerBrandSuffix: e.target.value }))}
                           className="w-full px-3 py-2 bg-surface border border-outline/15 rounded-xl text-xs text-on-surface"
                           placeholder="TECH"
