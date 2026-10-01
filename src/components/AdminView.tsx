@@ -2152,7 +2152,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         setStagedProduct(null);
                         setSandboxUrl("");
                       }}
-                      className="px-3 py-1.5 hover:bg-black/5 dark:hover:bg-white/5 text-on-surface-variant hover:text-on-surface rounded-lg text-[11px] font-semibold transition-all cursor-pointer"
+                      className="px-3 py-1.5 hover:bg-black/5 text-on-surface-variant hover:text-on-surface rounded-lg text-[11px] font-semibold transition-all cursor-pointer"
                     >
                       Clear Draft
                     </button>
@@ -5060,7 +5060,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <div key={cat.name} className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-outline/15 bg-surface-container p-3 sm:p-4 hover:border-primary/45 hover:shadow-md transition-all text-left min-w-[125px] h-24 sm:h-36 shrink-0">
                           <div className="absolute inset-0 z-0">
                             {cat.image ? (
-                              <img src={cat.image} alt={displayName} className="w-full h-full object-cover opacity-30 dark:opacity-45" referrerPolicy="no-referrer" />
+                              <img src={cat.image} alt={displayName} className="w-full h-full object-cover opacity-30" referrerPolicy="no-referrer" />
                             ) : null}
                             <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/80 to-transparent" />
                           </div>
@@ -8039,7 +8039,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 ))}
               </div>
             )}
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl p-3 text-[10px] text-blue-800 dark:text-blue-200">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-[10px] text-blue-800">
               <b>Tip:</b> For laptops/tablets without SIM, create "WiFi Only" (code: <code>none</code>) or "No SIM". For watches, "eSIM Only". The code is what gets saved in product variants, so keep it short and kebab-case.
             </div>
           </div>
@@ -8408,7 +8408,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   ) : generatedReport ? (
                     <div className="text-left space-y-4 max-h-[700px] overflow-y-auto pr-2">
                       <div className="p-5 bg-surface border border-outline/10 rounded-2xl">
-                        <div className="prose prose-sm max-w-none text-on-surface/90 leading-relaxed space-y-3 dark:prose-invert">
+                        <div className="prose prose-sm max-w-none text-on-surface/90 leading-relaxed space-y-3">
                           <Markdown>{generatedReport}</Markdown>
                         </div>
                       </div>

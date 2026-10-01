@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShoppingBag, Search, Menu, X, ChevronDown, ChevronUp, Sun, Moon, LogOut, History } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, ChevronDown, ChevronUp, LogOut, History } from "lucide-react";
 import { AppScreen, Product } from "../types";
 
 interface NavbarProps {
@@ -13,8 +13,6 @@ interface NavbarProps {
   setSelectedCategory: (category: string) => void;
   selectedBrand: string;
   setSelectedBrand: (brand: string) => void;
-  isDarkMode: boolean;
-  onToggleDarkMode: () => void;
   isAdminAuthenticated?: boolean;
   onAdminLogout?: () => void;
   products?: Product[];
@@ -32,8 +30,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   setSelectedCategory,
   selectedBrand,
   setSelectedBrand,
-  isDarkMode,
-  onToggleDarkMode,
   isAdminAuthenticated = false,
   onAdminLogout,
   products = [],
@@ -199,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onError={() => setLogoFailed(true)}
             />
           ) : logoFailed ? (
-            <span className="font-display font-black text-lg md:text-xl text-on-surface dark:text-on-surface tracking-tight select-none">
+            <span className="font-display font-black text-lg md:text-xl text-on-surface tracking-tight select-none">
               AXON<span className="text-primary font-light">TECH</span>
             </span>
           ) : null}
@@ -334,18 +330,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        {/* Actions — Dark Mode & Cart */}
+        {/* Actions — Cart */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={onToggleDarkMode}
-            className="p-2 text-on-surface/90 hover:text-primary hover:bg-surface-container-low rounded-full transition-colors cursor-pointer"
-            id="nav-dark-mode-btn"
-            aria-label="Toggle Dark Mode"
-          >
-            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
-
           {/* Cart Icon */}
           <button
             onClick={onOpenCart}
@@ -458,7 +444,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onError={() => setLogoFailed(true)}
                   />
                 ) : logoFailed ? (
-                  <span className="font-display font-black text-lg text-on-surface dark:text-on-surface tracking-tight select-none">
+                  <span className="font-display font-black text-lg text-on-surface tracking-tight select-none">
                     AXON<span className="text-primary font-light">TECH</span>
                   </span>
                 ) : null}

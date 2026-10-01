@@ -413,18 +413,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="absolute inset-0 z-0 select-none overflow-hidden" key={`bg-media-${activeSlide?.id}`}>
               {(config?.heroMediaOverrideEnabled && config?.heroMediaOverrideUrl) ? (
                 config?.heroMediaOverrideType === "embed" ? (
-                  <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
+                  <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25" dangerouslySetInnerHTML={{ __html: config?.heroMediaOverrideUrl }} />
                 ) : config?.heroMediaOverrideType === "video" ? (
-                  <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
+                  <video src={config?.heroMediaOverrideUrl} className="w-full h-full object-contain opacity-25 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
                 ) : (
-                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
+                  <img src={config?.heroMediaOverrideUrl} alt="Hero media" className="w-full h-full object-contain opacity-25 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
                 )
               ) : activeSlide?.effectiveMediaType === "embed" ? (
-                <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25 dark:opacity-35" dangerouslySetInnerHTML={{ __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl }} />
+                <div className="absolute inset-0 w-full h-full select-none overflow-hidden hero-embed-container opacity-25" dangerouslySetInnerHTML={{ __html: activeSlide?.effectiveMediaEmbed || activeSlide?.effectiveMediaUrl }} />
               ) : activeSlide?.effectiveMediaType === "video" ? (
-                <video src={activeSlide?.effectiveMediaUrl} className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
+                <video src={activeSlide?.effectiveMediaUrl} className="w-full h-full object-contain opacity-25 scale-102 transition-transform duration-1000" autoPlay loop muted playsInline onLoadedMetadata={(e) => { const video = e.currentTarget; if (video.duration && isFinite(video.duration)) { setSlideInterval(Math.ceil(video.duration * 1000) + 500); } }} />
               ) : (
-                <img src={activeSlide?.effectiveMediaUrl} alt={activeSlide?.mediaAlt || activeSlide?.title} className="w-full h-full object-contain opacity-25 dark:opacity-35 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
+                <img src={activeSlide?.effectiveMediaUrl} alt={activeSlide?.mediaAlt || activeSlide?.title} className="w-full h-full object-contain opacity-25 scale-102 transition-transform duration-1000" referrerPolicy="no-referrer" />
               )}
               {/* Glass & Gradient overlays for dynamic high-end typography legibility */}
               <div className="absolute inset-0 bg-gradient-to-r from-surface-container-low via-surface-container-low/95 to-surface-container-low/40 md:from-surface-container-low via-surface-container-low/90 lg:to-surface-container-low/30" />
@@ -713,7 +713,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <img 
                     src={cat.image} 
                     alt={cat.name} 
-                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 opacity-30 dark:opacity-45"
+                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 opacity-30"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/80 to-transparent group-hover:via-surface-container/70 transition-all" />

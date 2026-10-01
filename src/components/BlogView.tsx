@@ -205,7 +205,7 @@ export function BlogView() {
             </header>
 
             {/* Markdown Article Content */}
-            <div className="prose dark:prose-invert max-w-none text-foreground/90 leading-relaxed" id="blog-post-body">
+            <div className="prose max-w-none text-foreground/90 leading-relaxed" id="blog-post-body">
               <Markdown>{activePost.content}</Markdown>
             </div>
 

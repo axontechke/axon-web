@@ -92,32 +92,9 @@ function AppContent() {
   // Successful Order state
   const [completedOrderDetails, setCompletedOrderDetails] = useState<any>(null);
 
-  // Dark Mode State and Persistence
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem("axon_dark_mode");
-      return saved !== null ? saved === "true" : false;
-    } catch {
-      return false;
-    }
-  });
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    try {
-      localStorage.setItem("axon_dark_mode", String(isDarkMode));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [isDarkMode]);
 
   // Synchronize cart changes with localStorage
   useEffect(() => {
@@ -299,8 +276,6 @@ function AppContent() {
         setSelectedCategory={setSelectedCategory}
         selectedBrand={selectedBrand}
         setSelectedBrand={setSelectedBrand}
-        isDarkMode={isDarkMode}
-        onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         isAdminAuthenticated={isAdminAuthenticated}
         onAdminLogout={() => {
           setIsAdminAuthenticated(false);

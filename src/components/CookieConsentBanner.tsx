@@ -45,10 +45,10 @@ export function CookieConsentBanner() {
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
           className="fixed bottom-0 inset-x-0 z-[60] p-2.5 sm:p-5 pointer-events-none"
         >
-          <div className="max-w-2xl mx-auto pointer-events-auto rounded-2xl border border-outline-variant/40 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl shadow-black/10 dark:shadow-black/30 dark:bg-surface-container-high/95 dark:border-outline-variant/20">
+          <div className="max-w-2xl mx-auto pointer-events-auto rounded-2xl border border-outline-variant/40 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl shadow-black/10">
             {/* Header row */}
             <div className="flex items-start gap-2.5 sm:gap-3 px-3.5 sm:px-5 pt-3 sm:pt-4 pb-2.5 sm:pb-3">
-              <div className="flex-shrink-0 mt-0.5 p-1.5 sm:p-2 rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
+              <div className="flex-shrink-0 mt-0.5 p-1.5 sm:p-2 rounded-xl bg-primary/10 text-primary">
                 <Cookie className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -80,7 +80,7 @@ export function CookieConsentBanner() {
                   className="overflow-hidden"
                 >
                   <div className="px-3.5 sm:px-5 pb-2.5 sm:pb-3 text-[11px] sm:text-xs leading-relaxed text-on-surface-variant space-y-2">
-                    <div className="p-2.5 sm:p-3 rounded-xl bg-surface-container/60 dark:bg-surface-container-low/60 border border-outline-variant/30">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-surface-container/60 border border-outline-variant/30">
                       <p className="font-medium text-on-surface mb-1.5">What we store:</p>
                       <ul className="space-y-1">
                         <li className="flex items-start gap-2">
