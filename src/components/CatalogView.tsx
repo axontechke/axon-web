@@ -448,7 +448,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
             </div>
           ) : (
             /* Products Grid */
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}

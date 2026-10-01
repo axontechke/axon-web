@@ -65,7 +65,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   // Search History States
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [isMobileInputFocused, setIsMobileInputFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem("axon_recent_searches");
@@ -173,28 +172,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <nav className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-outline/10 px-4 py-3 md:px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto flex flex-col gap-3">
+        <div className="relative flex items-center justify-between gap-4 h-12 md:h-auto">
         {/* Mobile Menu Button — leftmost */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-2 text-on-surface/90 hover:bg-surface-container-low rounded-full transition-colors"
+          className="lg:hidden p-2 text-on-surface/90 hover:bg-surface-container-low rounded-full transition-colors"
           id="nav-mobile-menu-btn"
           aria-label="Toggle Menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        {/* Logo */}
+        {/* Logo — centered on mobile, left-aligned on md+ */}
         <div
           onClick={() => handleNavClick("Home")}
-          className="flex flex-row items-center cursor-pointer group shrink-0"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:static md:translate-x-0 md:translate-y-0 md:top-auto md:left-auto flex flex-row items-center cursor-pointer group shrink-0"
           id="nav-logo-container"
         >
           {logoUrl && !logoFailed ? (
             <img
               src={logoUrl}
               alt="Axon Logo"
-              className="w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
+              className="w-12 h-12 md:w-16 md:h-16 object-contain bg-transparent transition-transform duration-300 group-hover:scale-105 shrink-0"
               referrerPolicy="no-referrer"
               onError={() => setLogoFailed(true)}
             />
@@ -205,10 +205,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : null}
         </div>
 
-        {/* Search Bar — next to logo on mobile, after links on desktop */}
+        {/* Search Bar — desktop/tablet inline (mobile uses stacked search below header) */}
         <form
           onSubmit={handleSearchSubmit}
-          className="relative flex-1 min-w-0 md:flex-initial max-w-none sm:max-w-[200px] lg:max-w-[260px] w-full order-3 lg:order-5"
+          className="relative hidden md:block flex-1 min-w-0 md:max-w-[200px] lg:max-w-[260px] w-full"
           id="nav-search-form"
         >
           <input
@@ -271,7 +271,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </form>
 
         {/* Desktop Links */}
-        <div className="hidden lg:flex items-center gap-6 text-sm font-medium order-5">
+        <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
           {(config?.headerLinks || [
             { name: "Home", category: "Home", enabled: true },
             { name: "Shop All", category: "All", enabled: true },
@@ -310,47 +310,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             );
           })}
-          {/* Tablet-only nav links (hidden lg+, hidden md-) */}
-          <div className="hidden md:flex lg:hidden items-center gap-4 text-xs font-medium shrink-0 order-5">
-            {(config?.headerLinks || [
-              { name: "Home", category: "Home", enabled: true },
-              { name: "Shop All", category: "All", enabled: true },
-              { name: "Laptops", category: "Laptops", enabled: true },
-              { name: "Tablets", category: "Tablets", enabled: true },
-              { name: "Audio", category: "Audio", enabled: true },
-              { name: "Phones", category: "Phones", enabled: true },
-              { name: "Track Order", category: "TrackOrder", enabled: true },
-              { name: "Contact Us", category: "Contact", enabled: true },
-              { name: "Blog", category: "Blog", enabled: true }
-            ]).filter((l: any) => l.enabled).map((link: any) => {
-              const screen = link.category === "Home" ? "Home"
-                : link.category === "TrackOrder" ? "TrackOrder"
-                : link.category === "Contact" ? "Contact"
-                : link.category === "Blog" ? "Blog"
-                : "Catalog";
-              const isCategory = !["Home", "TrackOrder", "Contact", "Blog"].includes(link.category);
-              const isActive = link.category === "Home"
-                ? activeScreen === "Home"
-                : link.category === "TrackOrder"
-                  ? activeScreen === "TrackOrder"
-                  : link.category === "Contact"
-                    ? activeScreen === "Contact"
-                    : link.category === "Blog"
-                      ? activeScreen === "Blog"
-                      : activeScreen === "Catalog" && selectedCategory === (isCategory ? link.category : "All");
-              return (
-                <button
-                  key={link.name}
-                  onClick={() => handleNavClick(screen as AppScreen, isCategory ? link.category : undefined)}
-                  className={`transition-colors hover:text-primary ${
-                    isActive ? "text-primary font-semibold" : "text-on-surface/80"
-                  }`}
-                >
-                  {link.name.length > 8 ? link.name.substring(0, 7) + "…" : link.name}
-                </button>
-              );
-            })}
-          </div>
           {isAdminAuthenticated && (
             <div className="flex items-center gap-1.5">
               <button
@@ -376,7 +335,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Actions — Dark Mode & Cart */}
-        <div className="flex items-center gap-3 shrink-0 order-6">
+        <div className="flex items-center gap-3 shrink-0">
           {/* Dark Mode Toggle */}
           <button
             onClick={onToggleDarkMode}
@@ -402,6 +361,72 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
         </div>
+        </div>
+
+        {/* Search Bar — full-width below header on mobile */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="relative w-full md:hidden"
+          id="nav-search-form-mobile"
+        >
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onFocus={() => setIsInputFocused(true)}
+            onBlur={() => setIsInputFocused(false)}
+            className="w-full bg-surface-container-low border border-outline/20 rounded-full py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 animate-all"
+          />
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-on-surface-variant/60" />
+
+          {/* Recent Searches Dropdown */}
+          {isInputFocused && recentSearches.length > 0 && (
+            <div
+              className="absolute left-0 right-0 top-full mt-2 bg-surface-container-high border border-outline/15 rounded-2xl shadow-xl py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left overflow-hidden"
+              id="nav-search-history-dropdown-mobile"
+            >
+              <div className="flex justify-between items-center px-4 pb-2 mb-1 border-b border-outline/5">
+                <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Recent Searches</span>
+                <button
+                  type="button"
+                  onMouseDown={clearAllSearches}
+                  className="text-[9px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer"
+                >
+                  Clear All
+                </button>
+              </div>
+              <div className="max-h-[220px] overflow-y-auto">
+                {recentSearches.map((query, idx) => (
+                  <div
+                    key={idx}
+                    className="group flex justify-between items-center px-4 py-2 hover:bg-surface-container-highest transition-colors cursor-pointer text-xs text-on-surface"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleRecentSearchClick(query);
+                    }}
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden mr-2">
+                      <History className="w-3.5 h-3.5 text-on-surface-variant/50 shrink-0" />
+                      <span className="truncate">{query}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        deleteSearchQuery(e, query);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-surface-container rounded transition-all cursor-pointer"
+                      title="Remove from history"
+                    >
+                      <X className="w-3.5 h-3.5 text-on-surface-variant/70 hover:text-on-surface" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </form>
       </div>
 
       {/* Mobile left slide-out Drawer & Backdrop */}
@@ -409,13 +434,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 w-screen h-screen bg-black/50 z-50 md:hidden animate-in fade-in duration-200"
+            className="fixed inset-0 w-screen h-screen bg-black/50 z-50 lg:hidden animate-in fade-in duration-200"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Slide-out Drawer */}
           <div 
-            className="fixed inset-y-0 left-0 max-w-[290px] w-full h-screen bg-surface z-50 shadow-2xl p-5 flex flex-col gap-5 md:hidden overflow-y-auto animate-in slide-in-from-left duration-300 border-r border-outline/10 text-left"
+            className="fixed inset-y-0 left-0 max-w-[290px] w-full h-screen bg-surface z-50 shadow-2xl p-5 flex flex-col gap-5 lg:hidden overflow-y-auto animate-in slide-in-from-left duration-300 border-r border-outline/10 text-left"
             id="mobile-drawer"
           >
             {/* Header with logo & close */}
@@ -428,7 +453,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <img
                     src={logoUrl}
                     alt="Axon Logo"
-                    className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105 shrink-0 dark:brightness-0 dark:invert"
+                    className="w-12 h-12 object-contain bg-transparent transition-transform duration-300 group-hover:scale-105 shrink-0"
                     referrerPolicy="no-referrer"
                     onError={() => setLogoFailed(true)}
                   />
@@ -445,67 +470,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Mobile Search */}
-            <form onSubmit={handleSearchSubmit} className="relative w-full" id="nav-mobile-search-form">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={localSearch}
-                onChange={(e) => setLocalSearch(e.target.value)}
-                onFocus={() => setIsMobileInputFocused(true)}
-                onBlur={() => setIsMobileInputFocused(false)}
-                className="w-full bg-surface-container-low border border-outline/20 rounded-full py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-primary text-on-surface placeholder:text-on-surface-variant/40 animate-all"
-              />
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-on-surface-variant/60" />
-
-              {/* Mobile Recent Searches Dropdown */}
-              {isMobileInputFocused && recentSearches.length > 0 && (
-                <div 
-                  className="absolute left-0 right-0 top-full mt-2 bg-surface-container-high border border-outline/15 rounded-2xl shadow-xl py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left overflow-hidden"
-                  id="nav-mobile-search-history-dropdown"
-                >
-                  <div className="flex justify-between items-center px-4 pb-2 mb-1 border-b border-outline/5">
-                    <span className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Recent Searches</span>
-                    <button 
-                      type="button"
-                      onMouseDown={clearAllSearches}
-                      className="text-[9px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="max-h-[220px] overflow-y-auto">
-                    {recentSearches.map((query, idx) => (
-                      <div 
-                        key={idx}
-                        className="group flex justify-between items-center px-4 py-2 hover:bg-surface-container-highest transition-colors cursor-pointer text-xs text-on-surface"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          handleRecentSearchClick(query);
-                        }}
-                      >
-                        <div className="flex items-center gap-2 overflow-hidden mr-2">
-                          <History className="w-3.5 h-3.5 text-on-surface-variant/50 shrink-0" />
-                          <span className="truncate">{query}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            deleteSearchQuery(e, query);
-                          }}
-                          className="p-1 hover:bg-surface-container rounded transition-all cursor-pointer"
-                          title="Remove from history"
-                        >
-                          <X className="w-3.5 h-3.5 text-on-surface-variant/70 hover:text-on-surface" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </form>
 
             {/* Navigation Lists */}
             <div className="flex flex-col gap-1 text-left">

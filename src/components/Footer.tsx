@@ -135,14 +135,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
 
   return (
     <footer className="bg-[#1c1b1b] text-[#f3ece9] border-t border-[#857068]/20 mt-20" id="main-footer">
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand Column */}
         <div className="space-y-4 text-left">
           <div className="flex flex-row items-center gap-2 shrink-0 whitespace-nowrap">
             <img 
               src={brandLogo || undefined}
               alt={`${businessName} Logo`}
-              className="w-8 h-8 object-contain shrink-0 brightness-0 invert"
+              className="w-8 h-8 object-contain bg-transparent shrink-0"
               referrerPolicy="no-referrer"
             />
             <span className="font-display font-bold text-xl tracking-tight text-white select-none">

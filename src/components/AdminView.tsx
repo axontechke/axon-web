@@ -4002,7 +4002,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <img
                             src={webConfig.navbarLogoUrl}
                             alt="Navbar logo preview"
-                            className="h-12 object-contain bg-surface-container"
+                            className="h-12 object-contain bg-transparent"
                             referrerPolicy="no-referrer"
                           />
                         </div>
@@ -4068,7 +4068,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <img
                             src={webConfig.footerLogoUrl}
                             alt="Footer logo preview"
-                            className="h-12 object-contain bg-surface-container"
+                            className="h-12 object-contain bg-transparent"
                             referrerPolicy="no-referrer"
                           />
                         </div>
