@@ -95,11 +95,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   const brandLogo = config?.footerBrandLogoUrl || config?.footerLogoUrl || "";
   const configuredName = (config?.footerBrandName || contact?.businessName || "").trim();
   const configuredSuffix = (config?.footerBrandSuffix || "").trim();
-  // Brand name is optional when a logo is present; fall back only when there is no logo.
-  const businessName = brandLogo ? configuredName : (configuredName || "AXON");
-  const brandSuffix = brandLogo ? configuredSuffix : (configuredSuffix || "TECH");
-  const displayName = businessName || "AXON";
-  const footerDesc = config?.footerDescription || `${displayName} | Your Trusted Technology Partner`;
+  // Brand name is optional; when logo and text are both missing, this section stays empty.
+  const businessName = configuredName;
+  const brandSuffix = configuredSuffix;
+  const footerDesc = config?.footerDescription || (businessName ? `${businessName} | Your Trusted Technology Partner` : "Your Trusted Technology Partner");
   const address = contact?.location?.addressString || "";
   const formattedPhone = contact?.phones?.formattedPrimary || "";
   const salesEmail = contact?.emails?.sales || "";
@@ -109,7 +108,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
   const col1Links = config?.footerCol1Links || [];
   const col2Title = config?.footerCol2Title || "Support & Care";
   const col2Links = config?.footerCol2Links || [];
-  const copyrightText = config?.footerCopyrightText || `© ${new Date().getFullYear()} ${displayName}. All rights reserved.`;
+  const copyrightText = config?.footerCopyrightText || (businessName ? `© ${new Date().getFullYear()} ${businessName}. All rights reserved.` : `© ${new Date().getFullYear()}. All rights reserved.`);
   const newsletterTitle = config?.footerNewsletterTitle || "Stay Updated";
   const newsletterDesc = config?.footerNewsletterDescription || "Subscribe to receive notifications on new arrivals, deals, and exclusive bundles.";
   const bottomLinks = config?.footerBottomLinks || [
@@ -147,7 +146,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, config: parentConfig
               <img
                 key={brandLogo}
                 src={brandLogo}
-                alt={`${businessName} Logo`}
+                alt={businessName ? `${businessName} Logo` : "Footer logo"}
                 className="w-8 h-8 object-contain bg-transparent shrink-0"
                 referrerPolicy="no-referrer"
               />
